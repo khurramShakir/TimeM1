@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Account
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  
+  periods   BudgetPeriod[]
+}
+
+// A "Budget Period" container (e.g., Week of Dec 4th, or Month of Jan 2025)
+model BudgetPeriod {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime // The start date of the period
+  type      String   // "WEEKLY", "MONTHLY", "YEARLY"
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // State of the period
+  isClosed  Boolean  @default(false)
+  
+  envelopes Envelope[]
+
+  @@unique([userId, startDate, type]) // One budget per period type per start date
+}
+
+// The "Buckets" for a specific period
+// e.g., "Work" for Week 42.
+model Envelope {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g., "Work", "Sleep", "Unallocated"
+  color       String?  // UI color code
+  
+  budgeted    Decimal  // The plan (e.g., 40.00)
+  
+  periodId    Int
+  period      BudgetPeriod @relation(fields: [periodId], references: [id])
+  
+  transactions Transaction[]
+}
+
+// The actual spending of time
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  amount      Decimal  // e.g., 2.5 hours
+  description String?  // "Deep work on Project X"
+  date        DateTime // When it happened
+  
+  envelopeId  Int
+  envelope    Envelope @relation(fields: [envelopeId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  startTime   DateTime? // Optional: For Time Range entries
+  endTime     DateTime? // Optional: For Time Range entries
+}
