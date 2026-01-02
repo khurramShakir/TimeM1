@@ -13,8 +13,12 @@
   --border-strong: #cbd5e1;
 
   /* Brand / Functional Colors */
-  --primary: #3b82f6;
-  /* Soft Blue */
+  --primary: #10b981;
+  /* Emerald Green */
+  --primary-hover: #059669;
+  /* Green-600 */
+  --primary-light: #d1fae5;
+  /* Green-100 */
   --primary-foreground: #ffffff;
 
   --success: #10b981;

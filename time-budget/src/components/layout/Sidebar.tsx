@@ -12,6 +12,8 @@ const navigation = [
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
+import { UserButton } from "@clerk/nextjs";
+
 export function Sidebar() {
     const pathname = usePathname();
 
@@ -39,10 +41,9 @@ export function Sidebar() {
             </nav>
 
             <div className={styles.footer}>
-                <button className={styles.signOutBtn}>
-                    <LogOut className="w-5 h-5" />
-                    Sign Out
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem' }}>
+                    <UserButton afterSignOutUrl="/" showName />
+                </div>
             </div>
         </div>
     );

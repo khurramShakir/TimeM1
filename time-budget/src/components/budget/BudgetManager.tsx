@@ -19,8 +19,9 @@ interface Envelope {
 }
 
 interface BudgetManagerProps {
-    userId: number;
+    userId: string;
     initialEnvelopes: Envelope[];
+    currentDate: string; // Added to sync actions with viewed week
 }
 
 // Shared with BudgetChart for consistency
@@ -33,7 +34,7 @@ const COLOR_VALUES: Record<string, string> = {
     default: "#cbd5e1"
 };
 
-export default function BudgetManager({ userId, initialEnvelopes }: BudgetManagerProps) {
+export default function BudgetManager({ userId, initialEnvelopes, currentDate }: BudgetManagerProps) {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEnvelope, setEditingEnvelope] = useState<Envelope | null>(null);
@@ -45,7 +46,7 @@ export default function BudgetManager({ userId, initialEnvelopes }: BudgetManage
     const handleCreate = async (data: { name: string; budgeted: number; color: string }) => {
         setIsSubmitting(true);
         try {
-            await createEnvelope({ userId, ...data });
+            await createEnvelope({ ...data, date: currentDate });
             setIsModalOpen(false);
             router.refresh();
         } catch (error) {

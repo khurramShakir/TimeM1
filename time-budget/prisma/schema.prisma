@@ -12,9 +12,8 @@ datasource db {
 
 // User Account
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id // Clerk User ID
   email     String   @unique
-  password  String
   name      String?
   createdAt DateTime @default(now())
   
@@ -26,7 +25,7 @@ model BudgetPeriod {
   id        Int      @id @default(autoincrement())
   startDate DateTime // The start date of the period
   type      String   // "WEEKLY", "MONTHLY", "YEARLY"
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
   
   // State of the period

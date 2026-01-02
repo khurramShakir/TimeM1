@@ -1,22 +1,49 @@
 import React from "react";
-import { getBudgetSummary } from "@/lib/actions";
+import { getBudgetSummary, initNewWeek } from "@/lib/actions";
 import BudgetManager from "@/components/budget/BudgetManager";
+import { DateNavigation } from "@/components/layout/DateNavigation";
+import { revalidatePath } from "next/cache";
+import styles from "../page.module.css";
 
-export default async function BudgetPage() {
-    const USER_ID = 1; // MVP hardcoded
-    const summary = await getBudgetSummary(USER_ID);
+interface PageProps {
+    searchParams: Promise<{ date?: string }>;
+}
 
-    if (!summary) {
+export default async function BudgetPage({ searchParams }: PageProps) {
+    const { date: dateStr } = await searchParams;
+    const summary = await getBudgetSummary(dateStr);
+    const currentDate = dateStr ? new Date(dateStr) : new Date();
+
+    const handleInitWeek = async () => {
+        "use server";
+        await initNewWeek(currentDate);
+        revalidatePath("/dashboard/budget");
+    };
+
+    if (!summary.period) {
         return (
-            <div style={{ padding: "2rem" }}>
-                <h1>No Budget Period Found</h1>
-                <p>Please run the seed script or create a period.</p>
+            <div className={styles.page}>
+                <header className={styles.header}>
+                    <DateNavigation currentDate={currentDate} />
+                </header>
+                <div className={styles.emptyState}>
+                    <div className={styles.emptyIcon}>🗓️</div>
+                    <h2 className={styles.emptyTitle}>No budget found for this week</h2>
+                    <p className={styles.emptyText}>
+                        Initialize this week to start managing your envelopes.
+                    </p>
+                    <form action={handleInitWeek}>
+                        <button type="submit" className={styles.initBtn}>
+                            Start New Week
+                        </button>
+                    </form>
+                </div>
             </div>
         );
     }
 
     // Convert Decimals to numbers for client component
-    const sanitizedEnvelopes = summary.envelopes.map(env => ({
+    const sanitizedEnvelopes = summary.envelopes.map((env: any) => ({
         ...env,
         budgeted: Number(env.budgeted),
         spent: Number(env.spent),
@@ -25,9 +52,15 @@ export default async function BudgetPage() {
     }));
 
     return (
-        <BudgetManager
-            userId={USER_ID}
-            initialEnvelopes={sanitizedEnvelopes}
-        />
+        <div className={styles.page}>
+            <header className={styles.header} style={{ marginBottom: '1rem' }}>
+                <DateNavigation currentDate={currentDate} />
+            </header>
+            <BudgetManager
+                userId={summary.period.userId as any}
+                initialEnvelopes={sanitizedEnvelopes}
+                currentDate={currentDate.toISOString().split("T")[0]}
+            />
+        </div>
     );
 }

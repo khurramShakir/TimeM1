@@ -1,0 +1,62 @@
+.navigation {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    width: fit-content;
+}
+
+.navBtn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.navBtn:hover {
+    background: #f1f5f9;
+    color: var(--primary);
+}
+
+.dateDisplay {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 220px;
+    justify-content: center;
+}
+
+.calendarIcon {
+    color: var(--primary);
+}
+
+.rangeText {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .navigation {
+        gap: 0.75rem;
+    }
+
+    .dateDisplay {
+        min-width: 160px;
+    }
+
+    .rangeText {
+        font-size: 0.85rem;
+    }
+}
