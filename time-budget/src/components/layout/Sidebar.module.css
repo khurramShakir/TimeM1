@@ -52,6 +52,29 @@
     color: var(--primary);
 }
 
+.switchMode {
+    padding: 1rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.switchLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--secondary);
+    transition: all 0.2s;
+}
+
+.switchLink:hover {
+    background-color: var(--surface-200);
+    color: var(--primary);
+}
+
 .footer {
     padding: 1rem;
     border-top: 1px solid var(--border-subtle);

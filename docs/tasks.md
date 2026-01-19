@@ -8,19 +8,23 @@
 - [x] **Data Fetching**: Server Actions for fetching budget data and summary.
 - [x] **Budget Transfer**: Server Action and UI to move budget between envelopes.
 
-## Recent UI Refinements
+## Recent UI & Domain Refinements
+- [x] **Feature: Multi-Domain Support**: Separate views for "Time" and "Money" management.
+- [x] **UI Polish - Transaction Buttons**: Refined icons (Clock/Banknote) with white-bordered '+' sign badges.
+- [x] **Feature: Weekly/Monthly Toggle**: High-level logic for different period types (Functional).
 - [x] **Feature: Budget Chart**: Detailed Pie Chart for budget allocation (Verified).
 - [x] **UI Polish - Round 13**: Final Hybrid Solution - Google 3D Pie + Recharts Bar (Stable) (Verified).
 
-## Session 12/12/2025 - Completed
+## Session 12/12/2025 - 01/13/2025 - Completed
 - [x] **Feature: Transaction List (History)**: Full CRUD - Create, Read, Update, Delete transactions.
-- [x] **UI Consistency**: Standardized fonts, icons (20px), and button styles across Envelopes & History screens.
-- [x] **Bug Fix**: Modal "screen vanish" when selecting/highlighting Hours input (fixed overlay click handling).
+- [x] **UI Consistency**: Standardized fonts, icons, and emerald green theme.
+- [x] **Bug Fix**: Modal "screen vanish" and overlay click handling.
 
 ## Next Session - Priority Items
 - [ ] **Deployment**: Git setup and build for production.
-- [ ] **Auth**: Simple Clerk/NextAuth integration.
-- [ ] **Date Picker**: For selecting specific weeks/budget periods.
+- [ ] **Settings Page**: Customizable weekly totals, default categories, and profile management.
+- [ ] **Date Picker**: Improved UX for selecting specific weeks/months.
+- [ ] **Reports**: Advanced weekly/monthly summary reports.
 
 ## Backlog
 - [ ] **Custom Envelopes**: UI to create/delete envelopes (currently via Budget Manager).

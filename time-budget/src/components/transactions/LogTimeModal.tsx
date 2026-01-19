@@ -24,11 +24,12 @@ interface LogTimeModalProps {
         startTime?: Date | null;
         endTime?: Date | null;
     } | null;
+    domain?: string;
 }
 
 type Mode = "duration" | "range";
 
-export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, transaction }: LogTimeModalProps) {
+export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, transaction, domain = "TIME" }: LogTimeModalProps) {
     const [mode, setMode] = useState<Mode>("duration");
     const [envelopeId, setEnvelopeId] = useState<number>(envelopes[0]?.id || 0);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -135,25 +136,27 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
     return createPortal(
         <div className={styles.overlay} onMouseDown={onClose}>
             <div className={styles.modal} onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
-                <h2 className={styles.title}>Log Time</h2>
+                <h2 className={styles.title}>{domain === "TIME" ? "Log Time" : "Record Transaction"}</h2>
 
-                {/* Tabs */}
-                <div className={styles.tabs}>
-                    <button
-                        type="button"
-                        className={`${styles.tab} ${mode === "duration" ? styles.activeTab : ""}`}
-                        onClick={() => setMode("duration")}
-                    >
-                        Duration
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.tab} ${mode === "range" ? styles.activeTab : ""}`}
-                        onClick={() => setMode("range")}
-                    >
-                        Time Range
-                    </button>
-                </div>
+                {/* Tabs - Only for TIME domain */}
+                {domain === "TIME" && (
+                    <div className={styles.tabs}>
+                        <button
+                            type="button"
+                            className={`${styles.tab} ${mode === "duration" ? styles.activeTab : ""}`}
+                            onClick={() => setMode("duration")}
+                        >
+                            Duration
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.tab} ${mode === "range" ? styles.activeTab : ""}`}
+                            onClick={() => setMode("range")}
+                        >
+                            Time Range
+                        </button>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.group}>
@@ -179,16 +182,16 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                         />
                     </div>
 
-                    {mode === "duration" ? (
+                    {mode === "duration" || domain === "MONEY" ? (
                         <div className={styles.group}>
-                            <label>Hours</label>
+                            <label>{domain === "TIME" ? "Hours" : "Amount"}</label>
                             <input
                                 type="number"
-                                step="0.1"
+                                step={domain === "TIME" ? "0.1" : "0.01"}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 required
-                                placeholder="e.g. 1.5"
+                                placeholder={domain === "TIME" ? "e.g. 1.5" : "e.g. 50.00"}
                             />
                         </div>
                     ) : (
@@ -238,7 +241,7 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                             Cancel
                         </button>
                         <button type="submit" className={styles.saveBtn} disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save Log"}
+                            {isSubmitting ? "Saving..." : (domain === "TIME" ? "Save Log" : "Save Transaction")}
                         </button>
                     </div>
                 </form>

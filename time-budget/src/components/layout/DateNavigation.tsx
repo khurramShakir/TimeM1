@@ -7,14 +7,20 @@ import styles from "./DateNavigation.module.css";
 
 interface DateNavigationProps {
     currentDate: Date;
+    periodType?: string;
 }
 
-export function DateNavigation({ currentDate }: DateNavigationProps) {
+export function DateNavigation({ currentDate, periodType = "WEEKLY" }: DateNavigationProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const formatDateRange = (date: Date) => {
         const start = new Date(date);
+
+        if (periodType === "MONTHLY") {
+            return start.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+        }
+
         const day = start.getDay();
         const diff = start.getDate() - day;
         const sunday = new Date(start.setDate(diff));
@@ -26,9 +32,13 @@ export function DateNavigation({ currentDate }: DateNavigationProps) {
         return `${sunday.toLocaleDateString(undefined, options)} - ${saturday.toLocaleDateString(undefined, options)}, ${saturday.getFullYear()}`;
     };
 
-    const navigate = (days: number) => {
+    const navigate = (amount: number) => {
         const newDate = new Date(currentDate);
-        newDate.setDate(newDate.getDate() + days);
+        if (periodType === "MONTHLY") {
+            newDate.setMonth(newDate.getMonth() + amount);
+        } else {
+            newDate.setDate(newDate.getDate() + (amount * 7));
+        }
         const dateStr = newDate.toISOString().split("T")[0];
 
         const params = new URLSearchParams(searchParams.toString());
@@ -39,9 +49,9 @@ export function DateNavigation({ currentDate }: DateNavigationProps) {
     return (
         <div className={styles.navigation}>
             <button
-                onClick={() => navigate(-7)}
+                onClick={() => navigate(-1)}
                 className={styles.navBtn}
-                title="Previous Week"
+                title={periodType === "MONTHLY" ? "Previous Month" : "Previous Week"}
             >
                 <ChevronLeft size={20} />
             </button>
@@ -52,9 +62,9 @@ export function DateNavigation({ currentDate }: DateNavigationProps) {
             </div>
 
             <button
-                onClick={() => navigate(7)}
+                onClick={() => navigate(1)}
                 className={styles.navBtn}
-                title="Next Week"
+                title={periodType === "MONTHLY" ? "Next Month" : "Next Week"}
             >
                 <ChevronRight size={20} />
             </button>

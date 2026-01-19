@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import styles from "./page.module.css";
 import { notFound } from "next/navigation";
+import { formatValue } from "@/lib/format";
 
 export default async function EnvelopeDetailsPage({
     params,
@@ -10,17 +11,20 @@ export default async function EnvelopeDetailsPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
-    const envelope = await getEnvelopeDetails(Number(id));
+    const envelope = await getEnvelopeDetails(Number(id)) as any;
 
     if (!envelope) {
         notFound();
     }
 
+    const domain = envelope.domain || "TIME";
+    const label = domain === "TIME" ? "Hours" : "Amount";
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
-                    <Link href="/dashboard" className={styles.backBtn}>
+                    <Link href={`/dashboard/${domain.toLowerCase()}`} className={styles.backBtn}>
                         <ArrowLeft className="w-4 h-4" />
                         Back to Dashboard
                     </Link>
@@ -31,7 +35,7 @@ export default async function EnvelopeDetailsPage({
                 </div>
                 <div className={styles.summaryCard}>
                     <span className={styles.summaryLabel}>Remaining: </span>
-                    <span className={styles.summaryValue}>{envelope.remaining.toFixed(2)} Hours</span>
+                    <span className={styles.summaryValue}>{formatValue(envelope.remaining, domain)}</span>
                 </div>
             </header>
 
@@ -41,7 +45,7 @@ export default async function EnvelopeDetailsPage({
                         <tr>
                             <th>Date</th>
                             <th>Description</th>
-                            <th className="text-right">Hours</th>
+                            <th className="text-right">{label}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,11 +56,11 @@ export default async function EnvelopeDetailsPage({
                                 </td>
                             </tr>
                         ) : (
-                            envelope.transactions.map((t) => (
+                            envelope.transactions.map((t: any) => (
                                 <tr key={t.id}>
-                                    <td>{t.date.toLocaleDateString()}</td>
+                                    <td>{new Date(t.date).toLocaleDateString()}</td>
                                     <td>{t.description || "-"}</td>
-                                    <td className="text-right font-bold">{Number(t.amount).toFixed(2)}h</td>
+                                    <td className="text-right font-bold">{formatValue(Number(t.amount), domain)}</td>
                                 </tr>
                             ))
                         )}

@@ -25,6 +25,9 @@ interface EnvelopeData {
 interface BudgetChartProps {
     envelopes: EnvelopeData[];
     totalBudgeted: number;
+    domain?: string;
+    periodType?: string;
+    totalAvailable?: number;
 }
 
 // Map app colors to 'Badge' background colors (Pastel) for Pie Chart
@@ -38,19 +41,29 @@ const COLOR_VALUES: Record<string, string> = {
     unallocated: "#f1f5f9" // Slate-100
 };
 
-export function BudgetChart({ envelopes, totalBudgeted }: BudgetChartProps) {
+export function BudgetChart({
+    envelopes,
+    totalBudgeted,
+    domain = "TIME",
+    periodType = "WEEKLY",
+    totalAvailable = 168
+}: BudgetChartProps) {
     // 1. Identify "Unallocated" envelope logic
     const explicitUnallocatedEnv = envelopes.find(e => e.name.toLowerCase() === "unallocated");
     const otherEnvelopes = envelopes.filter(e => e.name.toLowerCase() !== "unallocated");
-    const implicitUnallocated = Math.max(0, 168 - totalBudgeted);
+    const isTime = domain === "TIME";
+    const implicitUnallocated = isTime ? Math.max(0, totalAvailable - totalBudgeted) : 0;
     const totalUnallocated = (explicitUnallocatedEnv?.budgeted || 0) + implicitUnallocated;
 
     // --- Google Charts: Pie Chart Data (Allocation) ---
     const pieData = [
-        ["Category", "Hours"],
+        ["Category", isTime ? "Hours" : "Amount"],
         ...otherEnvelopes.map(env => [env.name, env.budgeted]),
-        ["Unallocated", totalUnallocated]
     ];
+
+    if (isTime || totalUnallocated > 0) {
+        pieData.push(["Unallocated", totalUnallocated]);
+    }
 
     const pieColors = [
         ...otherEnvelopes.map(env => COLOR_VALUES[env.color] || COLOR_VALUES.default),
@@ -81,11 +94,16 @@ export function BudgetChart({ envelopes, totalBudgeted }: BudgetChartProps) {
 
     const trueAllocated = otherEnvelopes.reduce((sum, e) => sum + e.budgeted, 0);
 
+    const periodLabel = periodType === "MONTHLY" ? "Monthly" : "Weekly";
+    const hoursLabel = isTime ? `${totalAvailable} hours` : "your budget";
+
     return (
         <div className={styles.chartCard}>
             <div className={styles.header}>
-                <h3 className={styles.title}>Weekly Budget Allocation</h3>
-                <span className={styles.subtitle}>Where your 168 hours are going</span>
+                <h3 className={styles.title}>{isTime ? `${periodLabel} Budget Allocation` : "Expense Allocation"}</h3>
+                <span className={styles.subtitle}>
+                    {isTime ? `Where your ${hoursLabel} are going` : "Budget distribution across categories"}
+                </span>
             </div>
 
             <div className={styles.content}>
@@ -106,13 +124,19 @@ export function BudgetChart({ envelopes, totalBudgeted }: BudgetChartProps) {
                     <div className={styles.statsRow}>
                         <div className={styles.statItem}>
                             <span className={styles.statLabel}>Total Allocated</span>
-                            <span className={styles.statValueProminent}>{trueAllocated.toFixed(1)}h</span>
+                            <span className={styles.statValueProminent}>
+                                {isTime ? `${trueAllocated.toFixed(1)}h` : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trueAllocated)}
+                            </span>
                         </div>
-                        <div className={styles.statDivider} />
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Unallocated</span>
-                            <span className={styles.statValueSecondary}>{totalUnallocated.toFixed(1)}h</span>
-                        </div>
+                        {isTime && (
+                            <>
+                                <div className={styles.statDivider} />
+                                <div className={styles.statItem}>
+                                    <span className={styles.statLabel}>Unallocated</span>
+                                    <span className={styles.statValueSecondary}>{totalUnallocated.toFixed(1)}h</span>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Bottom: Bar Chart (Comparison) */}

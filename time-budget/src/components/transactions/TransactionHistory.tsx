@@ -28,6 +28,7 @@ interface Envelope {
 interface TransactionHistoryProps {
     transactions: Transaction[];
     envelopes: Envelope[];
+    domain?: string;
 }
 
 const COLOR_STYLES: Record<string, { bg: string, text: string }> = {
@@ -39,7 +40,9 @@ const COLOR_STYLES: Record<string, { bg: string, text: string }> = {
     default: { bg: "#cbd5e1", text: "#1e293b" }
 };
 
-export default function TransactionHistory({ transactions, envelopes }: TransactionHistoryProps) {
+import { formatValue } from "@/lib/format";
+
+export default function TransactionHistory({ transactions, envelopes, domain = "TIME" }: TransactionHistoryProps) {
     const [filterEnvelopeId, setFilterEnvelopeId] = useState<string>("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -92,7 +95,7 @@ export default function TransactionHistory({ transactions, envelopes }: Transact
                     </select>
                     <button className={styles.logBtn} onClick={handleNew}>
                         <Plus size={20} />
-                        Log Time
+                        {domain === "TIME" ? "Log Time" : "Log Money"}
                     </button>
                 </div>
             </div>
@@ -107,7 +110,7 @@ export default function TransactionHistory({ transactions, envelopes }: Transact
                                 <th>Date</th>
                                 <th>Envelope</th>
                                 <th>Description</th>
-                                <th>Hours</th>
+                                <th>{domain === "TIME" ? "Hours" : "Amount"}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -128,7 +131,7 @@ export default function TransactionHistory({ transactions, envelopes }: Transact
                                             </span>
                                         </td>
                                         <td>{t.description || "-"}</td>
-                                        <td className={styles.amount}>{Number(t.amount).toFixed(2)}h</td>
+                                        <td className={styles.amount}>{formatValue(Number(t.amount), domain)}</td>
                                         <td>
                                             <div className={styles.actions}>
                                                 <button
@@ -160,6 +163,7 @@ export default function TransactionHistory({ transactions, envelopes }: Transact
                 onClose={() => setIsModalOpen(false)}
                 envelopes={envelopes}
                 transaction={modalTransaction}
+                domain={domain}
             />
         </div>
     );

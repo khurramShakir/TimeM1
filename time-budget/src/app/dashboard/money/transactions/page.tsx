@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 export default async function TransactionsPage() {
     // Fetch data in parallel for the current authenticated user
     const [period, transactions] = await Promise.all([
-        getCurrentBudgetPeriod(),
-        getTransactions()
+        getCurrentBudgetPeriod("MONEY"),
+        getTransactions("MONEY")
     ]);
 
     // Extract envelopes for filter
@@ -32,16 +32,17 @@ export default async function TransactionsPage() {
         <div style={{ paddingBottom: "2rem" }}>
             <div style={{ marginBottom: "2rem" }}>
                 <h1 style={{ fontSize: "1.875rem", fontWeight: "700", color: "var(--foreground)" }}>
-                    Transaction List
+                    Money Transactions
                 </h1>
                 <p style={{ color: "var(--foreground)", opacity: 0.6 }}>
-                    View and filter your time logging history.
+                    View and filter your financial spending history.
                 </p>
             </div>
 
             <TransactionHistory
                 transactions={formattedTransactions}
                 envelopes={envelopes}
+                domain="MONEY"
             />
         </div>
     );

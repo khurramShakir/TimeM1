@@ -15,9 +15,12 @@ interface TransferModalProps {
     isOpen: boolean;
     onClose: () => void;
     envelopes: Envelope[];
+    domain?: string;
 }
 
-export function TransferModal({ isOpen, onClose, envelopes }: TransferModalProps) {
+import { formatValue } from "@/lib/format";
+
+export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME" }: TransferModalProps) {
     const [fromId, setFromId] = useState<number>(envelopes[0]?.id || 0);
     const [toId, setToId] = useState<number>(envelopes[1]?.id || envelopes[0]?.id || 0);
     const [amount, setAmount] = useState("");
@@ -70,7 +73,7 @@ export function TransferModal({ isOpen, onClose, envelopes }: TransferModalProps
                             >
                                 {envelopes.map(env => (
                                     <option key={env.id} value={env.id}>
-                                        {env.name} ({env.remaining.toFixed(2)}h left)
+                                        {env.name} ({formatValue(env.remaining, domain)} left)
                                     </option>
                                 ))}
                             </select>
@@ -87,7 +90,7 @@ export function TransferModal({ isOpen, onClose, envelopes }: TransferModalProps
                             >
                                 {envelopes.map(env => (
                                     <option key={env.id} value={env.id}>
-                                        {env.name} ({env.remaining.toFixed(2)}h left)
+                                        {env.name} ({formatValue(env.remaining, domain)} left)
                                     </option>
                                 ))}
                             </select>
@@ -99,13 +102,13 @@ export function TransferModal({ isOpen, onClose, envelopes }: TransferModalProps
                         <div className={styles.inputWrapper}>
                             <input
                                 type="number"
-                                step="0.1"
+                                step={domain === "TIME" ? "0.1" : "0.01"}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 required
-                                placeholder="0.0"
+                                placeholder="0.00"
                             />
-                            <span className={styles.suffix}>hours</span>
+                            <span className={styles.suffix}>{domain === "TIME" ? "hours" : "USD"}</span>
                         </div>
                     </div>
 

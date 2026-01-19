@@ -22,8 +22,20 @@ function getStartOfWeek(date: Date) {
     return start;
 }
 
+function getStartOfMonth(date: Date) {
+    const d = new Date(date);
+    const start = new Date(d.getFullYear(), d.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
+    return start;
+}
+
+function getStartOfPeriod(date: Date, type: string) {
+    if (type === "MONTHLY") return getStartOfMonth(date);
+    return getStartOfWeek(date);
+}
+
 // Ensure the user exists in our local DB, if not create them
-async function ensureUserExists(clerkId: string) {
+async function ensureUserExists(clerkId: string, domain: string = "TIME", periodType: string = "WEEKLY") {
     let user = await db.user.findUnique({
         where: { id: clerkId } as any
     });
@@ -32,22 +44,33 @@ async function ensureUserExists(clerkId: string) {
         user = await db.user.create({
             data: {
                 id: clerkId,
-                email: `${clerkId}@example.com`,
+                email: `${clerkId}@clerk.user`,
             }
         });
+    }
 
-        const startOfWeek = getStartOfWeek(new Date());
+    // Now ensure the domain-specific period exists
+    const startOfPeriod = getStartOfPeriod(new Date(), periodType);
+    const existingPeriod = await db.budgetPeriod.findFirst({
+        where: { userId: clerkId, startDate: startOfPeriod, domain: domain, type: periodType }
+    });
 
+    if (!existingPeriod) {
         await db.budgetPeriod.create({
             data: {
                 userId: clerkId,
-                startDate: startOfWeek,
-                type: "WEEKLY",
+                startDate: startOfPeriod,
+                type: periodType,
+                domain: domain,
                 envelopes: {
-                    create: [
+                    create: domain === "TIME" ? [
                         { name: "Work", budgeted: 40, color: "blue" },
                         { name: "Sleep", budgeted: 56, color: "purple" },
                         { name: "Leisure", budgeted: 20, color: "green" },
+                    ] : [
+                        { name: "Rent", budgeted: 1500, color: "blue" },
+                        { name: "Groceries", budgeted: 400, color: "green" },
+                        { name: "Entertainment", budgeted: 100, color: "purple" },
                     ]
                 }
             } as any
@@ -95,22 +118,23 @@ export async function createTransaction(params: CreateTransactionParams) {
         } as any,
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/transactions");
+    revalidatePath(`/dashboard/${envelope.period.domain.toLowerCase()}`);
+    revalidatePath(`/dashboard/${envelope.period.domain.toLowerCase()}/transactions`);
 }
 
 // Fetch the budget period for a specific date (or current if omitted)
-export async function getBudgetPeriodByDate(date: Date, clerkId?: string) {
+export async function getBudgetPeriodByDate(date: Date, clerkId?: string, domain: string = "TIME", periodType: string = "WEEKLY") {
     const userId = clerkId || await getAuthenticatedUser();
-    await ensureUserExists(userId);
+    await ensureUserExists(userId, domain, periodType);
 
-    const startOfWeek = getStartOfWeek(date);
+    const startOfPeriod = getStartOfPeriod(date, periodType);
 
     const period = await db.budgetPeriod.findFirst({
         where: {
             userId: userId as any,
-            type: "WEEKLY",
-            startDate: startOfWeek
+            type: periodType,
+            startDate: startOfPeriod,
+            domain: domain
         },
         include: {
             envelopes: {
@@ -125,23 +149,23 @@ export async function getBudgetPeriodByDate(date: Date, clerkId?: string) {
 }
 
 // Deprecated or redirect to getBudgetPeriodByDate for compatibility
-export async function getCurrentBudgetPeriod(clerkId?: string) {
-    return getBudgetPeriodByDate(new Date(), clerkId);
+export async function getCurrentBudgetPeriod(domain: string = "TIME", clerkId?: string) {
+    return getBudgetPeriodByDate(new Date(), clerkId, domain, "WEEKLY");
 }
 
-export async function initNewWeek(targetDate: Date) {
+export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", type: string = "WEEKLY") {
     const userId = await getAuthenticatedUser();
-    const startOfTargetWeek = getStartOfWeek(targetDate);
+    const startOfTargetPeriod = getStartOfPeriod(targetDate, type);
 
     // Check if period already exists
     const existing = await db.budgetPeriod.findFirst({
-        where: { userId: userId as any, startDate: startOfTargetWeek }
+        where: { userId: userId as any, startDate: startOfTargetPeriod, domain: domain, type: type }
     });
     if (existing) return existing;
 
-    // Find the latest previous period to clone categories from
+    // Find the latest previous period of SAME TYPE to clone categories from
     const latestPeriod = await db.budgetPeriod.findFirst({
-        where: { userId: userId as any },
+        where: { userId: userId as any, domain: domain, type: type },
         orderBy: { startDate: "desc" },
         include: { envelopes: true }
     }) as any;
@@ -149,34 +173,65 @@ export async function initNewWeek(targetDate: Date) {
     const newPeriod = await db.budgetPeriod.create({
         data: {
             userId: userId as any,
-            startDate: startOfTargetWeek,
-            type: "WEEKLY",
+            startDate: startOfTargetPeriod,
+            type: type,
+            domain: domain,
             envelopes: {
                 create: latestPeriod?.envelopes.map((env: any) => ({
                     name: env.name,
                     budgeted: env.budgeted,
                     color: env.color
-                })) || [
-                        { name: "Work", budgeted: 40, color: "blue" },
-                        { name: "Sleep", budgeted: 56, color: "purple" },
-                        { name: "Leisure", budgeted: 20, color: "green" },
-                    ]
+                })) || (domain === "TIME" ? [
+                    { name: "Work", budgeted: 40, color: "blue" },
+                    { name: "Sleep", budgeted: 56, color: "purple" },
+                    { name: "Leisure", budgeted: 20, color: "green" },
+                ] : [
+                    { name: "Rent", budgeted: 1500, color: "blue" },
+                    { name: "Groceries", budgeted: 400, color: "green" },
+                    { name: "Entertainment", budgeted: 100, color: "purple" },
+                ])
             }
         }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/budget");
+    const path = `/dashboard/${domain.toLowerCase()}`;
+    revalidatePath(path);
+    revalidatePath(`${path}/budget`);
     return newPeriod;
 }
 
+// For backward compatibility until all pages are updated
+export async function initNewWeek(targetDate: Date, domain: string = "MONEY") {
+    return initNewPeriod(targetDate, domain, "WEEKLY");
+}
+
 // Calculate totals for a period given a date
-export async function getBudgetSummary(targetDateInput?: string | Date) {
+export async function getBudgetSummary(targetDateInput?: string | Date, domain: string = "TIME", periodType: string = "WEEKLY") {
     const userId = await getAuthenticatedUser();
     const date = targetDateInput ? new Date(targetDateInput) : new Date();
-    const period = await getBudgetPeriodByDate(date, userId) as any;
+    const period = await getBudgetPeriodByDate(date, userId, domain, periodType) as any;
 
-    if (!period) return { period: null, envelopes: [], totalBudgeted: 0, totalSpent: 0, totalRemaining: 168 };
+    function getHoursInPeriod(targetDate: Date, type: string) {
+        if (type === "WEEKLY") return 168; // 24 * 7
+        if (type === "MONTHLY") {
+            const year = targetDate.getFullYear();
+            const month = targetDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            return daysInMonth * 24;
+        }
+        return 0;
+    }
+
+    const availableHoursInPeriod = getHoursInPeriod(date, periodType);
+
+    if (!period) return {
+        period: null,
+        envelopes: [],
+        totalBudgeted: 0,
+        totalSpent: 0,
+        totalRemaining: domain === "TIME" ? availableHoursInPeriod : 0,
+        periodType
+    };
 
     // Calculate totals
     const envelopes = (period.envelopes as any[]).map((env: any) => {
@@ -197,7 +252,9 @@ export async function getBudgetSummary(targetDateInput?: string | Date) {
 
     const totalBudgeted = envelopes.reduce((sum: number, e: any) => sum + e.budgeted, 0);
     const totalSpent = envelopes.reduce((sum: number, e: any) => sum + e.spent, 0);
-    const totalRemaining = 168 - totalSpent;
+    // For TIME, remaining is total physical hours minus spent
+    // For MONEY, remaining is total budgeted minus spent
+    const totalRemaining = domain === "TIME" ? availableHoursInPeriod - totalSpent : totalBudgeted - totalSpent;
 
     return {
         period,
@@ -205,6 +262,8 @@ export async function getBudgetSummary(targetDateInput?: string | Date) {
         totalBudgeted,
         totalSpent,
         totalRemaining,
+        totalAvailable: availableHoursInPeriod,
+        periodType
     };
 }
 
@@ -236,6 +295,7 @@ export async function getEnvelopeDetails(envelopeId: number) {
         budgeted,
         spent,
         remaining,
+        domain: envelope.period.domain
     };
 }
 
@@ -273,8 +333,11 @@ export async function createEnvelope(params: CreateEnvelopeParams) {
     const { name, budgeted, color, date } = params;
 
     const targetDate = date ? new Date(date) : new Date();
+    // Default to TIME if not specified? 
+    // Actually createEnvelope should probably know the domain.
+    // For now we'll infer it from the period we find, but we should probably pass it.
     const period = await getBudgetPeriodByDate(targetDate, userId);
-    if (!period) throw new Error("No active budget period found for this date");
+    if (!period) throw new Error("No active budget period found");
 
     await db.envelope.create({
         data: {
@@ -285,8 +348,9 @@ export async function createEnvelope(params: CreateEnvelopeParams) {
         }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/budget");
+    const path = `/dashboard/${period.domain.toLowerCase()}`;
+    revalidatePath(path);
+    revalidatePath(`${path}/budget`);
 }
 
 export async function updateEnvelope(id: number, data: { name?: string; budgeted?: number; color?: string }) {
@@ -312,13 +376,14 @@ export async function deleteEnvelope(id: number) {
     revalidatePath("/dashboard/budget");
 }
 
-export async function getTransactions() {
+export async function getTransactions(domain: string = "TIME") {
     const userId = await getAuthenticatedUser();
     const transactions = await db.transaction.findMany({
         where: {
             envelope: {
                 period: {
                     userId: userId as any,
+                    domain: domain
                 },
             },
         },

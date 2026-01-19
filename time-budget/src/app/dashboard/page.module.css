@@ -1,124 +1,132 @@
+.gateway {
+    padding: 4rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    min-height: 80vh;
+    justify-content: center;
+}
+
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
+    text-align: center;
 }
 
-.chartSection {
-    margin-bottom: 2rem;
-    height: auto;
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--foreground);
-    margin: 0;
-}
-
-.subtitle {
-    color: var(--foreground);
-    opacity: 0.6;
-    margin: 0;
-}
-
-.summaryCard {
-    background-color: #ffffff;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.summaryLabel {
-    font-size: 0.875rem;
-    color: var(--foreground);
-    opacity: 0.6;
-}
-
-.summaryValue {
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.summaryValueWarning {
-    font-weight: 700;
-    color: var(--danger);
+.header p {
+    color: #64748b;
+    font-size: 1.1rem;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
 }
 
-@media (min-width: 768px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 1024px) {
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.titleGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.emptyState {
+.card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    text-decoration: none;
+    color: inherit;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
     text-align: center;
-    background: white;
-    border-radius: 16px;
-    border: 1px dashed #cbd5e1;
-    margin-top: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
 }
 
-.emptyIcon {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
+.card:hover {
+    transform: translateY(-8px);
+    border-color: #22c55e;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-.emptyTitle {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 0.75rem;
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: transparent;
+    transition: background 0.3s ease;
 }
 
-.emptyText {
-    color: #64748b;
-    max-width: 400px;
+.card:hover::before {
+    background: #22c55e;
+}
+
+.iconWrapper {
+    width: 100px;
+    height: 100px;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .iconWrapper {
+    transform: scale(1.1);
+}
+
+.timeIcon {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.moneyIcon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.card h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.card p {
+    color: #64748b;
     line-height: 1.6;
 }
 
-.initBtn {
-    background-color: var(--success);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+.arrow {
+    margin-top: 2rem;
+    padding: 0.75rem;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: #94a3b8;
+    transition: all 0.3s ease;
 }
 
-.initBtn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
+.card:hover .arrow {
+    background: #22c55e;
+    color: white;
+    transform: translateX(4px);
+}
+
+@media (max-width: 640px) {
+    .gateway {
+        padding: 2rem 1rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }

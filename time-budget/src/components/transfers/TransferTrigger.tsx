@@ -11,7 +11,7 @@ interface Envelope {
     remaining: number;
 }
 
-export function TransferTrigger({ envelopes }: { envelopes: Envelope[] }) {
+export function TransferTrigger({ envelopes, domain = "TIME" }: { envelopes: Envelope[], domain?: string }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -28,6 +28,7 @@ export function TransferTrigger({ envelopes }: { envelopes: Envelope[] }) {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 envelopes={envelopes}
+                domain={domain}
             />
         </>
     );

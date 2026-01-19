@@ -30,10 +30,11 @@ model BudgetPeriod {
   
   // State of the period
   isClosed  Boolean  @default(false)
+  domain    String   @default("MONEY") // "TIME" or "MONEY"
   
   envelopes Envelope[]
 
-  @@unique([userId, startDate, type]) // One budget per period type per start date
+  @@unique([userId, startDate, type, domain]) // One budget per period type per start date per domain
 }
 
 // The "Buckets" for a specific period
