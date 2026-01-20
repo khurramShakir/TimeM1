@@ -25,11 +25,21 @@ interface LogTimeModalProps {
         endTime?: Date | null;
     } | null;
     domain?: string;
+    currency?: string;
 }
 
 type Mode = "duration" | "range";
 
-export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, transaction, domain = "TIME" }: LogTimeModalProps) {
+const SYMBOL_MAP: Record<string, string> = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    CAD: "C$",
+    AUD: "A$"
+};
+
+export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, transaction, domain = "TIME", currency = "USD" }: LogTimeModalProps) {
     const [mode, setMode] = useState<Mode>("duration");
     const [envelopeId, setEnvelopeId] = useState<number>(envelopes[0]?.id || 0);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -185,14 +195,21 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                     {mode === "duration" || domain === "MONEY" ? (
                         <div className={styles.group}>
                             <label>{domain === "TIME" ? "Hours" : "Amount"}</label>
-                            <input
-                                type="number"
-                                step={domain === "TIME" ? "0.1" : "0.01"}
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                required
-                                placeholder={domain === "TIME" ? "e.g. 1.5" : "e.g. 50.00"}
-                            />
+                            <div className={`${styles.inputWithPrefix} ${domain === "MONEY" ? styles.hasPrefix : ""}`}>
+                                {domain === "MONEY" && (
+                                    <span className={styles.prefix}>
+                                        {SYMBOL_MAP[currency] || currency}
+                                    </span>
+                                )}
+                                <input
+                                    type="number"
+                                    step={domain === "TIME" ? "0.1" : "0.01"}
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    required
+                                    placeholder={domain === "TIME" ? "e.g. 1.5" : "0.00"}
+                                />
+                            </div>
                         </div>
                     ) : (
                         <div className={styles.row}>

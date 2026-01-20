@@ -38,6 +38,14 @@
   --radius-lg: 1.5rem;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   color: var(--foreground);
   background: var(--surface-200);

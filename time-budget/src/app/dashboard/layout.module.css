@@ -37,3 +37,10 @@
         padding: 2rem;
     }
 }
+
+@media (max-width: 768px) {
+    .main {
+        padding-bottom: 80px;
+        /* Space for Bottom Nav */
+    }
+}

@@ -16,6 +16,7 @@ interface LogTimeTriggerProps {
     compact?: boolean;
     domain?: string;
     themeColor?: string; // Hex color to match parent card
+    currency?: string;
 }
 
 export function LogTimeTrigger({
@@ -23,7 +24,8 @@ export function LogTimeTrigger({
     initialEnvelopeId,
     compact = false,
     domain = "TIME",
-    themeColor
+    themeColor,
+    currency
 }: LogTimeTriggerProps) {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -61,6 +63,7 @@ export function LogTimeTrigger({
                 envelopes={envelopes}
                 initialEnvelopeId={initialEnvelopeId}
                 domain={domain}
+                currency={currency}
             />
         </>
     );

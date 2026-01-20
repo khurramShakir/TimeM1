@@ -5,6 +5,30 @@
     margin-bottom: 2rem;
 }
 
+.headerControls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .headerControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerControls>* {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 .chartSection {
     margin-bottom: 2rem;
     height: auto;
@@ -121,4 +145,10 @@
 .initBtn:hover {
     filter: brightness(1.1);
     transform: translateY(-2px);
+}
+
+.centeredContent {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
 }

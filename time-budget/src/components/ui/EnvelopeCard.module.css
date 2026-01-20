@@ -3,9 +3,12 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
+    padding: 0.5rem 0.75rem;
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: unset;
 }
 
 .card:hover {
@@ -16,53 +19,49 @@
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
 }
 
 .title {
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 0.9rem;
     margin: 0;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .badge {
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.1rem 0.35rem;
     border-radius: 9999px;
+    white-space: nowrap;
 }
 
 .stats {
     display: flex;
     justify-content: space-between;
-    font-size: 0.875rem;
+    font-size: 0.7rem;
     color: var(--foreground);
-    opacity: 0.8;
-    margin-bottom: 0.5rem;
-    align-items: flex-end;
+    opacity: 0.75;
+    margin-bottom: 0.15rem;
+    align-items: center;
 }
 
 .budgetValue {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 800;
     line-height: 1;
-    letter-spacing: -0.025em;
-    /* Color set by variant below */
 }
 
 .progressBar {
-    height: 0.5rem;
+    height: 4px;
     background-color: var(--surface-300);
     border-radius: 9999px;
     overflow: hidden;
-}
-
-.badgeLine {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
 }
 
 .progressFill {
@@ -77,20 +76,16 @@
 
 .blue .badge {
     background-color: #ffffff;
-    /* White badge on colored card */
     color: #1e40af;
 }
 
 .card.blue .budgetValue {
     color: #1e40af;
-    /* Blue-800 */
 }
 
 .card.blue {
     background-color: #dbeafe;
-    /* Match Chart/Swatch (Blue-100) */
     border-color: #bfdbfe;
-    /* Blue-200 for border */
 }
 
 .purple .progressFill {
@@ -104,14 +99,11 @@
 
 .card.purple .budgetValue {
     color: #6b21a8;
-    /* Purple-800 */
 }
 
 .card.purple {
     background-color: #f3e8ff;
-    /* Match Chart/Swatch (Purple-100) */
     border-color: #e9d5ff;
-    /* Purple-200 */
 }
 
 .green .progressFill {
@@ -125,14 +117,11 @@
 
 .card.green .budgetValue {
     color: #065f46;
-    /* Green-800 */
 }
 
 .card.green {
     background-color: #d1fae5;
-    /* Match Chart/Swatch (Green-100) */
     border-color: #bbf7d0;
-    /* Green-200 */
 }
 
 .gray .progressFill {
@@ -146,14 +135,11 @@
 
 .card.gray .budgetValue {
     color: #1f2937;
-    /* Gray-800 */
 }
 
 .card.gray {
     background-color: #f3f4f6;
-    /* Match Chart/Swatch (Gray-100) */
     border-color: #e5e7eb;
-    /* Gray-200 */
 }
 
 .red .progressFill {
@@ -167,12 +153,9 @@
 
 .card.red .budgetValue {
     color: #991b1b;
-    /* Red-800 */
 }
 
 .card.red {
     background-color: #fee2e2;
-    /* Match Chart/Swatch (Red-100) */
     border-color: #fecaca;
-    /* Red-200 */
 }

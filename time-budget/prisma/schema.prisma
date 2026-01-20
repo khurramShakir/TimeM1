@@ -18,6 +18,22 @@ model User {
   createdAt DateTime @default(now())
   
   periods   BudgetPeriod[]
+  settings  UserSettings?
+}
+
+// User preferences for domain, currency, etc.
+model UserSettings {
+  id              Int      @id @default(autoincrement())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  
+  currency        String   @default("USD")
+  weekStart       Int      @default(0) // 0 for Sunday, 1 for Monday
+  defaultDomain   String   @default("TIME")
+  defaultPeriod   String   @default("WEEKLY")
+  timeCapacity    Decimal  @default(168.0)
+  
+  updatedAt       DateTime @default(now()) @updatedAt
 }
 
 // A "Budget Period" container (e.g., Week of Dec 4th, or Month of Jan 2025)
@@ -31,6 +47,7 @@ model BudgetPeriod {
   // State of the period
   isClosed  Boolean  @default(false)
   domain    String   @default("MONEY") // "TIME" or "MONEY"
+  capacity  Decimal  @default(0)       // Total income or hours for this specific period
   
   envelopes Envelope[]
 

@@ -13,6 +13,7 @@ import {
     ResponsiveContainer
 } from "recharts";
 import styles from "./BudgetChart.module.css";
+import { formatValue } from "@/lib/format";
 
 interface EnvelopeData {
     id: number;
@@ -28,25 +29,19 @@ interface BudgetChartProps {
     domain?: string;
     periodType?: string;
     totalAvailable?: number;
+    currency?: string;
 }
 
 // Map app colors to 'Badge' background colors (Pastel) for Pie Chart
-const COLOR_VALUES: Record<string, string> = {
-    blue: "#dbeafe",   // Blue-100
-    purple: "#f3e8ff", // Purple-100
-    green: "#d1fae5",  // Green-100
-    gray: "#f3f4f6",   // Gray-100
-    red: "#fee2e2",    // Red-100
-    default: "#cbd5e1",
-    unallocated: "#f1f5f9" // Slate-100
-};
+import { getLightColor } from "@/lib/colors";
 
 export function BudgetChart({
     envelopes,
     totalBudgeted,
     domain = "TIME",
     periodType = "WEEKLY",
-    totalAvailable = 168
+    totalAvailable = 168,
+    currency = "USD"
 }: BudgetChartProps) {
     // 1. Identify "Unallocated" envelope logic
     const explicitUnallocatedEnv = envelopes.find(e => e.name.toLowerCase() === "unallocated");
@@ -66,8 +61,8 @@ export function BudgetChart({
     }
 
     const pieColors = [
-        ...otherEnvelopes.map(env => COLOR_VALUES[env.color] || COLOR_VALUES.default),
-        COLOR_VALUES.unallocated
+        ...otherEnvelopes.map(env => getLightColor(env.color)),
+        "#f1f5f9" // unallocated
     ];
 
     const pieOptions = {
@@ -125,7 +120,7 @@ export function BudgetChart({
                         <div className={styles.statItem}>
                             <span className={styles.statLabel}>Total Allocated</span>
                             <span className={styles.statValueProminent}>
-                                {isTime ? `${trueAllocated.toFixed(1)}h` : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trueAllocated)}
+                                {formatValue(trueAllocated, domain, currency)}
                             </span>
                         </div>
                         {isTime && (

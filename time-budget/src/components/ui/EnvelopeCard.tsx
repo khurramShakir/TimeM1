@@ -5,6 +5,7 @@ import styles from "./EnvelopeCard.module.css";
 import { LogTimeTrigger } from "@/components/transactions/LogTimeTrigger";
 import { useRouter } from "next/navigation";
 import { formatValue } from "@/lib/format";
+import { getThemeColor, getLightColor, getTextColor } from "@/lib/colors";
 
 interface EnvelopeProps {
     id: number;
@@ -14,9 +15,10 @@ interface EnvelopeProps {
     remaining: number;
     color?: string | null;
     domain?: string;
+    currency?: string;
 }
 
-export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, domain = "TIME" }: EnvelopeProps) {
+export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, domain = "TIME", currency = "USD" }: EnvelopeProps) {
     const router = useRouter();
 
     // Handle card click for details
@@ -27,59 +29,55 @@ export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, doma
     // Calculate progress percentage, capped at 100%
     const progress = Math.min((spent / budgeted) * 100, 100);
 
-    // Determine color variant
-    let variant = "gray";
-    if (color === "blue") variant = "blue";
-    if (color === "purple") variant = "purple";
-    if (color === "green") variant = "green";
-    if (color === "red") variant = "red";
-    if (remaining < 0) variant = "red";
+    // Determine colors
+    const themeColor = getThemeColor(color);
+    const lightBg = getLightColor(color);
+    const textColor = getTextColor(color);
 
-    // Map variant to hex for LogTimeTrigger
-    const hexColors: Record<string, string> = {
-        blue: "#2563eb",
-        purple: "#9333ea",
-        green: "#16a34a",
-        red: "#dc2626",
-        gray: "#4b5563"
+    // Fallback for "Over" state
+    const cardStyle = {
+        backgroundColor: remaining < 0 ? "#fee2e2" : lightBg,
+        borderColor: remaining < 0 ? "#fecaca" : `${themeColor}40`, // 40 is 25% opacity
     };
 
     return (
         <div
-            className={`${styles.card} ${styles[variant]}`}
+            className={styles.card}
             onClick={handleCardClick}
             role="button"
+            style={cardStyle}
             tabIndex={0}
         >
             <div className={styles.header}>
-                <div className="flex items-center justify-between w-full">
-                    <h3 className={styles.title}>{name}</h3>
-                    {/* Log Time/Transaction Button - Compact Style */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                     <LogTimeTrigger
-                        envelopes={[{ id, name }]} // Contextual envelope list (just this one)
+                        envelopes={[{ id, name }]}
                         initialEnvelopeId={id}
                         compact={true}
                         domain={domain}
-                        themeColor={hexColors[variant]}
+                        themeColor={themeColor}
+                        currency={currency}
                     />
+                    <h3 className={styles.title}>{name}</h3>
                 </div>
-            </div>
-            <div className={styles.badgeLine}>
-                <span className={styles.badge}>
-                    {formatValue(remaining, domain)} {remaining >= 0 ? 'Left' : 'Over'}
+                <span className={styles.badge} style={{ pointerEvents: 'none', backgroundColor: '#ffffff', color: remaining < 0 ? '#991b1b' : textColor }}>
+                    {formatValue(remaining, domain, currency)} {remaining >= 0 ? 'Left' : 'Over'}
                 </span>
             </div>
-            <div className={styles.body}>
-                <div className={styles.stats}>
-                    <span>Spent: {formatValue(spent, domain)}</span>
-                    <span className={styles.budgetValue}>{formatValue(budgeted, domain)}</span>
-                </div>
-                <div className={styles.progressBar}>
-                    <div
-                        className={styles.progressFill}
-                        style={{ width: `${progress}%` }}
-                    ></div>
-                </div>
+
+            <div className={styles.stats}>
+                <span>Spent: {formatValue(spent, domain, currency)}</span>
+                <span className={styles.budgetValue} style={{ color: remaining < 0 ? '#991b1b' : textColor }}>{formatValue(budgeted, domain, currency)}</span>
+            </div>
+
+            <div className={styles.progressBar}>
+                <div
+                    className={styles.progressFill}
+                    style={{
+                        width: `${progress}%`,
+                        backgroundColor: remaining < 0 ? "#ef4444" : themeColor
+                    }}
+                ></div>
             </div>
         </div>
     );

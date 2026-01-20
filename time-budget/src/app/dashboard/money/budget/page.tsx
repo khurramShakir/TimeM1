@@ -2,17 +2,17 @@ import React from "react";
 import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
 import BudgetManager from "@/components/budget/BudgetManager";
 import { DateNavigation } from "@/components/layout/DateNavigation";
-import styles from "../page.module.css";
+import styles from "../../time/page.module.css";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
 }
 
-export default async function BudgetPage({ searchParams }: PageProps) {
+export default async function MoneyBudgetPage({ searchParams }: PageProps) {
     const { date: dateStr } = await searchParams;
     const settings = await getUserSettings();
-    const periodType = "WEEKLY";
-    const domain = "TIME";
+    const domain = "MONEY";
+    const periodType = "MONTHLY";
 
     const currentDate = dateStr ? new Date(dateStr) : new Date();
     let summary = await getBudgetSummary(currentDate, domain, periodType);

@@ -1,23 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Home, PieChart, Settings, LogOut, Clock, List, Banknote, ArrowRight } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import styles from "./Sidebar.module.css";
 
 export function Sidebar() {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     // Determine the current domain prefix
     const isMoney = pathname.startsWith("/dashboard/money");
     const prefix = isMoney ? "/dashboard/money" : "/dashboard/time";
 
+    // Enforce Domain Specific Periods
+    const typeParam = isMoney ? "?type=MONTHLY" : ""; // Time defaults to Weekly implicitly
+
     const navigation = [
-        { name: "Dashboard", href: `${prefix}`, icon: Home },
-        { name: "Envelopes", href: `${prefix}/budget`, icon: PieChart },
-        { name: "History", href: `${prefix}/transactions`, icon: List },
-        { name: "Settings", href: `${prefix}/settings`, icon: Settings },
+        { name: "Dashboard", href: `${prefix}${typeParam}`, icon: Home },
+        { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
+        { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
+        { name: "Settings", href: `/dashboard/settings`, icon: Settings },
     ];
 
     return (

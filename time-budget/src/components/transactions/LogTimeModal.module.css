@@ -99,6 +99,42 @@
     box-shadow: 0 0 0 2px var(--surface-300);
 }
 
+.inputWithPrefix {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: #ffffff;
+    transition: all 0.2s;
+}
+
+.inputWithPrefix:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--surface-300);
+}
+
+.prefix {
+    padding-left: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 1rem;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.inputWithPrefix input {
+    border: none !important;
+    border-radius: 0 !important;
+    padding-left: 0.5rem !important;
+    flex: 1;
+    width: 100%;
+    background: transparent !important;
+}
+
+.inputWithPrefix input:focus {
+    box-shadow: none !important;
+}
+
 .row {
     display: flex;
     gap: 1rem;

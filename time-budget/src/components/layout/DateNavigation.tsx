@@ -8,9 +8,10 @@ import styles from "./DateNavigation.module.css";
 interface DateNavigationProps {
     currentDate: Date;
     periodType?: string;
+    weekStart?: number;
 }
 
-export function DateNavigation({ currentDate, periodType = "WEEKLY" }: DateNavigationProps) {
+export function DateNavigation({ currentDate, periodType = "WEEKLY", weekStart = 0 }: DateNavigationProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -22,14 +23,16 @@ export function DateNavigation({ currentDate, periodType = "WEEKLY" }: DateNavig
         }
 
         const day = start.getDay();
-        const diff = start.getDate() - day;
-        const sunday = new Date(start.setDate(diff));
+        // Adjust for weekStart (0 = Sun, 1 = Mon)
+        let diff = start.getDate() - day + weekStart;
+        if (day < weekStart) diff -= 7;
 
-        const saturday = new Date(sunday);
-        saturday.setDate(sunday.getDate() + 6);
+        const rangeStart = new Date(start.setDate(diff));
+        const rangeEnd = new Date(rangeStart);
+        rangeEnd.setDate(rangeStart.getDate() + 6);
 
         const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-        return `${sunday.toLocaleDateString(undefined, options)} - ${saturday.toLocaleDateString(undefined, options)}, ${saturday.getFullYear()}`;
+        return `${rangeStart.toLocaleDateString(undefined, options)} - ${rangeEnd.toLocaleDateString(undefined, options)}, ${rangeEnd.getFullYear()}`;
     };
 
     const navigate = (amount: number) => {

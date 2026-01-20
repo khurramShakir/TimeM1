@@ -13,10 +13,22 @@ async function getAuthenticatedUser() {
     return userId;
 }
 
-function getStartOfWeek(date: Date) {
+export async function updateUserProfile(data: { name?: string }) {
+    const userId = await getAuthenticatedUser();
+    await db.user.update({
+        where: { id: userId },
+        data: { name: data.name }
+    });
+    revalidatePath("/dashboard/settings");
+}
+
+function getStartOfWeek(date: Date, weekStart: number = 0) {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day; // Sunday is 0
+    // Calculate difference, adjusting for weekStart (0 for Sun, 1 for Mon)
+    let diff = d.getDate() - day + weekStart;
+    if (day < weekStart) diff -= 7;
+
     const start = new Date(d.setDate(diff));
     start.setHours(0, 0, 0, 0);
     return start;
@@ -29,9 +41,9 @@ function getStartOfMonth(date: Date) {
     return start;
 }
 
-function getStartOfPeriod(date: Date, type: string) {
+function getStartOfPeriod(date: Date, type: string, weekStart: number = 0) {
     if (type === "MONTHLY") return getStartOfMonth(date);
-    return getStartOfWeek(date);
+    return getStartOfWeek(date, weekStart);
 }
 
 // Ensure the user exists in our local DB, if not create them
@@ -49,35 +61,157 @@ async function ensureUserExists(clerkId: string, domain: string = "TIME", period
         });
     }
 
-    // Now ensure the domain-specific period exists
-    const startOfPeriod = getStartOfPeriod(new Date(), periodType);
-    const existingPeriod = await db.budgetPeriod.findFirst({
-        where: { userId: clerkId, startDate: startOfPeriod, domain: domain, type: periodType }
+    // Ensure settings exist
+    let settings = await (db as any).userSettings.findUnique({
+        where: { userId: clerkId }
     });
 
-    if (!existingPeriod) {
-        await db.budgetPeriod.create({
+    if (!settings) {
+        settings = await (db as any).userSettings.create({
             data: {
                 userId: clerkId,
-                startDate: startOfPeriod,
-                type: periodType,
-                domain: domain,
-                envelopes: {
-                    create: domain === "TIME" ? [
-                        { name: "Work", budgeted: 40, color: "blue" },
-                        { name: "Sleep", budgeted: 56, color: "purple" },
-                        { name: "Leisure", budgeted: 20, color: "green" },
-                    ] : [
-                        { name: "Rent", budgeted: 1500, color: "blue" },
-                        { name: "Groceries", budgeted: 400, color: "green" },
-                        { name: "Entertainment", budgeted: 100, color: "purple" },
-                    ]
-                }
-            } as any
+                currency: "USD",
+                weekStart: 0,
+                defaultDomain: "TIME",
+                defaultPeriod: "WEEKLY",
+                timeCapacity: 168
+            }
         });
     }
 
+    // Ensure BOTH domain-specific periods exist for the current time
+    const domains = [
+        { name: "TIME", period: "WEEKLY" },
+        { name: "MONEY", period: "MONTHLY" }
+    ];
+
+    for (const d of domains) {
+        const startOfP = getStartOfPeriod(new Date(), d.period, settings.weekStart);
+        const existingP = await db.budgetPeriod.findFirst({
+            where: { userId: clerkId, startDate: startOfP, domain: d.name, type: d.period }
+        });
+
+        if (!existingP) {
+            const capacity = d.name === "TIME" ? Number(settings.timeCapacity) : 0;
+            const period = await db.budgetPeriod.create({
+                data: {
+                    userId: clerkId,
+                    startDate: startOfP,
+                    type: d.period,
+                    domain: d.name,
+                    capacity: capacity,
+                    envelopes: {
+                        create: d.name === "TIME" ? [
+                            { name: "Work", budgeted: 40, color: "blue" },
+                            { name: "Sleep", budgeted: 56, color: "purple" },
+                            { name: "Leisure", budgeted: 20, color: "green" },
+                        ] : [
+                            { name: "Rent", budgeted: 1500, color: "blue" },
+                            { name: "Groceries", budgeted: 400, color: "green" },
+                            { name: "Entertainment", budgeted: 100, color: "purple" },
+                        ]
+                    }
+                } as any
+            });
+            await syncUnallocated(period.id);
+        }
+    }
+
     return clerkId;
+}
+
+export async function getUserSettings() {
+    const userId = await getAuthenticatedUser();
+    let settings = await (db as any).userSettings.findUnique({
+        where: { userId },
+        include: { user: true }
+    });
+
+    if (!settings) {
+        // Fallback or init if missing for some reason
+        await ensureUserExists(userId);
+        settings = await (db as any).userSettings.findUnique({
+            where: { userId }
+        });
+    }
+
+    return settings;
+}
+
+export async function updateUserSettings(data: {
+    currency?: string;
+    weekStart?: number;
+    defaultDomain?: string;
+    defaultPeriod?: string;
+    timeCapacity?: number;
+}) {
+    const userId = await getAuthenticatedUser();
+
+    await (db as any).userSettings.upsert({
+        where: { userId },
+        create: {
+            userId,
+            ...data
+        },
+        update: data
+    });
+
+    // If time capacity changed, we might want to sync current TIME periods
+    // But for now, user settings are global "defaults". 
+    // Usually capacity is set per-period now.
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/settings");
+}
+
+export async function syncUnallocated(periodId: number) {
+    const period = await db.budgetPeriod.findUnique({
+        where: { id: periodId },
+        include: { envelopes: true }
+    });
+    if (!period) return;
+
+    const totalBudgeted = period.envelopes
+        .filter(e => e.name !== "Unallocated")
+        .reduce((sum, e) => sum + Number(e.budgeted), 0);
+
+    const unallocatedBudget = Number(period.capacity) - totalBudgeted;
+
+    const unallocatedEnv = period.envelopes.find(e => e.name === "Unallocated");
+
+    if (unallocatedEnv) {
+        await db.envelope.update({
+            where: { id: unallocatedEnv.id },
+            data: { budgeted: unallocatedBudget }
+        });
+    } else {
+        await db.envelope.create({
+            data: {
+                periodId: period.id,
+                name: "Unallocated",
+                budgeted: unallocatedBudget,
+                color: "gray"
+            }
+        });
+    }
+}
+
+export async function updatePeriodCapacity(periodId: number, capacity: number) {
+    const userId = await getAuthenticatedUser();
+    const period = await db.budgetPeriod.findUnique({ where: { id: periodId } });
+
+    if (!period || (period.userId as any) !== userId) throw new Error("Unauthorized");
+
+    await db.budgetPeriod.update({
+        where: { id: periodId },
+        data: { capacity }
+    });
+
+    await syncUnallocated(periodId);
+
+    const domain = period.domain.toLowerCase();
+    revalidatePath(`/dashboard/${domain}`);
+    revalidatePath(`/dashboard/${domain}/budget`);
 }
 
 interface CreateTransactionParams {
@@ -118,8 +252,10 @@ export async function createTransaction(params: CreateTransactionParams) {
         } as any,
     });
 
-    revalidatePath(`/dashboard/${envelope.period.domain.toLowerCase()}`);
-    revalidatePath(`/dashboard/${envelope.period.domain.toLowerCase()}/transactions`);
+    const domain = envelope.period.domain.toLowerCase();
+    revalidatePath(`/dashboard/${domain}`);
+    revalidatePath(`/dashboard/${domain}/budget`);
+    revalidatePath(`/dashboard/${domain}/transactions`);
 }
 
 // Fetch the budget period for a specific date (or current if omitted)
@@ -127,7 +263,8 @@ export async function getBudgetPeriodByDate(date: Date, clerkId?: string, domain
     const userId = clerkId || await getAuthenticatedUser();
     await ensureUserExists(userId, domain, periodType);
 
-    const startOfPeriod = getStartOfPeriod(date, periodType);
+    const settings = await getUserSettings();
+    const startOfPeriod = getStartOfPeriod(date, periodType, settings.weekStart);
 
     const period = await db.budgetPeriod.findFirst({
         where: {
@@ -155,7 +292,8 @@ export async function getCurrentBudgetPeriod(domain: string = "TIME", clerkId?: 
 
 export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", type: string = "WEEKLY") {
     const userId = await getAuthenticatedUser();
-    const startOfTargetPeriod = getStartOfPeriod(targetDate, type);
+    const settings = await getUserSettings();
+    const startOfTargetPeriod = getStartOfPeriod(targetDate, type, settings.weekStart);
 
     // Check if period already exists
     const existing = await db.budgetPeriod.findFirst({
@@ -170,33 +308,37 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
         include: { envelopes: true }
     }) as any;
 
+    const capacity = latestPeriod ? Number(latestPeriod.capacity) : (domain === "TIME" ? Number(settings.timeCapacity) : 0);
+
     const newPeriod = await db.budgetPeriod.create({
         data: {
             userId: userId as any,
             startDate: startOfTargetPeriod,
             type: type,
             domain: domain,
+            capacity: capacity,
             envelopes: {
-                create: latestPeriod?.envelopes.map((env: any) => ({
-                    name: env.name,
-                    budgeted: env.budgeted,
-                    color: env.color
-                })) || (domain === "TIME" ? [
-                    { name: "Work", budgeted: 40, color: "blue" },
-                    { name: "Sleep", budgeted: 56, color: "purple" },
-                    { name: "Leisure", budgeted: 20, color: "green" },
-                ] : [
-                    { name: "Rent", budgeted: 1500, color: "blue" },
-                    { name: "Groceries", budgeted: 400, color: "green" },
-                    { name: "Entertainment", budgeted: 100, color: "purple" },
-                ])
+                create: latestPeriod?.envelopes
+                    .filter((env: any) => env.name !== "Unallocated")
+                    .map((env: any) => ({
+                        name: env.name,
+                        budgeted: env.budgeted,
+                        color: env.color
+                    })) || (domain === "TIME" ? [
+                        { name: "Work", budgeted: 40, color: "blue" },
+                        { name: "Sleep", budgeted: 56, color: "purple" },
+                        { name: "Leisure", budgeted: 20, color: "green" },
+                    ] : [
+                        { name: "Rent", budgeted: 1500, color: "blue" },
+                        { name: "Groceries", budgeted: 400, color: "green" },
+                        { name: "Entertainment", budgeted: 100, color: "purple" },
+                    ])
             }
         }
     });
 
-    const path = `/dashboard/${domain.toLowerCase()}`;
-    revalidatePath(path);
-    revalidatePath(`${path}/budget`);
+    await syncUnallocated(newPeriod.id);
+
     return newPeriod;
 }
 
@@ -208,16 +350,20 @@ export async function initNewWeek(targetDate: Date, domain: string = "MONEY") {
 // Calculate totals for a period given a date
 export async function getBudgetSummary(targetDateInput?: string | Date, domain: string = "TIME", periodType: string = "WEEKLY") {
     const userId = await getAuthenticatedUser();
+    const settings = await getUserSettings();
     const date = targetDateInput ? new Date(targetDateInput) : new Date();
     const period = await getBudgetPeriodByDate(date, userId, domain, periodType) as any;
 
     function getHoursInPeriod(targetDate: Date, type: string) {
-        if (type === "WEEKLY") return 168; // 24 * 7
+        if (period?.capacity && Number(period.capacity) > 0) return Number(period.capacity);
+
+        if (type === "WEEKLY") return Number(settings.timeCapacity); // Use user setting
         if (type === "MONTHLY") {
             const year = targetDate.getFullYear();
             const month = targetDate.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            return daysInMonth * 24;
+            // Scaling 168h week to month: (capacity / 7) * days
+            return (Number(settings.timeCapacity) / 7) * daysInMonth;
         }
         return 0;
     }
@@ -234,6 +380,7 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     };
 
     // Calculate totals
+    // Calculate totals and sanitize for Client Components (No Decimals)
     const envelopes = (period.envelopes as any[]).map((env: any) => {
         const spent = (env.transactions as any[]).reduce(
             (sum: number, t: any) => sum + Number(t.amount),
@@ -243,10 +390,17 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
         const remaining = budgeted - spent;
 
         return {
-            ...env,
+            id: env.id,
+            name: env.name,
             budgeted,
             spent,
             remaining,
+            color: env.color || "gray",
+            periodId: env.periodId,
+            transactions: (env.transactions as any[]).map(t => ({
+                ...t,
+                amount: Number(t.amount)
+            }))
         };
     });
 
@@ -263,7 +417,9 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
         totalSpent,
         totalRemaining,
         totalAvailable: availableHoursInPeriod,
-        periodType
+        periodType,
+        currency: settings.currency, // Pass currency to UI
+        weekStart: settings.weekStart
     };
 }
 
@@ -325,19 +481,20 @@ interface CreateEnvelopeParams {
     name: string;
     budgeted: number;
     color: string;
-    date?: string | Date; // Added date to target specific weeks
+    date?: string | Date;
+    domain: string;
+    type: string;
 }
 
 export async function createEnvelope(params: CreateEnvelopeParams) {
     const userId = await getAuthenticatedUser();
-    const { name, budgeted, color, date } = params;
+    const { name, budgeted, color, date, domain, type } = params;
 
     const targetDate = date ? new Date(date) : new Date();
-    // Default to TIME if not specified? 
-    // Actually createEnvelope should probably know the domain.
-    // For now we'll infer it from the period we find, but we should probably pass it.
-    const period = await getBudgetPeriodByDate(targetDate, userId);
+    const period = await getBudgetPeriodByDate(targetDate, userId, domain, type);
     if (!period) throw new Error("No active budget period found");
+
+    if (name === "Unallocated") throw new Error("Cannot create a category named Unallocated");
 
     await db.envelope.create({
         data: {
@@ -348,32 +505,52 @@ export async function createEnvelope(params: CreateEnvelopeParams) {
         }
     });
 
-    const path = `/dashboard/${period.domain.toLowerCase()}`;
+    await syncUnallocated(period.id);
+
+    const path = `/dashboard/${domain.toLowerCase()}`;
     revalidatePath(path);
     revalidatePath(`${path}/budget`);
 }
 
 export async function updateEnvelope(id: number, data: { name?: string; budgeted?: number; color?: string }) {
-    await db.envelope.update({
+    const env = await db.envelope.findUnique({ where: { id }, include: { period: true } });
+    if (!env) return;
+
+    if (env.name === "Unallocated" && data.name && data.name !== "Unallocated") {
+        throw new Error("Cannot rename the Unallocated category");
+    }
+
+    const updatedEnv = await db.envelope.update({
         where: { id },
-        data
+        data,
+        include: { period: true }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/budget");
+    await syncUnallocated(updatedEnv.periodId);
+
+    const path = `/dashboard/${updatedEnv.period.domain.toLowerCase()}`;
+    revalidatePath(path);
+    revalidatePath(`${path}/budget`);
 }
 
 export async function deleteEnvelope(id: number) {
-    // Check for transactions first? For MVP allow delete but maybe we should cascade/warn.
-    // Ideally we should move transactions to "Unallocated" or delete them.
-    // For now, let's assume we can delete.
+    const env = await db.envelope.findUnique({
+        where: { id },
+        include: { period: true }
+    });
+
+    if (!env) return;
+    if (env.name === "Unallocated") throw new Error("Cannot delete the Unallocated category");
 
     await db.envelope.delete({
         where: { id }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/budget");
+    await syncUnallocated(env.periodId);
+
+    const path = `/dashboard/${env.period.domain.toLowerCase()}`;
+    revalidatePath(path);
+    revalidatePath(`${path}/budget`);
 }
 
 export async function getTransactions(domain: string = "TIME") {
@@ -410,7 +587,7 @@ export async function updateTransaction(id: number, data: {
         throw new Error("Amount must be positive");
     }
 
-    await db.transaction.update({
+    const transaction = await db.transaction.update({
         where: { id },
         data: {
             envelopeId: data.envelopeId,
@@ -420,17 +597,23 @@ export async function updateTransaction(id: number, data: {
             startTime: data.startTime || null,
             endTime: data.endTime || null,
         },
+        include: { envelope: { include: { period: true } } }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/transactions");
+    const domain = (transaction.envelope.period as any).domain.toLowerCase();
+    revalidatePath(`/dashboard/${domain}`);
+    revalidatePath(`/dashboard/${domain}/budget`);
+    revalidatePath(`/dashboard/${domain}/transactions`);
 }
 
 export async function deleteTransaction(id: number) {
-    await db.transaction.delete({
+    const transaction = await db.transaction.delete({
         where: { id },
+        include: { envelope: { include: { period: true } } }
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/transactions");
+    const domain = (transaction.envelope.period as any).domain.toLowerCase();
+    revalidatePath(`/dashboard/${domain}`);
+    revalidatePath(`/dashboard/${domain}/budget`);
+    revalidatePath(`/dashboard/${domain}/transactions`);
 }

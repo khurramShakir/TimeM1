@@ -1,13 +1,24 @@
-import { getCurrentBudgetPeriod, getTransactions } from "@/lib/actions";
+import { getBudgetPeriodByDate, getTransactions, getUserSettings } from "@/lib/actions";
 import TransactionHistory from "@/components/transactions/TransactionHistory";
+import styles from "../../money/transactions/transactions.module.css"; // Reuse shared/money styles
 
 export const dynamic = 'force-dynamic';
 
-export default async function TransactionsPage() {
+interface PageProps {
+    searchParams: Promise<{ type?: string }>;
+}
+
+export default async function TransactionsPage({ searchParams }: PageProps) {
+    const { type: typeStr } = await searchParams;
+
+    // Fetch settings first to get default
+    const settings = await getUserSettings();
+    const periodType = typeStr === "WEEKLY" ? "WEEKLY" : (typeStr === "MONTHLY" ? "MONTHLY" : (settings.defaultPeriod || "WEEKLY"));
+
     // Fetch data in parallel for the current authenticated user
     const [period, transactions] = await Promise.all([
-        getCurrentBudgetPeriod("TIME"),
-        getTransactions("TIME")
+        getBudgetPeriodByDate(new Date(), undefined, "TIME", periodType),
+        getTransactions("TIME"),
     ]);
 
     // Extract envelopes for filter
@@ -29,20 +40,19 @@ export default async function TransactionsPage() {
     }));
 
     return (
-        <div style={{ paddingBottom: "2rem" }}>
-            <div style={{ marginBottom: "2rem" }}>
-                <h1 style={{ fontSize: "1.875rem", fontWeight: "700", color: "var(--foreground)" }}>
-                    Transaction List
-                </h1>
-                <p style={{ color: "var(--foreground)", opacity: 0.6 }}>
-                    View and filter your time logging history.
-                </p>
-            </div>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.titleGroup}>
+                    <h1 className={styles.title}>Transaction List</h1>
+                    <p className={styles.subtitle}>View and filter your time logging history</p>
+                </div>
+            </header>
 
             <TransactionHistory
                 transactions={formattedTransactions}
                 envelopes={envelopes}
                 domain="TIME"
+                currency={settings.currency}
             />
         </div>
     );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileNav } from "@/components/layout/MobileNav";
 import styles from "./layout.module.css";
 import { usePathname } from "next/navigation";
 
@@ -27,6 +28,9 @@ export default function DashboardLayout({
                     {children}
                 </div>
             </main>
+
+            {/* Mobile Navigation - Only visible on small screens */}
+            <MobileNav />
         </div>
     );
 }

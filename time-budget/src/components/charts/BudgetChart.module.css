@@ -37,6 +37,38 @@
     /* Explicit compact height for content area */
 }
 
+@media (max-width: 768px) {
+    .content {
+        flex-direction: column;
+        height: auto;
+        gap: 2rem;
+    }
+
+    .chartWrapper {
+        height: 250px;
+        min-width: 100%;
+    }
+
+    .sidePanel {
+        flex: none;
+        width: 100%;
+    }
+
+    .barContainer {
+        height: 200px;
+    }
+
+    .statsRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .statDivider {
+        display: none;
+    }
+}
+
 .chartWrapper {
     flex: 1;
     min-width: 200px;

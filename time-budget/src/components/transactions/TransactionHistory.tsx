@@ -29,6 +29,7 @@ interface TransactionHistoryProps {
     transactions: Transaction[];
     envelopes: Envelope[];
     domain?: string;
+    currency?: string;
 }
 
 const COLOR_STYLES: Record<string, { bg: string, text: string }> = {
@@ -42,7 +43,7 @@ const COLOR_STYLES: Record<string, { bg: string, text: string }> = {
 
 import { formatValue } from "@/lib/format";
 
-export default function TransactionHistory({ transactions, envelopes, domain = "TIME" }: TransactionHistoryProps) {
+export default function TransactionHistory({ transactions, envelopes, domain = "TIME", currency = "USD" }: TransactionHistoryProps) {
     const [filterEnvelopeId, setFilterEnvelopeId] = useState<string>("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -131,7 +132,7 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                             </span>
                                         </td>
                                         <td>{t.description || "-"}</td>
-                                        <td className={styles.amount}>{formatValue(Number(t.amount), domain)}</td>
+                                        <td className={styles.amount}>{formatValue(Number(t.amount), domain, currency)}</td>
                                         <td>
                                             <div className={styles.actions}>
                                                 <button
@@ -164,6 +165,7 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                 envelopes={envelopes}
                 transaction={modalTransaction}
                 domain={domain}
+                currency={currency}
             />
         </div>
     );

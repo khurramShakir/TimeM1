@@ -1,4 +1,4 @@
-import { getBudgetSummary, initNewPeriod } from "@/lib/actions";
+import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
 import { EnvelopeCard } from "@/components/ui/EnvelopeCard";
 import { TransferTrigger } from "@/components/transfers/TransferTrigger";
 import { BudgetChart } from "@/components/charts/BudgetChart";
@@ -12,10 +12,10 @@ interface PageProps {
 }
 
 export default async function MoneyDashboardPage({ searchParams }: PageProps) {
-    const { date: dateStr, type: typeStr } = await searchParams;
-    const periodType = typeStr === "WEEKLY" ? "WEEKLY" : (typeStr === "MONTHLY" ? "MONTHLY" : "MONTHLY");
+    const { date: dateStr } = await searchParams; // Ignore type param
+    const settings = await getUserSettings();
+    const periodType = "MONTHLY"; // Force Monthly for Money
 
-    // We use "MONEY" domain
     const data = await getBudgetSummary(dateStr, "MONEY", periodType);
     const currentDate = dateStr ? new Date(dateStr) : new Date();
 
@@ -31,22 +31,21 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
                 <header className={styles.header}>
                     <div className={styles.titleGroup}>
                         <h1 className={styles.title}>Money Dashboard</h1>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <PeriodToggle defaultType="MONTHLY" />
-                            <DateNavigation currentDate={currentDate} periodType={periodType} />
-                        </div>
+                        <p className={styles.subtitle}>Track and manage your spending</p>
+                    </div>
+                    <div className={styles.headerControls}>
+                        <DateNavigation currentDate={currentDate} weekStart={data.weekStart} periodType={periodType} />
                     </div>
                 </header>
                 <div className={styles.emptyState}>
                     <div className={styles.emptyIcon}>💰</div>
-                    <h2 className={styles.emptyTitle}>No {periodType.toLowerCase()} money budget found</h2>
+                    <h2 className={styles.emptyTitle}>No budget found</h2>
                     <p className={styles.emptyText}>
-                        It looks like you haven't started your money budget for this {periodType === 'MONTHLY' ? 'month' : 'week'} yet.
-                        We can set up your default categories to get you started!
+                        Initialize this month to start managing your money.
                     </p>
                     <form action={handleInitPeriod}>
                         <button type="submit" className={styles.initBtn}>
-                            Start New {periodType === 'MONTHLY' ? 'Monthly' : 'Money'} Budget
+                            Start New Month
                         </button>
                     </form>
                 </div>
@@ -54,45 +53,45 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
         );
     }
 
+    const salvagedEnvelopesForTransfer = data.envelopes.map((e: any) => ({
+        id: e.id,
+        name: e.name,
+        remaining: Number(e.remaining)
+    }));
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div className={styles.titleGroup}>
                     <h1 className={styles.title}>Money Dashboard</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <PeriodToggle defaultType="MONTHLY" />
-                        <DateNavigation currentDate={currentDate} periodType={periodType} />
-                    </div>
+                    <p className={styles.subtitle}>Monthly overview of your money budget</p>
                 </div>
-                <TransferTrigger envelopes={data.envelopes.map((e: any) => ({ id: e.id, name: e.name, remaining: e.remaining }))} />
+                <div className={styles.headerControls}>
+                    <DateNavigation currentDate={currentDate} weekStart={data.weekStart} periodType={periodType} />
+                </div>
             </header>
 
-            <section className={styles.chartSection}>
+            <div className={styles.chartSection}>
                 <BudgetChart
-                    envelopes={data.envelopes.map((e: any) => ({
-                        id: e.id,
-                        name: e.name,
-                        budgeted: e.budgeted,
-                        spent: e.spent,
-                        color: e.color || "blue"
-                    }))}
+                    envelopes={data.envelopes}
                     totalBudgeted={data.totalBudgeted}
+                    totalAvailable={data.totalAvailable}
                     domain="MONEY"
-                    periodType={periodType}
+                    currency={data.currency}
                 />
-            </section>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                <TransferTrigger envelopes={salvagedEnvelopesForTransfer} />
+            </div>
 
             <div className={styles.grid}>
-                {data.envelopes.map((env: any) => (
+                {data.envelopes.map((envelope: any) => (
                     <EnvelopeCard
-                        key={env.id}
-                        id={env.id}
-                        name={env.name}
-                        budgeted={env.budgeted}
-                        spent={env.spent}
-                        remaining={env.remaining}
-                        color={env.color}
+                        key={envelope.id}
+                        {...envelope}
                         domain="MONEY"
+                        currency={data.currency}
                     />
                 ))}
             </div>
