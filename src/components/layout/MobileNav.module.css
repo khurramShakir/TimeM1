@@ -1,0 +1,59 @@
+.mobileNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-subtle);
+    display: none;
+    /* Hidden by default, shown via media query in layout */
+    padding: 0 1rem 1.5rem 1rem;
+    /* Extra padding at bottom for Home indicator on iOS */
+    z-index: 50;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.navItems {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 100%;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    color: var(--foreground);
+    opacity: 0.6;
+    font-size: 0.75rem;
+    font-weight: 500;
+    height: 100%;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.navItemActive {
+    color: var(--primary);
+    opacity: 1;
+    font-weight: 600;
+}
+
+.navItem:active {
+    background-color: var(--surface-200);
+    transform: scale(0.95);
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    .mobileNav {
+        display: block;
+    }
+}

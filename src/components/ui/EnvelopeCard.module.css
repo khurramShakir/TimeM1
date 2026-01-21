@@ -1,0 +1,161 @@
+.card {
+    background: var(--surface-100);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0.75rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: unset;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 0;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.1rem 0.35rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--foreground);
+    opacity: 0.75;
+    margin-bottom: 0.15rem;
+    align-items: center;
+}
+
+.budgetValue {
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.progressBar {
+    height: 4px;
+    background-color: var(--surface-300);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+/* Color Variants */
+.blue .progressFill {
+    background-color: #3b82f6;
+}
+
+.blue .badge {
+    background-color: #ffffff;
+    color: #1e40af;
+}
+
+.card.blue .budgetValue {
+    color: #1e40af;
+}
+
+.card.blue {
+    background-color: #dbeafe;
+    border-color: #bfdbfe;
+}
+
+.purple .progressFill {
+    background-color: #a855f7;
+}
+
+.purple .badge {
+    background-color: #ffffff;
+    color: #6b21a8;
+}
+
+.card.purple .budgetValue {
+    color: #6b21a8;
+}
+
+.card.purple {
+    background-color: #f3e8ff;
+    border-color: #e9d5ff;
+}
+
+.green .progressFill {
+    background-color: #10b981;
+}
+
+.green .badge {
+    background-color: #ffffff;
+    color: #065f46;
+}
+
+.card.green .budgetValue {
+    color: #065f46;
+}
+
+.card.green {
+    background-color: #d1fae5;
+    border-color: #bbf7d0;
+}
+
+.gray .progressFill {
+    background-color: #6b7280;
+}
+
+.gray .badge {
+    background-color: #ffffff;
+    color: #1f2937;
+}
+
+.card.gray .budgetValue {
+    color: #1f2937;
+}
+
+.card.gray {
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+.red .progressFill {
+    background-color: #ef4444;
+}
+
+.red .badge {
+    background-color: #ffffff;
+    color: #991b1b;
+}
+
+.card.red .budgetValue {
+    color: #991b1b;
+}
+
+.card.red {
+    background-color: #fee2e2;
+    border-color: #fecaca;
+}

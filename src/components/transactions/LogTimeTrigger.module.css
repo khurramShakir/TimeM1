@@ -1,0 +1,84 @@
+.triggerBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--theme-color, #16a34a);
+    border: 1px solid var(--theme-color, #16a34a);
+    border-radius: var(--radius-sm);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.triggerBtn:hover {
+    filter: brightness(0.9);
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--theme-color, #16a34a);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    /* Circular as per user request */
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.iconBtn:hover {
+    filter: brightness(0.9);
+    transform: scale(1.05);
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
+.plusBadge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background-color: #ffffff;
+    /* White background for the badge */
+    border: 1.5px solid var(--theme-color, #16a34a);
+    /* Border matching theme */
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.plusIcon {
+    width: 10px;
+    height: 10px;
+    stroke-width: 5px;
+    /* Maximum boldness as requested */
+    color: var(--theme-color, #16a34a);
+    /* Green/themed plus sign */
+}
+
+.icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    stroke-width: 2.5px;
+    color: #ffffff;
+    opacity: 1;
+}

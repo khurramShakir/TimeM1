@@ -1,0 +1,34 @@
+{
+  "name": "time-budget",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:local": "cross-env DATABASE_URL=\"file:./dev.db\" next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:push:local": "prisma db push --schema=prisma/schema.local.prisma",
+    "db:studio:local": "prisma studio --schema=prisma/schema.local.prisma"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.36.5",
+    "@prisma/client": "5.10.2",
+    "lucide-react": "^0.555.0",
+    "next": "16.0.7",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-google-charts": "^5.2.1",
+    "recharts": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.7",
+    "prisma": "5.10.2",
+    "typescript": "^5"
+  }
+}

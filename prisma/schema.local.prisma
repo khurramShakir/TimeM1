@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// User Account
+model User {
+  id        String   @id // Clerk User ID
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  
+  periods   BudgetPeriod[]
+  settings  UserSettings?
+}
+
+// User preferences for domain, currency, etc.
+model UserSettings {
+  id              Int      @id @default(autoincrement())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  
+  currency        String   @default("USD")
+  weekStart       Int      @default(0) // 0 for Sunday, 1 for Monday
+  defaultDomain   String   @default("TIME")
+  defaultPeriod   String   @default("WEEKLY")
+  timeCapacity    Decimal  @default(168.0)
+  
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+// A "Budget Period" container (e.g., Week of Dec 4th, or Month of Jan 2025)
+model BudgetPeriod {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime // The start date of the period
+  type      String   // "WEEKLY", "MONTHLY", "YEARLY"
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // State of the period
+  isClosed  Boolean  @default(false)
+  domain    String   @default("MONEY") // "TIME" or "MONEY"
+  capacity  Decimal  @default(0)       // Total income or hours for this specific period
+  
+  envelopes Envelope[]
+
+  @@unique([userId, startDate, type, domain]) // One budget per period type per start date per domain
+}
+
+// The "Buckets" for a specific period
+// e.g., "Work" for Week 42.
+model Envelope {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g., "Work", "Sleep", "Unallocated"
+  color       String?  // UI color code
+  
+  budgeted    Decimal  // The plan (e.g., 40.00)
+  
+  periodId    Int
+  period      BudgetPeriod @relation(fields: [periodId], references: [id])
+  
+  transactions Transaction[]
+}
+
+// The actual spending of time
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  amount      Decimal  // e.g., 2.5 hours
+  description String?  // "Deep work on Project X"
+  date        DateTime // When it happened
+  
+  envelopeId  Int
+  envelope    Envelope @relation(fields: [envelopeId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  startTime   DateTime? // Optional: For Time Range entries
+  endTime     DateTime? // Optional: For Time Range entries
+}
