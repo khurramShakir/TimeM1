@@ -74,7 +74,9 @@ async function ensureUserExists(clerkId: string, domain: string = "TIME", period
                 weekStart: 0,
                 defaultDomain: "TIME",
                 defaultPeriod: "WEEKLY",
-                timeCapacity: 168
+                timeCapacity: 168,
+                baseMoneyCapacity: 0,
+                autoBudget: true
             }
         });
     }
@@ -135,7 +137,12 @@ export async function getUserSettings() {
         });
     }
 
-    return settings;
+    // Convert Decimals to numbers for Client Component serialization
+    return {
+        ...settings,
+        timeCapacity: Number(settings.timeCapacity),
+        baseMoneyCapacity: Number(settings.baseMoneyCapacity || 0)
+    };
 }
 
 export async function updateUserSettings(data: {
@@ -144,16 +151,28 @@ export async function updateUserSettings(data: {
     defaultDomain?: string;
     defaultPeriod?: string;
     timeCapacity?: number;
+    baseMoneyCapacity?: number;
+    autoBudget?: boolean;
 }) {
     const userId = await getAuthenticatedUser();
+
+    // Sanitize Data Types for Prisma
+    const cleanData: any = {};
+    if (data.currency) cleanData.currency = data.currency;
+    if (data.weekStart !== undefined) cleanData.weekStart = Number(data.weekStart);
+    if (data.defaultDomain) cleanData.defaultDomain = data.defaultDomain;
+    if (data.defaultPeriod) cleanData.defaultPeriod = data.defaultPeriod;
+    if (data.timeCapacity !== undefined) cleanData.timeCapacity = Math.round(Number(data.timeCapacity)); // Int
+    if (data.baseMoneyCapacity !== undefined) cleanData.baseMoneyCapacity = Number(data.baseMoneyCapacity); // Float
+    if (data.autoBudget !== undefined) cleanData.autoBudget = Boolean(data.autoBudget);
 
     await (db as any).userSettings.upsert({
         where: { userId },
         create: {
             userId,
-            ...data
+            ...cleanData
         },
-        update: data
+        update: cleanData
     });
 
     // If time capacity changed, we might want to sync current TIME periods
@@ -212,6 +231,47 @@ export async function updatePeriodCapacity(periodId: number, capacity: number) {
     const domain = period.domain.toLowerCase();
     revalidatePath(`/dashboard/${domain}`);
     revalidatePath(`/dashboard/${domain}/budget`);
+}
+
+
+export async function addIncome(periodId: number, amount: number) {
+    const userId = await getAuthenticatedUser();
+    const period = await db.budgetPeriod.findUnique({
+        where: { id: periodId },
+        include: { envelopes: true }
+    });
+
+    if (!period || (period.userId as any) !== userId) throw new Error("Unauthorized");
+
+    // 1. Update Capacity
+    await db.budgetPeriod.update({
+        where: { id: periodId },
+        data: { capacity: { increment: amount } }
+    });
+
+    // 2. Sync Unallocated
+    await syncUnallocated(periodId);
+
+    // 3. Create Audit Transaction (Log)
+    // We log it in "Unallocated" or the first envelope found if unallocated missing?
+    // Unallocated should exist after sync.
+    const unallocated = period.envelopes.find(e => e.name === "Unallocated")
+        || await db.envelope.findFirst({ where: { periodId, name: "Unallocated" } });
+
+    if (unallocated) {
+        await db.transaction.create({
+            data: {
+                envelopeId: unallocated.id,
+                amount: amount, // Real amount
+                type: "INCOME", // Type Income
+                description: `💰 Income Added`,
+                date: new Date()
+            } as any
+        });
+    }
+
+    const domain = period.domain.toLowerCase();
+    revalidatePath(`/dashboard/${domain}`);
 }
 
 interface CreateTransactionParams {
@@ -308,7 +368,48 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
         include: { envelopes: true }
     }) as any;
 
-    const capacity = latestPeriod ? Number(latestPeriod.capacity) : (domain === "TIME" ? Number(settings.timeCapacity) : 0);
+    let capacity = 0;
+    if (domain === "TIME") {
+        capacity = Number(settings.timeCapacity);
+    } else {
+        // MONEY Domain: Use Base Income Setting
+        capacity = Number(settings.baseMoneyCapacity || 0);
+    }
+
+    // Determine Envelope Cloning Strategy
+    let envelopesToCreate = [];
+    const shouldCopy = settings.autoBudget !== false; // Default to true
+
+    if (latestPeriod && shouldCopy) {
+        // Clone previous envelopes AND their budget amounts
+        envelopesToCreate = latestPeriod.envelopes
+            .filter((env: any) => env.name !== "Unallocated")
+            .map((env: any) => ({
+                name: env.name,
+                budgeted: env.budgeted, // Copy amount
+                color: env.color
+            }));
+    } else if (latestPeriod && !shouldCopy) {
+        // Clone NAMES only, set budget to 0 (Zero-Based Budgeting)
+        envelopesToCreate = latestPeriod.envelopes
+            .filter((env: any) => env.name !== "Unallocated")
+            .map((env: any) => ({
+                name: env.name,
+                budgeted: 0, // Reset to 0
+                color: env.color
+            }));
+    } else {
+        // Fresh Start (No previous period)
+        envelopesToCreate = domain === "TIME" ? [
+            { name: "Work", budgeted: 40, color: "blue" },
+            { name: "Sleep", budgeted: 56, color: "purple" },
+            { name: "Leisure", budgeted: 20, color: "green" },
+        ] : [
+            { name: "Rent", budgeted: 0, color: "blue" },
+            { name: "Groceries", budgeted: 0, color: "green" },
+            { name: "Entertainment", budgeted: 0, color: "purple" },
+        ];
+    }
 
     const newPeriod = await db.budgetPeriod.create({
         data: {
@@ -318,21 +419,7 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
             domain: domain,
             capacity: capacity,
             envelopes: {
-                create: latestPeriod?.envelopes
-                    .filter((env: any) => env.name !== "Unallocated")
-                    .map((env: any) => ({
-                        name: env.name,
-                        budgeted: env.budgeted,
-                        color: env.color
-                    })) || (domain === "TIME" ? [
-                        { name: "Work", budgeted: 40, color: "blue" },
-                        { name: "Sleep", budgeted: 56, color: "purple" },
-                        { name: "Leisure", budgeted: 20, color: "green" },
-                    ] : [
-                        { name: "Rent", budgeted: 1500, color: "blue" },
-                        { name: "Groceries", budgeted: 400, color: "green" },
-                        { name: "Entertainment", budgeted: 100, color: "purple" },
-                    ])
+                create: envelopesToCreate
             }
         }
     });
@@ -382,10 +469,11 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     // Calculate totals
     // Calculate totals and sanitize for Client Components (No Decimals)
     const envelopes = (period.envelopes as any[]).map((env: any) => {
-        const spent = (env.transactions as any[]).reduce(
-            (sum: number, t: any) => sum + Number(t.amount),
-            0
-        );
+        // Only sum up EXPENSE transactions for "Spent"
+        const spent = (env.transactions as any[])
+            .filter((t: any) => t.type === "EXPENSE" || !t.type) // Default to expense if null
+            .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
+
         const budgeted = Number(env.budgeted);
         const remaining = budgeted - spent;
 
@@ -413,6 +501,7 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     return {
         period,
         envelopes,
+        envelopes: envelopes,
         totalBudgeted,
         totalSpent,
         totalRemaining,
@@ -460,6 +549,7 @@ export async function transferBudget(fromId: number, toId: number, amount: numbe
     if (amount <= 0) throw new Error("Amount must be positive");
     if (fromId === toId) throw new Error("Cannot transfer to same envelope");
 
+    // 1. Perform Transfer
     await db.$transaction([
         db.envelope.update({
             where: { id: fromId },
@@ -470,6 +560,35 @@ export async function transferBudget(fromId: number, toId: number, amount: numbe
             data: { budgeted: { increment: amount } },
         }),
     ]);
+
+    // 2. Fetch envelope names for Audit Log
+    const fromEnv = await db.envelope.findUnique({ where: { id: fromId } });
+    const toEnv = await db.envelope.findUnique({ where: { id: toId } });
+
+    // 3. Create Audit Transactions (Amount 0)
+    // 3. Create Audit Transactions (Real Amount, Type TRANSFER)
+    if (fromEnv && toEnv) {
+        // Log on Source
+        await db.transaction.create({
+            data: {
+                envelopeId: fromId,
+                amount: amount,
+                type: "TRANSFER",
+                description: `Transferred to ${toEnv.name}`,
+                date: new Date()
+            } as any
+        });
+        // Log on Destination
+        await db.transaction.create({
+            data: {
+                envelopeId: toId,
+                amount: amount,
+                type: "TRANSFER",
+                description: `Received from ${fromEnv.name}`,
+                date: new Date()
+            } as any
+        });
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/budget");
@@ -616,4 +735,63 @@ export async function deleteTransaction(id: number) {
     revalidatePath(`/dashboard/${domain}`);
     revalidatePath(`/dashboard/${domain}/budget`);
     revalidatePath(`/dashboard/${domain}/transactions`);
+}
+
+// --- HUD Data Logic ---
+
+export async function getUnifiedHudData(dateStr?: string) {
+    const userId = await getAuthenticatedUser();
+    const settings = await getUserSettings();
+    const targetDate = dateStr ? new Date(dateStr) : new Date();
+
+    // Parallel fetch for both domains
+    const [timePeriod, moneyPeriod] = await Promise.all([
+        getBudgetPeriodByDate(targetDate, userId, "TIME", "WEEKLY"),
+        getBudgetPeriodByDate(targetDate, userId, "MONEY", "MONTHLY")
+    ]);
+
+    // Calculate Time Metrics
+    let timeLiquid = 0;
+    let timeTotal = Number(settings.timeCapacity);
+
+    if (timePeriod) {
+        // 1. Get Capacity from this specific period (or fallback to settings)
+        const capacity = Number(timePeriod.capacity) > 0 ? Number(timePeriod.capacity) : Number(settings.timeCapacity);
+        timeTotal = capacity;
+
+        // 2. Sum up all "Allocated" budgets (Everything EXCEPT "Unallocated")
+        const allocatedBudget = timePeriod.envelopes
+            .filter(e => e.name !== "Unallocated")
+            .reduce((sum, e) => sum + Number(e.budgeted), 0);
+
+        // 3. Liquid = Total Capacity - Allocated Budget
+        timeLiquid = capacity - allocatedBudget;
+    }
+
+    // Calculate Money Metrics
+    let moneyLiquid = 0;
+    let moneyTotal = 0; // Ideally this comes from "Income" setting later
+
+    if (moneyPeriod) {
+        // For Money, "Liquid" currently means "Unallocated Budget"
+        // This is a proxy for "Free Cash". 
+        // Real "Liquid Cash" = Income - Expenses. 
+        // For now, we assume user budgets their income into "Unallocated" if they want it free.
+        const explicit = moneyPeriod.envelopes.find(e => e.name === "Unallocated")?.budgeted || 0;
+        moneyLiquid = Number(explicit);
+        moneyTotal = moneyPeriod.envelopes.reduce((sum, e) => sum + Number(e.budgeted), 0);
+    }
+
+    return {
+        time: {
+            liquid: timeLiquid,
+            total: timeTotal,
+            unit: "h"
+        },
+        money: {
+            liquid: moneyLiquid,
+            total: moneyTotal, // Placeholder until Income logic
+            unit: settings.currency === "USD" ? "$" : settings.currency
+        }
+    };
 }

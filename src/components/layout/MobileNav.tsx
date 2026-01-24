@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, PieChart, List, Settings } from "lucide-react";
+import { Home, PieChart, List, Settings, ArrowRightLeft, MoreHorizontal } from "lucide-react";
 import styles from "./MobileNav.module.css";
 
 export function MobileNav() {
@@ -20,7 +20,7 @@ export function MobileNav() {
         { name: "Dashboard", href: `${prefix}${typeParam}`, icon: Home },
         { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
         { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
-        { name: "Settings", href: `/dashboard/settings`, icon: Settings },
+        { name: "More", href: `${pathname}?menu=more`, icon: MoreHorizontal },
     ];
 
     // Don't show on the gateway page
@@ -33,12 +33,16 @@ export function MobileNav() {
                     // Check if current path starts with the item href (ignoring query params)
                     // We split by '?' to compare just the path part
                     const itemPath = item.href.split('?')[0];
-                    const isActive = pathname === itemPath;
+                    const isMenuTrigger = item.href.includes("?menu=");
+                    const isParamMatch = isMenuTrigger && searchParams.get("menu") === "more";
+                    const isActive = isMenuTrigger ? isParamMatch : pathname === itemPath;
 
                     return (
                         <Link
                             key={item.name}
                             href={item.href}
+                            replace={isMenuTrigger}
+                            scroll={false}
                             className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                         >
                             <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />

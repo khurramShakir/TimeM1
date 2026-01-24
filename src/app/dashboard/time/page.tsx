@@ -7,6 +7,9 @@ import { DateNavigation } from "@/components/layout/DateNavigation";
 import { PeriodToggle } from "@/components/layout/PeriodToggle";
 import styles from "./page.module.css";
 import { revalidatePath } from "next/cache";
+import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
+import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
+import { Suspense } from "react";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
@@ -72,6 +75,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </div>
             </header>
 
+            <Suspense fallback={<div style={{ height: '100px' }} />}>
+                <UnifiedHUD date={dateStr} />
+            </Suspense>
+
             <div className={styles.chartSection}>
                 <BudgetChart
                     envelopes={data.envelopes}
@@ -95,6 +102,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     />
                 ))}
             </div>
+
+            <Suspense fallback={null}>
+                <UrlModalTrigger envelopes={data.envelopes} domain="TIME" />
+            </Suspense>
+
         </div>
     );
 }

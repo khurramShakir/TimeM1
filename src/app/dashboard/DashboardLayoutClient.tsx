@@ -2,6 +2,9 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { FloatingActionButton } from "@/components/layout/FloatingActionButton";
+import { MoreMenu } from "@/components/layout/MoreMenu";
+import { Suspense } from "react";
 import styles from "./layout.module.css";
 import { usePathname } from "next/navigation";
 
@@ -30,7 +33,15 @@ export default function DashboardLayoutClient({
             </main>
 
             {/* Mobile Navigation - Only visible on small screens */}
-            <MobileNav />
+            <Suspense fallback={null}>
+                <MobileNav />
+            </Suspense>
+            <Suspense fallback={null}>
+                <FloatingActionButton />
+            </Suspense>
+            <Suspense fallback={null}>
+                <MoreMenu />
+            </Suspense>
         </div>
     );
 }

@@ -2,8 +2,9 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { Clock, Banknote, Globe, Save, Loader2, User } from "lucide-react";
+import { Clock, Banknote, Globe, Save, Loader2, User, ChevronLeft } from "lucide-react";
 import { getUserSettings, updateUserSettings, updateUserProfile } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 type Tab = "profile" | "general" | "time" | "money";
@@ -12,6 +13,7 @@ export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile");
     const [settings, setSettings] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const router = useRouter();
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -34,7 +36,9 @@ export default function SettingsPage() {
                 weekStart: Number(settings.weekStart),
                 defaultDomain: settings.defaultDomain,
                 defaultPeriod: settings.defaultPeriod,
-                timeCapacity: Number(settings.timeCapacity)
+                timeCapacity: Number(settings.timeCapacity),
+                baseMoneyCapacity: Number(settings.baseMoneyCapacity),
+                autoBudget: settings.autoBudget
             });
 
             // Save Profile
@@ -63,7 +67,12 @@ export default function SettingsPage() {
 
     return (
         <div className={styles.page}>
-            <h1 className={styles.title}>Settings</h1>
+            <div className={styles.header}>
+                <button onClick={() => router.back()} className={styles.backBtn}>
+                    <ChevronLeft size={20} />
+                </button>
+                <h1 className={styles.title}>Settings</h1>
+            </div>
 
             <div className={styles.tabs}>
                 <button
@@ -235,6 +244,43 @@ export default function SettingsPage() {
                                         <option value="CAD">C$ (CAD)</option>
                                         <option value="AUD">A$ (AUD)</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Base Monthly Income</label>
+                                    <p className={styles.hint}>Auto-fills your budget at the start of the month.</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={settings.baseMoneyCapacity !== undefined ? settings.baseMoneyCapacity : 0}
+                                        onChange={(e) => setSettings({ ...settings, baseMoneyCapacity: e.target.value })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Auto-Budget Logic</label>
+                                    <p className={styles.hint}>Copy values from previous month?</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <label className={styles.toggle}>
+                                        <input
+                                            type="checkbox"
+                                            checked={settings.autoBudget !== false}
+                                            onChange={(e) => setSettings({ ...settings, autoBudget: e.target.checked })}
+                                        />
+                                        <span className={styles.toggleSlider}></span>
+                                        <span className={styles.toggleLabel}>
+                                            {settings.autoBudget !== false ? "Yes" : "No (Zero-Based)"}
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>

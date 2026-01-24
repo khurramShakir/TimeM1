@@ -4,12 +4,38 @@
     margin: 0 auto;
 }
 
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
 .title {
     font-size: 2.25rem;
     font-weight: 800;
-    margin-bottom: 2rem;
     color: var(--foreground);
     letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface-300);
+    border: none;
+    cursor: pointer;
+    color: var(--foreground);
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: var(--surface-200);
+    transform: translateX(-2px);
 }
 
 .tabs {
@@ -128,7 +154,7 @@
     max-width: 320px;
 }
 
-.group input,
+.group input:not([type="checkbox"]),
 .group select {
     width: 100%;
     padding: 0.875rem 1rem;
@@ -151,7 +177,7 @@
     padding-right: 3rem;
 }
 
-.group input:focus,
+.group input:not([type="checkbox"]):focus,
 .group select:focus {
     outline: none;
     border-color: var(--primary);
