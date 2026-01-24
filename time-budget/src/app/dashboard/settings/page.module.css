@@ -154,7 +154,7 @@
     max-width: 320px;
 }
 
-.group input,
+.group input:not([type="checkbox"]),
 .group select {
     width: 100%;
     padding: 0.875rem 1rem;
@@ -177,7 +177,7 @@
     padding-right: 3rem;
 }
 
-.group input:focus,
+.group input:not([type="checkbox"]):focus,
 .group select:focus {
     outline: none;
     border-color: var(--primary);

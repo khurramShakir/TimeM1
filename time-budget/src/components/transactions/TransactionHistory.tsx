@@ -9,6 +9,7 @@ import styles from "./TransactionHistory.module.css";
 interface Transaction {
     id: number;
     amount: number; // number
+    type?: string; // "EXPENSE", "INCOME", "TRANSFER"
     description: string;
     date: Date;
     envelope: {
@@ -121,7 +122,9 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                 return (
                                     <tr key={t.id}>
                                         <td className={styles.date}>
-                                            {new Date(t.date).toLocaleDateString()}
+                                            <span suppressHydrationWarning>
+                                                {new Date(t.date).toLocaleDateString()}
+                                            </span>
                                         </td>
                                         <td>
                                             <span
@@ -132,7 +135,10 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                             </span>
                                         </td>
                                         <td>{t.description || "-"}</td>
-                                        <td className={styles.amount}>{formatValue(Number(t.amount), domain, currency)}</td>
+                                        <td className={`${styles.amount} ${t.type === "INCOME" ? styles.amountPositive : ""} ${t.type === "TRANSFER" ? styles.amountTransfer : ""}`}>
+                                            {t.type === "INCOME" ? "+" : ""}
+                                            {formatValue(Number(t.amount), domain, currency)}
+                                        </td>
                                         <td>
                                             <div className={styles.actions}>
                                                 <button

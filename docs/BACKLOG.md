@@ -3,14 +3,15 @@
 This backlog tracks the tasks required to implement the "Frictionless" PWA Strategy.
 
 ## 📱 Mobile UX (PWA First)
-- [ ] **[UX-01] manifest.json Standalone**: Ensure `display: standalone` is set and theme colors are correct.
-- [ ] **[UX-02] Disable Zoom/Chrome**: Apply CSS to `body` to disable pinch-to-zoom and ensure no standard browser UI is visible.
-- [ ] **[UX-03] Bottom Navigation Bar**: 
-    - Implement a fixed bottom nav with: Home, Time, Money, Settings.
+- [x] **[UX-01] manifest.json Standalone**: Ensure `display: standalone` is set and theme colors are correct.
+- [x] **[UX-02] Disable Zoom/Chrome**: Apply CSS to `body` to disable pinch-to-zoom and ensure no standard browser UI is visible.
+- [x] **[UX-03] Bottom Navigation Bar**: 
+    - Implement a fixed bottom nav with: Home, Time, Money, Switch, Settings.
     - Remove the existing Sidebar for mobile widths.
-- [ ] **[UX-04] Context-Aware FAB**:
-    - Implement a Floating Action Button `+` in the bottom right.
+- [x] **[UX-04] Context-Aware FAB**:
+    - Implement a Floating Action Button `+` with glassmorphism overlap.
     - Logic: Detect current active tab (Time/Money) and open the relevant input modal.
+- [x] **[UX-06] "More" Bottom Sheet**: Consolidate secondary actions (Settings, Mode Switch, Sign Out) into a slide-up menu.
 - [ ] **[UX-05] 2-Tap Logging**: 
     - Refactor Transaction modals for speed. 
     - Focus on primary input immediately on open.

@@ -1,0 +1,148 @@
+.triggerBtn {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    background: var(--surface-200);
+    transition: all 0.2s;
+}
+
+.triggerBtn:hover {
+    background: var(--surface-300);
+    transform: translateY(-1px);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--foreground);
+    font-size: 1.25rem;
+}
+
+.hint {
+    margin: 0 0 1.5rem 0;
+    font-size: 0.9rem;
+    color: var(--foreground);
+    opacity: 0.6;
+}
+
+.inputGroup {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    background: var(--surface-100);
+    padding: 0.25rem 0.75rem;
+}
+
+.currencySymbol {
+    font-weight: 700;
+    color: var(--foreground);
+    opacity: 0.5;
+    font-size: 1.25rem;
+}
+
+.inputGroup input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    outline: none;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.actions button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    border: none;
+    transition: all 0.2s;
+}
+
+.cancelBtn {
+    background: var(--surface-200);
+    color: var(--foreground);
+}
+
+.addBtn {
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

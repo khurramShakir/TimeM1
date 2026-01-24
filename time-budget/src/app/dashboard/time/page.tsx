@@ -8,6 +8,7 @@ import { PeriodToggle } from "@/components/layout/PeriodToggle";
 import styles from "./page.module.css";
 import { revalidatePath } from "next/cache";
 import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
+import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
 import { Suspense } from "react";
 
 interface PageProps {
@@ -73,6 +74,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     <DateNavigation currentDate={currentDate} weekStart={data.weekStart} periodType={periodType} />
                 </div>
             </header>
+
+            <Suspense fallback={<div style={{ height: '100px' }} />}>
+                <UnifiedHUD date={dateStr} />
+            </Suspense>
 
             <div className={styles.chartSection}>
                 <BudgetChart

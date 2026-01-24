@@ -28,6 +28,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     const formattedTransactions = (transactions as any[]).map(t => ({
         id: t.id,
         amount: Number(t.amount),
+        type: t.type || "EXPENSE", // Include transaction type for styling
         description: t.description || "",
         date: t.date,
         startTime: t.startTime,

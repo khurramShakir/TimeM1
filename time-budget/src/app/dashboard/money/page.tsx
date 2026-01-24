@@ -8,6 +8,8 @@ import { PeriodToggle } from "@/components/layout/PeriodToggle";
 import styles from "../time/page.module.css";
 import { revalidatePath } from "next/cache";
 import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
+import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
+import { AddIncomeButton } from "@/components/dashboard/AddIncomeButton";
 import { Suspense } from "react";
 
 interface PageProps {
@@ -73,6 +75,13 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
                     <DateNavigation currentDate={currentDate} weekStart={data.weekStart} periodType={periodType} />
                 </div>
             </header>
+
+            <Suspense fallback={<div style={{ height: '100px' }} />}>
+                <UnifiedHUD date={dateStr} />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', padding: '0 1rem' }}>
+                    {data.period && <AddIncomeButton periodId={data.period.id} />}
+                </div>
+            </Suspense>
 
             <div className={styles.chartSection}>
                 <BudgetChart

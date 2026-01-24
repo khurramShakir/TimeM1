@@ -156,3 +156,14 @@
     color: var(--foreground);
     opacity: 0.5;
 }
+
+.amountPositive {
+    color: #10b981 !important;
+    /* Green-500 - !important needed to override .table td color */
+}
+
+.amountTransfer {
+    color: var(--foreground);
+    opacity: 0.5;
+    /* Muted */
+}

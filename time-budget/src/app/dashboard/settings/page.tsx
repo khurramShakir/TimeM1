@@ -36,7 +36,9 @@ export default function SettingsPage() {
                 weekStart: Number(settings.weekStart),
                 defaultDomain: settings.defaultDomain,
                 defaultPeriod: settings.defaultPeriod,
-                timeCapacity: Number(settings.timeCapacity)
+                timeCapacity: Number(settings.timeCapacity),
+                baseMoneyCapacity: Number(settings.baseMoneyCapacity),
+                autoBudget: settings.autoBudget
             });
 
             // Save Profile
@@ -242,6 +244,43 @@ export default function SettingsPage() {
                                         <option value="CAD">C$ (CAD)</option>
                                         <option value="AUD">A$ (AUD)</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Base Monthly Income</label>
+                                    <p className={styles.hint}>Auto-fills your budget at the start of the month.</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={settings.baseMoneyCapacity !== undefined ? settings.baseMoneyCapacity : 0}
+                                        onChange={(e) => setSettings({ ...settings, baseMoneyCapacity: e.target.value })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Auto-Budget Logic</label>
+                                    <p className={styles.hint}>Copy values from previous month?</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <label className={styles.toggle}>
+                                        <input
+                                            type="checkbox"
+                                            checked={settings.autoBudget !== false}
+                                            onChange={(e) => setSettings({ ...settings, autoBudget: e.target.checked })}
+                                        />
+                                        <span className={styles.toggleSlider}></span>
+                                        <span className={styles.toggleLabel}>
+                                            {settings.autoBudget !== false ? "Yes" : "No (Zero-Based)"}
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
