@@ -1,4 +1,5 @@
 import React from "react";
+export const dynamic = "force-dynamic";
 import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
 import BudgetManager from "@/components/budget/BudgetManager";
 import { DateNavigation } from "@/components/layout/DateNavigation";

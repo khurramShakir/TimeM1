@@ -70,17 +70,33 @@ This document provides a comprehensive step-by-step history of our development s
 
 ---
 
+---
+
+## 📅 Session 6: Color Personalization & Visual Consistency
+**Date**: 2026-01-19 | **Time**: 11:30 - 11:45 EST
+**Objective**: Enhance envelope customization and ensure visual consistency across all charts and UI components.
+
+### Key Implementations:
+-   **Expanded Color Ecosystem**: Increased envelope color presets to 8 and integrated a native custom color picker for unlimited personalization.
+-   **Recent Color History**: Implemented `localStorage` sync to remember the last 5 custom colors, making them readily available in the modal list.
+-   **Safe Color Rendering**: Refactored the color utility to use 6-digit hex blending (instead of transparency), resolving "Invalid color" crashes in Google Charts.
+-   **Currency Localization**: Normalized the Canadian Dollar symbol to **"C$"** throughout the app (Dashboard, Charts, Modals) for a cleaner, unified look.
+-   **UX Refinements**: Added selection checkmarks (✓) for custom colors and fixed padding layout bugs where currency symbols overlapped numeric inputs.
+
+---
+
 ## 🚀 Current State
-**Last Updated**: 2026-01-19 10:30 EST
+**Last Updated**: 2026-01-19 11:45 EST
 
 We have a powerful, dual-purpose resource management system:
 - [x] **Dual Domains**: Seamlessly switch between Time and Money management.
+- [x] **Advanced Personalization**: Custom color picker with persistence and 8 vibrant presets.
+- [x] **Stable Charting**: Robust color processing for guaranteed chart rendering across all platforms.
+- [x] **Localized Formatting**: Normalized "C$" currency support for a professional look.
 - [x] **Auth & Isolation**: Secure multi-user environment via Clerk.
-- [x] **Dynamic Initialization**: One-click setup for new weeks/months with historical cloning.
-- [x] **Premium Branding**: Unified emerald green theme with refined interactive elements.
-- [x] **History & CRUD**: Full transaction ledger for both domains.
 
 **Next Session Goals**: 
-1.  **Settings Page**: Implement customizable weekly totals and default category management.
-2.  **Cloud Run Deployment**: Setup Docker and deploy to Google Cloud (Public URL).
+1.  **History Tab Debugging**: Investigate and resolve reported issues on the History/Transaction ledger.
+2.  **Settings Page**: Implement customizable weekly totals and default category management.
 3.  **Advanced Reports**: Create detailed aggregate reports for long-term trends.
+4.  **Cloud Run Deployment**: Setup Docker and deploy to Google Cloud (Public URL).

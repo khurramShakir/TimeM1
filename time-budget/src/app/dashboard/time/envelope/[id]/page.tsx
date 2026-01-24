@@ -1,4 +1,5 @@
 import { getEnvelopeDetails } from "@/lib/actions";
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import styles from "./page.module.css";

@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "cross-env DATABASE_URL=\"file:./dev.db\" next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push:local": "prisma db push --schema=prisma/schema.local.prisma",
+    "db:studio:local": "prisma studio --schema=prisma/schema.local.prisma"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
@@ -22,6 +25,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "prisma": "5.10.2",

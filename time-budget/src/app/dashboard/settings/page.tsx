@@ -1,8 +1,10 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { Clock, Banknote, Globe, Save, Loader2, User } from "lucide-react";
+import { Clock, Banknote, Globe, Save, Loader2, User, ChevronLeft } from "lucide-react";
 import { getUserSettings, updateUserSettings, updateUserProfile } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 type Tab = "profile" | "general" | "time" | "money";
@@ -11,6 +13,7 @@ export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile");
     const [settings, setSettings] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const router = useRouter();
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -62,7 +65,12 @@ export default function SettingsPage() {
 
     return (
         <div className={styles.page}>
-            <h1 className={styles.title}>Settings</h1>
+            <div className={styles.header}>
+                <button onClick={() => router.back()} className={styles.backBtn}>
+                    <ChevronLeft size={20} />
+                </button>
+                <h1 className={styles.title}>Settings</h1>
+            </div>
 
             <div className={styles.tabs}>
                 <button

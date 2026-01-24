@@ -1,4 +1,5 @@
 import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
+export const dynamic = "force-dynamic";
 import { EnvelopeCard } from "@/components/ui/EnvelopeCard";
 import { TransferTrigger } from "@/components/transfers/TransferTrigger";
 import { BudgetChart } from "@/components/charts/BudgetChart";
@@ -6,6 +7,8 @@ import { DateNavigation } from "@/components/layout/DateNavigation";
 import { PeriodToggle } from "@/components/layout/PeriodToggle";
 import styles from "../time/page.module.css";
 import { revalidatePath } from "next/cache";
+import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
+import { Suspense } from "react";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
@@ -95,6 +98,11 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
                     />
                 ))}
             </div>
+
+            <Suspense fallback={null}>
+                <UrlModalTrigger envelopes={data.envelopes} domain="MONEY" currency={data.currency} />
+            </Suspense>
+
         </div>
     );
 }

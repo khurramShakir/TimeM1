@@ -1,0 +1,12 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '--build-arg',
+    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_c21pbGluZy1sb25naG9ybi01MS5jbGVyay5hY2NvdW50cy5kZXYk',
+    '-t',
+    'gcr.io/time-budget-2026/timem1',
+    '.'
+  ]
+images:
+- 'gcr.io/time-budget-2026/timem1'
