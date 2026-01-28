@@ -5,12 +5,13 @@ import styles from "./EnvelopeCard.module.css";
 import { LogTimeTrigger } from "@/components/transactions/LogTimeTrigger";
 import { useRouter } from "next/navigation";
 import { formatValue } from "@/lib/format";
-import { getThemeColor, getLightColor, getTextColor } from "@/lib/colors";
+import { getThemeColor, getLightColor, getTextColor, darkenHexColor } from "@/lib/colors";
 
 interface EnvelopeProps {
     id: number;
     name: string;
     budgeted: number;
+    funded: number;
     spent: number;
     remaining: number;
     color?: string | null;
@@ -18,7 +19,9 @@ interface EnvelopeProps {
     currency?: string;
 }
 
-export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, domain = "TIME", currency = "USD" }: EnvelopeProps) {
+
+
+export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, color, domain = "TIME", currency = "USD" }: EnvelopeProps) {
     const router = useRouter();
 
     // Handle card click for details
@@ -26,18 +29,47 @@ export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, doma
         router.push(`/dashboard/${domain.toLowerCase()}/envelope/${id}`);
     };
 
-    // Calculate progress percentage, capped at 100%
-    const progress = Math.min((spent / budgeted) * 100, 100);
+    // Funding status (MONEY domain only)
+    const isOverspent = remaining < 0;
+    const isUnderfunded = domain === "MONEY" && funded < budgeted && budgeted > 0 && !isOverspent;
+    const isFullyFunded = domain === "MONEY" && funded >= budgeted && !isOverspent;
 
-    // Determine colors
+    // Status indicator color: red=overspent, amber=underfunded, green=fully funded
+    const getStatusColor = () => {
+        if (isOverspent) return "#ef4444"; // Red
+        if (isUnderfunded) return "#f59e0b"; // Amber
+        if (isFullyFunded) return "#22c55e"; // Green
+        return null; // No indicator for TIME or neutral states
+    };
+    const statusColor = getStatusColor();
+
+    // Determine colors - always use envelope's theme color for background
     const themeColor = getThemeColor(color);
     const lightBg = getLightColor(color);
     const textColor = getTextColor(color);
+    const darkThemeColor = darkenHexColor(themeColor, 30); // made slightly darker for better contrast
 
-    // Fallback for "Over" state
+    // Calculate segment percentages based on max(budgeted, funded)
+    // This ensures the bar scales to the largest value involved
+    const maxVal = Math.max(budgeted, funded);
+    const baseValue = maxVal > 0 ? maxVal : 1;
+
+    const spentPercent = Math.min((spent / baseValue) * 100, 100);
+    const fundedPercent = Math.min((funded / baseValue) * 100, 100);
+    const budgetedPercent = Math.min((budgeted / baseValue) * 100, 100);
+
+    // Segment 1: Spent (Dark) - always starts at 0
+    // Segment 2: Available (Theme) - comes after spent, up to funded amount
+    const availablePercent = Math.max(fundedPercent - spentPercent, 0);
+
+    // Segment 3: Unfunded Gap (Striped) - comes after funded, up to budgeted amount
+    // Only exists if Budgeted > Funded
+    const unfundedPercent = budgeted > funded ? Math.max(budgetedPercent - fundedPercent, 0) : 0;
+
+    // Card background: red only if overspent, otherwise use theme color
     const cardStyle = {
-        backgroundColor: remaining < 0 ? "#fee2e2" : lightBg,
-        borderColor: remaining < 0 ? "#fecaca" : `${themeColor}40`, // 40 is 25% opacity
+        backgroundColor: isOverspent ? "#fee2e2" : lightBg,
+        borderColor: isOverspent ? "#fecaca" : `${themeColor}40`,
     };
 
     return (
@@ -59,25 +91,62 @@ export function EnvelopeCard({ id, name, budgeted, spent, remaining, color, doma
                         currency={currency}
                     />
                     <h3 className={styles.title}>{name}</h3>
+                    {/* Status indicator circle for MONEY domain */}
+                    {statusColor && (
+                        <span
+                            title={isOverspent ? "Overspent" : isUnderfunded ? "Underfunded" : "Fully Funded"}
+                            style={{
+                                display: 'inline-block',
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                backgroundColor: statusColor,
+                                flexShrink: 0
+                            }}
+                        />
+                    )}
                 </div>
-                <span className={styles.badge} style={{ pointerEvents: 'none', backgroundColor: '#ffffff', color: remaining < 0 ? '#991b1b' : textColor }}>
+                <span className={styles.badge} style={{ pointerEvents: 'none', backgroundColor: '#ffffff', color: isOverspent ? '#991b1b' : textColor }}>
                     {formatValue(remaining, domain, currency)} {remaining >= 0 ? 'Left' : 'Over'}
                 </span>
             </div>
 
             <div className={styles.stats}>
                 <span>Spent: {formatValue(spent, domain, currency)}</span>
-                <span className={styles.budgetValue} style={{ color: remaining < 0 ? '#991b1b' : textColor }}>{formatValue(budgeted, domain, currency)}</span>
+                <span className={styles.budgetValue} style={{ color: isOverspent ? '#991b1b' : textColor }}>
+                    {formatValue(funded, domain, currency)} of {formatValue(budgeted, domain, currency)}
+                </span>
             </div>
 
+            {/* Multi-segment progress bar */}
             <div className={styles.progressBar}>
-                <div
-                    className={styles.progressFill}
-                    style={{
-                        width: `${progress}%`,
-                        backgroundColor: remaining < 0 ? "#ef4444" : themeColor
-                    }}
-                ></div>
+                {/* Spent segment (dark shade) */}
+                {spentPercent > 0 && (
+                    <div
+                        className={`${styles.progressSegment} ${styles.progressSpent}`}
+                        style={{
+                            width: `${spentPercent}%`,
+                            backgroundColor: isOverspent ? "#ef4444" : darkThemeColor
+                        }}
+                    />
+                )}
+                {/* Available segment (theme color - funded but not spent) */}
+                {availablePercent > 0 && !isOverspent && (
+                    <div
+                        className={`${styles.progressSegment} ${styles.progressAvailable}`}
+                        style={{
+                            width: `${availablePercent}%`,
+                            backgroundColor: themeColor
+                        }}
+                    />
+                )}
+                {/* Unfunded segment (striped gray - for MONEY only) */}
+                {unfundedPercent > 0 && domain === "MONEY" && !isOverspent && (
+                    <div
+                        className={`${styles.progressSegment} ${styles.progressUnfunded}`}
+                        style={{ width: `${unfundedPercent}%` }}
+                    />
+                )}
             </div>
         </div>
     );

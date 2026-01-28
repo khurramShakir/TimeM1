@@ -190,25 +190,36 @@ export async function syncUnallocated(periodId: number) {
     });
     if (!period) return;
 
+    // Calculate unallocated budgeted (capacity - sum of other budgeted)
     const totalBudgeted = period.envelopes
         .filter(e => e.name !== "Unallocated")
         .reduce((sum, e) => sum + Number(e.budgeted), 0);
-
     const unallocatedBudget = Number(period.capacity) - totalBudgeted;
+
+    // Calculate unallocated funded (capacity - sum of other funded)
+    const totalFunded = period.envelopes
+        .filter(e => e.name !== "Unallocated")
+        .reduce((sum, e) => sum + Number(e.funded), 0);
+    const unallocatedFunded = Number(period.capacity) - totalFunded;
 
     const unallocatedEnv = period.envelopes.find(e => e.name === "Unallocated");
 
     if (unallocatedEnv) {
         await db.envelope.update({
             where: { id: unallocatedEnv.id },
-            data: { budgeted: unallocatedBudget }
+            data: {
+                budgeted: unallocatedBudget,
+                funded: unallocatedFunded
+            }
         });
     } else {
+        // Create new Unallocated envelope with both budgeted and funded
         await db.envelope.create({
             data: {
                 periodId: period.id,
                 name: "Unallocated",
                 budgeted: unallocatedBudget,
+                funded: unallocatedFunded,
                 color: "gray"
             }
         });
@@ -243,27 +254,36 @@ export async function addIncome(periodId: number, amount: number) {
 
     if (!period || (period.userId as any) !== userId) throw new Error("Unauthorized");
 
-    // 1. Update Capacity
+    // 1. Update Period Capacity
     await db.budgetPeriod.update({
         where: { id: periodId },
         data: { capacity: { increment: amount } }
     });
 
-    // 2. Sync Unallocated
+    // 2. Sync Unallocated budgeted amount
     await syncUnallocated(periodId);
 
-    // 3. Create Audit Transaction (Log)
-    // We log it in "Unallocated" or the first envelope found if unallocated missing?
-    // Unallocated should exist after sync.
+    // 3. Update Unallocated funded amount (actual money deposited)
+    const unallocatedEnv = await db.envelope.findFirst({
+        where: { periodId, name: "Unallocated" }
+    });
+    if (unallocatedEnv) {
+        await db.envelope.update({
+            where: { id: unallocatedEnv.id },
+            data: { funded: { increment: amount } }
+        });
+    }
+
+    // 4. Create Audit Transaction (Log)
     const unallocated = period.envelopes.find(e => e.name === "Unallocated")
-        || await db.envelope.findFirst({ where: { periodId, name: "Unallocated" } });
+        || unallocatedEnv;
 
     if (unallocated) {
         await db.transaction.create({
             data: {
                 envelopeId: unallocated.id,
-                amount: amount, // Real amount
-                type: "INCOME", // Type Income
+                amount: amount,
+                type: "INCOME",
                 description: `💰 Income Added`,
                 date: new Date()
             } as any
@@ -475,12 +495,21 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
             .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
         const budgeted = Number(env.budgeted);
-        const remaining = budgeted - spent;
+        let funded = Number(env.funded);
+
+        // For TIME domain, budget and funded are the same concept (capacity)
+        if (domain === "TIME") {
+            funded = budgeted;
+        }
+
+        // Balance = funded - spent (what's left to spend from actual deposits)
+        const remaining = funded - spent;
 
         return {
             id: env.id,
             name: env.name,
             budgeted,
+            funded,
             spent,
             remaining,
             color: env.color || "gray",
@@ -498,16 +527,18 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     // For MONEY, remaining is total budgeted minus spent
     const totalRemaining = domain === "TIME" ? availableHoursInPeriod - totalSpent : totalBudgeted - totalSpent;
 
+    const totalFunded = envelopes.reduce((sum: number, e: any) => sum + e.funded, 0);
+
     return {
         period,
         envelopes,
-        envelopes: envelopes,
         totalBudgeted,
+        totalFunded,
         totalSpent,
         totalRemaining,
         totalAvailable: availableHoursInPeriod,
         periodType,
-        currency: settings.currency, // Pass currency to UI
+        currency: settings.currency,
         weekStart: settings.weekStart
     };
 }
@@ -549,15 +580,15 @@ export async function transferBudget(fromId: number, toId: number, amount: numbe
     if (amount <= 0) throw new Error("Amount must be positive");
     if (fromId === toId) throw new Error("Cannot transfer to same envelope");
 
-    // 1. Perform Transfer
+    // 1. Perform Transfer - move FUNDED (actual money), not budgeted (target)
     await db.$transaction([
         db.envelope.update({
             where: { id: fromId },
-            data: { budgeted: { decrement: amount } },
+            data: { funded: { decrement: amount } },
         }),
         db.envelope.update({
             where: { id: toId },
-            data: { budgeted: { increment: amount } },
+            data: { funded: { increment: amount } },
         }),
     ]);
 
@@ -615,11 +646,16 @@ export async function createEnvelope(params: CreateEnvelopeParams) {
 
     if (name === "Unallocated") throw new Error("Cannot create a category named Unallocated");
 
+    // For TIME domain: funded = budgeted (time is always "fully funded")
+    // For MONEY domain: funded = 0 (must explicitly fund via Fill Envelopes)
+    const funded = domain === "TIME" ? budgeted : 0;
+
     await db.envelope.create({
         data: {
             periodId: period.id,
             name,
             budgeted,
+            funded,
             color
         }
     });
@@ -639,9 +675,16 @@ export async function updateEnvelope(id: number, data: { name?: string; budgeted
         throw new Error("Cannot rename the Unallocated category");
     }
 
+    // For TIME domain: sync funded = budgeted when budget changes
+    const domain = env.period.domain;
+    const updateData: any = { ...data };
+    if (domain === "TIME" && data.budgeted !== undefined) {
+        updateData.funded = data.budgeted;
+    }
+
     const updatedEnv = await db.envelope.update({
         where: { id },
-        data,
+        data: updateData,
         include: { period: true }
     });
 
@@ -773,13 +816,14 @@ export async function getUnifiedHudData(dateStr?: string) {
     let moneyTotal = 0; // Ideally this comes from "Income" setting later
 
     if (moneyPeriod) {
-        // For Money, "Liquid" currently means "Unallocated Budget"
-        // This is a proxy for "Free Cash". 
-        // Real "Liquid Cash" = Income - Expenses. 
-        // For now, we assume user budgets their income into "Unallocated" if they want it free.
-        const explicit = moneyPeriod.envelopes.find(e => e.name === "Unallocated")?.budgeted || 0;
-        moneyLiquid = Number(explicit);
-        moneyTotal = moneyPeriod.envelopes.reduce((sum, e) => sum + Number(e.budgeted), 0);
+        // For Money:
+        // 1. Total = The actual Income/Capacity set for this period
+        // 2. Liquid = Unallocated Funded (Cash not yet assigned to an envelope)
+        const capacity = Number(moneyPeriod.capacity);
+        const unallocatedEnv = moneyPeriod.envelopes.find(e => e.name === "Unallocated");
+
+        moneyLiquid = unallocatedEnv ? Number(unallocatedEnv.funded) : 0;
+        moneyTotal = capacity;
     }
 
     return {

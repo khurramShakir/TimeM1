@@ -67,3 +67,15 @@ export function getTextColor(color: string | null | undefined): string {
     }
     return PRESET_COLORS[color]?.text || PRESET_COLORS.gray.text;
 }
+
+/**
+ * Darkens a hex color by a given percentage.
+ */
+export function darkenHexColor(hex: string, percent: number): string {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max((num >> 16) - amt, 0);
+    const G = Math.max((num >> 8 & 0x00FF) - amt, 0);
+    const B = Math.max((num & 0x0000FF) - amt, 0);
+    return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+}

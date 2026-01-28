@@ -19,6 +19,8 @@
 - [x] **[HIST-01] Feature: Transaction List (History)**: Full CRUD - Create, Read, Update, Delete transactions.
 - [x] **[HIST-02] UI Consistency**: Standardized fonts, icons, and emerald green theme.
 - [x] **[HIST-03] Bug Fix**: Modal "screen vanish" and overlay click handling.
+- [x] **[HIST-04] Funded Field Logic**: Added explicit `funded` vs `budgeted` tracking (Database & Logic).
+- [x] **[HIST-05] UI Polish**: Multi-segment progress bars, mobile fixes, and consistent styling for Allocation Studio.
 
 ## Next Session - Priority Items
 - [x] **[PRIO-01] Deployment**: Git setup and build for production.
@@ -29,16 +31,30 @@
     - [x] Dynamic Persistence (Copy from Previous Period).
     - [x] Unallocated Management (Automatic Buffer logic).
     - [x] Transfer Logic (Allow moves to/from Unallocated).
-    - [ ] Income Setup Screen ("Fill Envelopes" Flow).
+    - [x] Income Setup Screen ("Fill Envelopes" Flow).
 
     - [ ] Profile Management (View/Update name).
 - [ ] **[PRIO-03] Date Picker**: Improved UX for selecting specific weeks/months.
 - [ ] **[PRIO-04] Reports**: Advanced weekly/monthly summary reports.
 
+## Session 07 - Refining Budgeting & UI
+- [x] **[BUDG-01] Budget Manager UI Polish**:
+    - [x] Add `funded` column to Budget Manager table.
+    - [x] Update progress bar in Budget Manager to multi-segment (spent, available, unfunded gap).
+    - [x] Ensure visual consistency with Dashboard `EnvelopeCard`.
+    - [x] Refinement: Hide `Funded` column for Time domain (redundant).
+- [x] **[BUDG-02] Allocation Studio Enhancement**:
+    - [x] Add `funded` status to envelope cards in Fill Page.
+    - [x] Show "Funded / Budgeted" indicator to guide users on remaining funding needs.
+- [x] **[BUDG-03] Reports Page**:
+    - [x] Create `/dashboard/reports` page.
+    - [x] Implement advanced summary (Budgeted vs Funded vs Spent).
+    - [x] Add breakdown by category and domain-specific insights.
+    - [x] Add navigation links to Reports in Sidebar and Mobile Nav.
+- [x] **[BUDG-04] Profile Management Polish**:
+    - [x] Finalize any remaining profile update logic or UI tweaks.
+
 ## Backlog
-- [ ] **[LOG-01] Notifications**: Preferences for budget alerts or reminders.
-- [ ] **[LOG-02] Custom Envelopes**: UI to create/delete envelopes (currently via Budget Manager).
-- [x] **[LOG-03] Cloud Deployment**: Deploy to Google Cloud Run with public URL.
-- [ ] **[LOG-04] Super Admin**: Screen to manage multiple users.
+...
 
 

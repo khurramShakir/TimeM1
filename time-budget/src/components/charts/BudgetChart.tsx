@@ -118,17 +118,17 @@ export function BudgetChart({
                     {/* Top: Stats Row */}
                     <div className={styles.statsRow}>
                         <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Total Allocated</span>
+                            <span className={styles.statLabel}>Total Capacity</span>
                             <span className={styles.statValueProminent}>
-                                {formatValue(trueAllocated, domain, currency)}
+                                {formatValue(isTime ? totalAvailable : totalAvailable, domain, currency)}
                             </span>
                         </div>
                         {isTime && (
                             <>
                                 <div className={styles.statDivider} />
                                 <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Unallocated</span>
-                                    <span className={styles.statValueSecondary}>{totalUnallocated.toFixed(1)}h</span>
+                                    <span className={styles.statLabel}>Target Plan</span>
+                                    <span className={styles.statValueSecondary}>{trueAllocated.toFixed(1)}h</span>
                                 </div>
                             </>
                         )}

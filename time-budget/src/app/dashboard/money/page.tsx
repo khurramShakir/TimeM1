@@ -94,7 +94,7 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                <TransferTrigger envelopes={salvagedEnvelopesForTransfer} />
+                <TransferTrigger envelopes={salvagedEnvelopesForTransfer} domain="MONEY" currency={data.currency} />
             </div>
 
             <div className={styles.grid}>
@@ -109,7 +109,12 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
             </div>
 
             <Suspense fallback={null}>
-                <UrlModalTrigger envelopes={data.envelopes} domain="MONEY" currency={data.currency} />
+                <UrlModalTrigger
+                    envelopes={data.envelopes}
+                    domain="MONEY"
+                    currency={data.currency}
+                    periodId={data.period.id}
+                />
             </Suspense>
 
         </div>

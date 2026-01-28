@@ -1,3 +1,15 @@
+export function formatCurrency(value: number, currency: string = "USD"): string {
+    const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+    }).format(value);
+
+    if (currency === "CAD") {
+        return formatted.replace("CA$", "C$");
+    }
+    return formatted;
+}
+
 export function formatValue(value: number, domain: string = "TIME", currency: string = "USD"): string {
     if (domain === "TIME") {
         const hours = Math.floor(Math.abs(value));
@@ -8,15 +20,7 @@ export function formatValue(value: number, domain: string = "TIME", currency: st
         if (mins === 0) return `${value < 0 ? '-' : ''}${hours}h`;
         return `${value < 0 ? '-' : ''}${hours}h ${mins}m`;
     } else {
-        const formatted = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: currency,
-        }).format(value);
-
-        if (currency === "CAD") {
-            return formatted.replace("CA$", "C$");
-        }
-        return formatted;
+        return formatCurrency(value, currency);
     }
 }
 

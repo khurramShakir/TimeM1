@@ -11,7 +11,13 @@ interface Envelope {
     remaining: number;
 }
 
-export function TransferTrigger({ envelopes, domain = "TIME" }: { envelopes: Envelope[], domain?: string }) {
+interface TransferTriggerProps {
+    envelopes: Envelope[];
+    domain?: string;
+    currency?: string;
+}
+
+export function TransferTrigger({ envelopes, domain = "TIME", currency = "USD" }: TransferTriggerProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -29,6 +35,7 @@ export function TransferTrigger({ envelopes, domain = "TIME" }: { envelopes: Env
                 onClose={() => setIsOpen(false)}
                 envelopes={envelopes}
                 domain={domain}
+                currency={currency}
             />
         </>
     );

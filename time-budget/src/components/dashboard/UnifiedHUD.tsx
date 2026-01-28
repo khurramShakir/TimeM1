@@ -14,7 +14,7 @@ export async function UnifiedHUD({ date }: { date?: string }) {
                 threshold={data.time.total}
             />
             <LiquidCard
-                label="Liquid Cash"
+                label="Unallocated Cash"
                 value={data.money.liquid}
                 unit=""
                 prefix={data.money.unit}

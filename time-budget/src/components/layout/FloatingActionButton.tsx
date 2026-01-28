@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "./FloatingActionButton.module.css";
 
@@ -31,9 +31,24 @@ export function FloatingActionButton() {
 
     return (
         <div className={styles.fabContainer}>
-            <button className={styles.fab} onClick={handleClick} aria-label="Add New">
-                <Plus size={32} strokeWidth={2.5} />
-            </button>
+            {/* Secondary Action: Fill Envelopes */}
+            <div className="flex flex-col gap-3 items-center">
+                <button
+                    className={`${styles.fab} ${styles.secondaryFab} w-10 h-10 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-2 border-emerald-600 mb-3`}
+                    onClick={() => {
+                        const domain = pathname.includes("/dashboard/money") ? "MONEY" : "TIME";
+                        router.push(`/dashboard/fill?domain=${domain}`);
+                    }}
+                    aria-label="Fill Envelopes"
+                    title="Fill / Add Funds"
+                >
+                    <Wallet size={18} strokeWidth={2.5} />
+                </button>
+
+                <button className={styles.fab} onClick={handleClick} aria-label="Add New">
+                    <Plus size={32} strokeWidth={2.5} />
+                </button>
+            </div>
         </div>
     );
 }

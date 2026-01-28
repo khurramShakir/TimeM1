@@ -66,7 +66,8 @@ model Envelope {
   name        String   // e.g., "Work", "Sleep", "Unallocated"
   color       String?  // UI color code
   
-  budgeted    Decimal  // The plan (e.g., 40.00)
+  budgeted    Decimal  // The plan/target amount (e.g., 40.00)
+  funded      Decimal  @default(0) // Actual money deposited (for MONEY domain)
   
   periodId    Int
   period      BudgetPeriod @relation(fields: [periodId], references: [id])
