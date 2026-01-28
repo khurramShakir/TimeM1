@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, PieChart, Settings, LogOut, Clock, List, Banknote, ArrowRight } from "lucide-react";
+import { Home, PieChart, Settings, LogOut, Clock, List, Banknote, ArrowRight, TrendingUp } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import styles from "./Sidebar.module.css";
 
@@ -11,7 +11,7 @@ export function Sidebar() {
     const searchParams = useSearchParams();
 
     // Determine the current domain prefix
-    const isMoney = pathname.startsWith("/dashboard/money");
+    const isMoney = pathname.startsWith("/dashboard/money") || searchParams.get("domain") === "MONEY";
     const prefix = isMoney ? "/dashboard/money" : "/dashboard/time";
 
     // Enforce Domain Specific Periods
@@ -21,6 +21,7 @@ export function Sidebar() {
         { name: "Dashboard", href: `${prefix}${typeParam}`, icon: Home },
         { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
         { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
+        { name: "Reports", href: `/dashboard/reports${isMoney ? "?domain=MONEY" : "?domain=TIME"}`, icon: TrendingUp },
         { name: "Settings", href: `/dashboard/settings`, icon: Settings },
     ];
 

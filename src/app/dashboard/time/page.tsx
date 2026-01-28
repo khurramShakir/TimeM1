@@ -104,7 +104,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </div>
 
             <Suspense fallback={null}>
-                <UrlModalTrigger envelopes={data.envelopes} domain="TIME" />
+                <UrlModalTrigger
+                    envelopes={data.envelopes}
+                    domain="TIME"
+                    periodId={data.period.id}
+                />
             </Suspense>
 
         </div>

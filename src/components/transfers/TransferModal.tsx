@@ -16,11 +16,12 @@ interface TransferModalProps {
     onClose: () => void;
     envelopes: Envelope[];
     domain?: string;
+    currency?: string;
 }
 
 import { formatValue } from "@/lib/format";
 
-export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME" }: TransferModalProps) {
+export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME", currency = "USD" }: TransferModalProps) {
     const [fromId, setFromId] = useState<number>(envelopes[0]?.id || 0);
     const [toId, setToId] = useState<number>(envelopes[1]?.id || envelopes[0]?.id || 0);
     const [amount, setAmount] = useState("");
@@ -73,7 +74,7 @@ export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME" }: T
                             >
                                 {envelopes.map(env => (
                                     <option key={env.id} value={env.id}>
-                                        {env.name} ({formatValue(env.remaining, domain)} left)
+                                        {env.name} ({formatValue(env.remaining, domain, currency)} left)
                                     </option>
                                 ))}
                             </select>
@@ -90,7 +91,7 @@ export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME" }: T
                             >
                                 {envelopes.map(env => (
                                     <option key={env.id} value={env.id}>
-                                        {env.name} ({formatValue(env.remaining, domain)} left)
+                                        {env.name} ({formatValue(env.remaining, domain, currency)} left)
                                     </option>
                                 ))}
                             </select>
@@ -108,7 +109,7 @@ export function TransferModal({ isOpen, onClose, envelopes, domain = "TIME" }: T
                                 required
                                 placeholder="0.00"
                             />
-                            <span className={styles.suffix}>{domain === "TIME" ? "hours" : "USD"}</span>
+                            <span className={styles.suffix}>{domain === "TIME" ? "hours" : currency}</span>
                         </div>
                     </div>
 

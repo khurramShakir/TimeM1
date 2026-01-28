@@ -10,7 +10,7 @@ export function MobileNav() {
     const searchParams = useSearchParams();
 
     // Determine the current domain prefix
-    const isMoney = pathname.startsWith("/dashboard/money");
+    const isMoney = pathname.startsWith("/dashboard/money") || searchParams.get("domain") === "MONEY";
     const prefix = isMoney ? "/dashboard/money" : "/dashboard/time";
 
     // Enforce Domain Specific Periods

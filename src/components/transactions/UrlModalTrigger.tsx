@@ -17,7 +17,7 @@ export function UrlModalTrigger({ envelopes, domain, currency }: UrlModalTrigger
     const action = searchParams.get("action");
 
     // Check for either specific action names
-    const isOpen = (domain === "TIME" && action === "log_time") ||
+    const isLogTimeOpen = (domain === "TIME" && action === "log_time") ||
         (domain === "MONEY" && action === "add_transaction");
 
     const handleClose = () => {
@@ -28,7 +28,7 @@ export function UrlModalTrigger({ envelopes, domain, currency }: UrlModalTrigger
 
     return (
         <LogTimeModal
-            isOpen={isOpen}
+            isOpen={isLogTimeOpen}
             onClose={handleClose}
             envelopes={envelopes}
             domain={domain}

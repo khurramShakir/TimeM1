@@ -58,10 +58,34 @@
 }
 
 .progressBar {
-    height: 4px;
+    height: 6px;
     background-color: var(--surface-300);
     border-radius: 9999px;
     overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+.progressSegment {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.progressSpent {
+    /* Dark shade - will be set via inline style */
+}
+
+.progressAvailable {
+    /* Theme color - will be set via inline style */
+}
+
+.progressUnfunded {
+    /* Striped gray for unfunded gap */
+    background: repeating-linear-gradient(45deg,
+            #e5e7eb,
+            #e5e7eb 3px,
+            #d1d5db 3px,
+            #d1d5db 6px);
 }
 
 .progressFill {
