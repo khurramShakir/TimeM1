@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Settings, ArrowRightLeft, LogOut, X } from "lucide-react";
+import { Settings, ArrowRightLeft, LogOut, X, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import styles from "./MoreMenu.module.css";
@@ -29,6 +29,18 @@ export function MoreMenu() {
 
                 <h3 style={{ padding: '0 1rem', marginBottom: '1rem', fontWeight: 700 }}>More Actions</h3>
 
+                {(() => {
+                    const isMoney = pathname.startsWith("/dashboard/money") || searchParams.get("domain") === "MONEY";
+                    return (
+                        <Link href={`/dashboard/reports${isMoney ? "?domain=MONEY" : "?domain=TIME"}`} className={styles.menuItem} onClick={closeMenu}>
+                            <div className={styles.menuItemIcon}>
+                                <TrendingUp size={20} />
+                            </div>
+                            <span>Advanced Reports</span>
+                        </Link>
+                    );
+                })()}
+
                 <Link href="/dashboard/settings" className={styles.menuItem} onClick={closeMenu}>
                     <div className={styles.menuItemIcon}>
                         <Settings size={20} />
@@ -44,7 +56,7 @@ export function MoreMenu() {
                 </Link>
 
                 <div className={styles.menuItem} style={{ padding: 0 }}>
-                    <SignOutButton signOutCallback={() => router.push("/")}>
+                    <SignOutButton redirectUrl="/">
                         <button className={`${styles.menuItem} ${styles.signOutItem}`} style={{ background: 'transparent' }}>
                             <div className={styles.menuItemIcon}>
                                 <LogOut size={20} />

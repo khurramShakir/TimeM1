@@ -13,6 +13,7 @@ interface Envelope {
     id: number;
     name: string;
     budgeted: number; // Decimal passed as number/string
+    funded: number;   // Added funded field
     spent: number;
     remaining: number;
     color: string;
@@ -30,7 +31,7 @@ interface BudgetManagerProps {
 }
 
 // Shared with BudgetChart for consistency
-import { getThemeColor, getLightColor, getTextColor } from "@/lib/colors";
+import { getThemeColor, getLightColor, getTextColor, darkenHexColor } from "@/lib/colors";
 
 export default function BudgetManager({
     userId,
@@ -126,7 +127,7 @@ export default function BudgetManager({
                     <h1 className={styles.title}>{domain === "TIME" ? "Time Budget" : "Money Budget"}</h1>
                     <div className={styles.capacityControl}>
                         <label className={styles.capacityLabel}>
-                            {domain === "TIME" ? "Weekly Capacity (Hours):" : "Total Period Income:"}
+                            {domain === "TIME" ? "Weekly Capacity (Hours):" : "Total Capacity (Cash):"}
                         </label>
                         <div className={styles.capacityInputWrapper}>
                             <input
@@ -151,12 +152,13 @@ export default function BudgetManager({
             </div>
 
             <div className={styles.list}>
-                <div className={styles.listHeader}>
+                <div className={`${styles.listHeader} ${domain === "TIME" ? styles.timeDomain : ""}`}>
                     <div className={styles.colName}>
                         <div className={styles.triggerPlaceholder} />
                         <span>Envelope Name</span>
                     </div>
-                    <div className={styles.colBudget}>{domain === "TIME" ? "Hours" : "Limit"}</div>
+                    <div className={styles.colBudget}>{domain === "TIME" ? "Hours" : "Target"}</div>
+                    {domain !== "TIME" && <div className={styles.colFunded}>Funded</div>}
                     <div className={styles.colStatus}>Status / Progress</div>
                     <div className={styles.colAction}>Actions</div>
                 </div>
@@ -171,7 +173,7 @@ export default function BudgetManager({
                         .map(env => (
                             <div
                                 key={env.id}
-                                className={`${styles.row} ${env.name === "Unallocated" ? styles.unallocatedRow : ""}`}
+                                className={`${styles.row} ${env.name === "Unallocated" ? styles.unallocatedRow : ""} ${domain === "TIME" ? styles.timeDomain : ""}`}
                             >
                                 <div className={styles.colName}>
                                     {env.name !== "Unallocated" ? (
@@ -195,30 +197,79 @@ export default function BudgetManager({
                                 <div className={styles.colBudget}>
                                     {domain === "TIME" ? `${Number(env.budgeted).toFixed(1)}h` : `${currency}${Number(env.budgeted).toLocaleString()}`}
                                 </div>
+                                {domain !== "TIME" && (
+                                    <div className={styles.colFunded}>
+                                        {domain === "TIME" ? `${Number(env.funded).toFixed(1)}h` : `${currency}${Number(env.funded).toLocaleString()}`}
+                                    </div>
+                                )}
                                 <div className={styles.colStatus}>
                                     {(() => {
                                         const budgeted = Number(env.budgeted);
+                                        const funded = Number(env.funded);
                                         const spent = Number(env.spent);
-                                        const percent = budgeted > 0 ? Math.min((spent / budgeted) * 100, 100) : 0;
-                                        const isOver = spent > budgeted;
-                                        const colorHex = isOver ? "#ef4444" : getThemeColor(env.color);
+
+                                        const maxVal = Math.max(budgeted, funded);
+                                        const baseValue = maxVal > 0 ? maxVal : 1;
+
+                                        const spentPercent = Math.min((spent / baseValue) * 100, 100);
+                                        const fundedPercent = Math.min((funded / baseValue) ? (funded / baseValue) * 100 : 0, 100);
+                                        const budgetedPercent = Math.min((budgeted / baseValue) * 100, 100);
+
+                                        const isOverspent = spent > funded;
+                                        const themeColor = getThemeColor(env.color);
+                                        const darkThemeColor = darkenHexColor(themeColor, 30);
+
+                                        // Segments
+                                        const availablePercent = Math.max(fundedPercent - spentPercent, 0);
+                                        const unfundedPercent = budgeted > funded ? Math.max(budgetedPercent - fundedPercent, 0) : 0;
 
                                         return (
                                             <div className={styles.progressWrapper}>
                                                 <div className={styles.progressBar}>
-                                                    <div
-                                                        className={styles.progressFill}
-                                                        style={{
-                                                            width: `${percent}%`,
-                                                            backgroundColor: isOver ? "#ef4444" : colorHex
-                                                        }}
-                                                    />
+                                                    {/* Spent segment */}
+                                                    {spentPercent > 0 && (
+                                                        <div
+                                                            className={styles.progressSegment}
+                                                            style={{
+                                                                width: `${spentPercent}%`,
+                                                                backgroundColor: isOverspent ? "#ef4444" : darkThemeColor,
+                                                                height: '100%',
+                                                                position: 'absolute',
+                                                                left: 0
+                                                            }}
+                                                        />
+                                                    )}
+                                                    {/* Available segment */}
+                                                    {availablePercent > 0 && !isOverspent && (
+                                                        <div
+                                                            className={styles.progressSegment}
+                                                            style={{
+                                                                width: `${availablePercent}%`,
+                                                                backgroundColor: themeColor,
+                                                                height: '100%',
+                                                                position: 'absolute',
+                                                                left: `${spentPercent}%`
+                                                            }}
+                                                        />
+                                                    )}
+                                                    {/* Unfunded segment */}
+                                                    {unfundedPercent > 0 && domain === "MONEY" && !isOverspent && (
+                                                        <div
+                                                            className={`${styles.progressSegment} ${styles.progressUnfunded}`}
+                                                            style={{
+                                                                width: `${unfundedPercent}%`,
+                                                                height: '100%',
+                                                                position: 'absolute',
+                                                                left: `${fundedPercent}%`
+                                                            }}
+                                                        />
+                                                    )}
                                                 </div>
                                                 <div className={styles.spentText}>
                                                     {domain === "TIME"
-                                                        ? `${spent.toFixed(1)}h used`
-                                                        : `${currency}${spent.toLocaleString()} spent`}
-                                                    {isOver && " (Over)"}
+                                                        ? `${spent.toFixed(1)}h used of ${budgeted.toFixed(1)}h`
+                                                        : `${currency}${spent.toLocaleString()} spent of ${currency}${funded.toLocaleString()}`}
+                                                    {isOverspent && " (Over)"}
                                                 </div>
                                             </div>
                                         );
