@@ -140,12 +140,35 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
         }
     };
 
+    const overlayRef = React.useRef<HTMLDivElement>(null);
+
+    const handleOverlayClick = (e: React.MouseEvent) => {
+        if (e.target === overlayRef.current) {
+            onClose();
+        }
+    };
+
+    const stopPropagation = (e: React.MouseEvent) => {
+        e.stopPropagation();
+    };
+
     if (!isOpen) return null;
 
     // Use Portal to escape stacking context of parent Cards
     return createPortal(
-        <div className={styles.overlay} onMouseDown={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
+        <div
+            ref={overlayRef}
+            className={styles.overlay}
+            onClick={handleOverlayClick}
+            onMouseDown={stopPropagation}
+            onMouseUp={stopPropagation}
+        >
+            <div
+                className={styles.modal}
+                onClick={stopPropagation}
+                onMouseDown={stopPropagation}
+                onMouseUp={stopPropagation}
+            >
                 <h2 className={styles.title}>{domain === "TIME" ? "Log Time" : "Record Transaction"}</h2>
 
                 {/* Tabs - Only for TIME domain */}

@@ -1,0 +1,11 @@
+.gcloudignore
+.git
+.gitignore
+node_modules/
+.next/
+.env
+.env.local
+.env.*.local
+*.db
+*.db-journal
+docker-compose.yml
