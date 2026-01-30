@@ -17,10 +17,10 @@ This backlog tracks the tasks required to implement the "Frictionless" PWA Strat
     - Focus on primary input immediately on open.
 
 ## 📊 Unified Dashboard
-- [ ] **[DB-01] Heads-Up Display (HUD)**:
+- [x] **[DB-01] Heads-Up Display (HUD)**:
     - Create the dual-card summary component.
     - Hook: Fetch `currentPeriod` Liquid Cash and Liquid Time.
-- [ ] **[DB-02] Red State Logic**:
+- [x] **[DB-02] Red State Logic**:
     - Update progress bars/envelopes to turn red when `spent > budgeted`.
     - Add global warning banner if total budget is exceeded.
 - [ ] **[DB-03] Opportunity Cost Nudge**:
@@ -37,11 +37,11 @@ This backlog tracks the tasks required to implement the "Frictionless" PWA Strat
 - [ ] **[ENG-04] CSV Export**: Server Action + Client-side trigger to export all transactions.
 
 ## 🛠️ Technical Debt & Foundation
-- [ ] **[TECH-01] File Cleanup**: Rename `Stretegy.md` to `Strategy.md`.
+- [x] **[TECH-01] File Cleanup**: Rename `Strategy.md` to `Strategy.md`.
 - [ ] **[TECH-02] Schema Update**: Ensure `User.hourlyRate` and `Transaction.billable` exist in Prisma.
-42: 
-43: ## 🚀 DevOps & Automation
-44: - [ ] **[OPS-01] CI/CD Pipeline**: 
-45:     - Setup GitHub Actions or Google Cloud Build triggers.
-46:     - Logic: Automatically build and deploy to Cloud Run on merge to `main`.
-47:     - Include automated Prisma migrations (`db push` or `migrate deploy`).
+
+## 🚀 DevOps & Automation
+- [ ] **[OPS-01] CI/CD Pipeline**: 
+    - Setup GitHub Actions or Google Cloud Build triggers.
+    - Logic: Automatically build and deploy to Cloud Run on merge to `main`.
+    - Include automated Prisma migrations (`db push` or `migrate deploy`).
