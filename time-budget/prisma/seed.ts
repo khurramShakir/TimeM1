@@ -10,9 +10,9 @@ async function main() {
         where: { email: 'alice@example.com' },
         update: {},
         create: {
+            id: 'user_2xyz_test', // Mock Clerk ID
             email: 'alice@example.com',
             name: 'Alice',
-            password: 'password123', // In a real app, hash this!
         },
     })
     console.log(`Created user with id: ${user.id}`)
@@ -27,10 +27,11 @@ async function main() {
 
     const period = await prisma.budgetPeriod.upsert({
         where: {
-            userId_startDate_type: {
+            userId_startDate_type_domain: {
                 userId: user.id,
                 startDate: monday,
                 type: 'WEEKLY',
+                domain: 'TIME',
             },
         },
         update: {},
@@ -38,6 +39,7 @@ async function main() {
             userId: user.id,
             startDate: monday,
             type: 'WEEKLY',
+            domain: 'TIME',
             isClosed: false,
         },
     })

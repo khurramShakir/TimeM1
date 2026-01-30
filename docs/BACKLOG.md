@@ -39,3 +39,9 @@ This backlog tracks the tasks required to implement the "Frictionless" PWA Strat
 ## 🛠️ Technical Debt & Foundation
 - [ ] **[TECH-01] File Cleanup**: Rename `Stretegy.md` to `Strategy.md`.
 - [ ] **[TECH-02] Schema Update**: Ensure `User.hourlyRate` and `Transaction.billable` exist in Prisma.
+42: 
+43: ## 🚀 DevOps & Automation
+44: - [ ] **[OPS-01] CI/CD Pipeline**: 
+45:     - Setup GitHub Actions or Google Cloud Build triggers.
+46:     - Logic: Automatically build and deploy to Cloud Run on merge to `main`.
+47:     - Include automated Prisma migrations (`db push` or `migrate deploy`).
