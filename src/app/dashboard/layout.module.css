@@ -1,0 +1,46 @@
+.layout {
+    display: flex;
+    height: 100vh;
+    background-color: var(--surface-200);
+}
+
+.sidebarContainer {
+    display: none;
+    height: 100%;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .sidebarContainer {
+        display: block;
+    }
+}
+
+.main {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.main.noSidebar .container {
+    max-width: 100%;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding-bottom: 150px;
+        /* Space for Bottom Nav + Floating FAB */
+    }
+}

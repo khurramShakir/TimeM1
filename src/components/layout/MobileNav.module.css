@@ -1,0 +1,73 @@
+.mobileNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    display: none;
+    padding: 0 0.5rem calc(env(safe-area-inset-bottom, 0px) + 0.5rem) 0.5rem;
+    z-index: 100;
+    box-shadow: 0 -8px 24px -4px rgba(0, 0, 0, 0.04);
+}
+
+.navItems {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 100%;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    color: var(--foreground);
+    opacity: 0.5;
+    font-size: 0.65rem;
+    font-weight: 500;
+    height: 100%;
+    border-radius: var(--radius-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    padding-top: 4px;
+}
+
+.navItemActive {
+    color: var(--primary);
+    opacity: 1;
+    font-weight: 700;
+}
+
+/* Active Pill Indicator */
+.navItemActive::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.navItem:active {
+    background-color: var(--surface-200);
+    transform: scale(0.95);
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    .mobileNav {
+        display: block;
+    }
+}

@@ -1,0 +1,14 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '--build-arg', 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${_CLERK_KEY}',
+    '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/timem1:latest',
+    '.'
+  ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/timem1:latest']
+images:
+- 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/timem1:latest'
+substitutions:
+  _CLERK_KEY: 'pk_test_c21pbGluZy1sb25naG9ybi01MS5jbGVyay5hY2NvdW50cy5kZXYk'

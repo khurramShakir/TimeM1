@@ -1,0 +1,197 @@
+.container {
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-input);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--foreground);
+    min-width: 200px;
+    font-family: var(--font-sans);
+}
+
+.logBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #16a34a;
+    /* Green-600 */
+    border: 1px solid #16a34a;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.logBtn:hover {
+    background-color: #15803d;
+    /* Green-700 */
+    border-color: #15803d;
+    opacity: 1;
+    /* Override opacity hover from previous */
+}
+
+.tableWrapper {
+    background: white;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background-color: var(--surface-100);
+    border-bottom: 1px solid var(--border-subtle);
+    font-weight: 600;
+    color: var(--foreground);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--foreground);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table td:last-child {
+    padding-right: 2rem;
+}
+
+.table tr:hover td {
+    background-color: var(--surface-50);
+}
+
+.amount {
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.date {
+    color: var(--foreground);
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.envelopeBadge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.actionBtn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--foreground);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.actionBtn:hover {
+    opacity: 1;
+    background-color: var(--surface-200);
+}
+
+.deleteBtn:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.noData {
+    padding: 4rem;
+    text-align: center;
+    color: var(--foreground);
+    opacity: 0.5;
+}
+
+.amountPositive {
+    color: #10b981 !important;
+    /* Green-500 - !important needed to override .table td color */
+}
+
+.amountTransfer {
+    color: var(--foreground);
+    opacity: 0.5;
+}
+
+.entityColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.entityName {
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.refNumber {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.description {
+    opacity: 0.7;
+    font-style: italic;
+    font-size: 0.8rem;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
