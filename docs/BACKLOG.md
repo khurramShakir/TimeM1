@@ -43,5 +43,5 @@ This backlog tracks the tasks required to implement the "Frictionless" PWA Strat
 ## 🚀 DevOps & Automation
 - [ ] **[OPS-01] CI/CD Pipeline**: 
     - Setup GitHub Actions or Google Cloud Build triggers.
-    - Logic: Automatically build and deploy to Cloud Run on merge to `main`.
+    - Logic: Automatically build and deploy to Cloud Run on merge to `master` (User requested flow).
     - Include automated Prisma migrations (`db push` or `migrate deploy`).

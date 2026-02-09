@@ -1,12 +1,11 @@
-.container {
-    padding-bottom: 2rem;
-}
-
 .header {
     margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .titleGroup {

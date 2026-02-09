@@ -1,5 +1,4 @@
 .container {
-    padding: 1rem;
     max-width: 900px;
     margin: 0 auto;
 }
@@ -97,6 +96,10 @@
     border-bottom: none;
 }
 
+.table td:last-child {
+    padding-right: 2rem;
+}
+
 .table tr:hover td {
     background-color: var(--surface-50);
 }
@@ -122,7 +125,7 @@
 
 .actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     justify-content: flex-end;
 }
 
@@ -165,5 +168,33 @@
 .amountTransfer {
     color: var(--foreground);
     opacity: 0.5;
-    /* Muted */
+}
+
+.entityColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.entityName {
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.refNumber {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.description {
+    opacity: 0.7;
+    font-style: italic;
+    font-size: 0.8rem;
+    max-width: 200px;
+    min-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
 }

@@ -7,16 +7,28 @@
     align-items: center;
     z-index: 50;
     backdrop-filter: blur(2px);
+    padding: 1rem;
 }
 
 .modal {
     background-color: #ffffff;
     padding: 2rem;
-    border-radius: var(--radius-md);
-    width: 90%;
+    border-radius: var(--radius-lg);
+    /* More rounded modal */
+    width: 100%;
     max-width: 500px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     animation: slideIn 0.2s ease-out;
+    position: relative;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.modal::-webkit-scrollbar {
+    display: none;
 }
 
 @keyframes slideIn {
@@ -45,7 +57,7 @@
 }
 
 .tab {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
     font-weight: 500;
     color: var(--foreground);
     opacity: 0.6;
@@ -54,6 +66,7 @@
     border-bottom: 2px solid transparent;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.875rem;
 }
 
 .activeTab {
@@ -75,20 +88,24 @@
 }
 
 .group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--text-muted);
 }
 
 .group input,
 .group select,
 .group textarea {
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
+    /* Updated to radius-md for more rounding */
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    background-color: var(--surface-100);
 }
 
 .group input:focus,
@@ -97,29 +114,31 @@
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 2px var(--surface-300);
+    background-color: #ffffff;
 }
 
 .inputWithPrefix {
     display: flex;
     align-items: center;
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    background: #ffffff;
+    border-radius: var(--radius-md);
+    /* Updated to radius-md */
+    background: var(--surface-100);
     transition: all 0.2s;
 }
 
 .inputWithPrefix:focus-within {
     border-color: var(--primary);
     box-shadow: 0 0 0 2px var(--surface-300);
+    background-color: #ffffff;
 }
 
 .prefix {
     padding-left: 0.75rem;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1rem;
     user-select: none;
-    white-space: nowrap;
 }
 
 .inputWithPrefix input {
@@ -131,17 +150,29 @@
     background: transparent !important;
 }
 
-.inputWithPrefix input:focus {
-    box-shadow: none !important;
-}
-
 .row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
 
-.row .group {
-    flex: 1;
+@media (max-width: 640px) {
+    .modal {
+        padding: 1.25rem;
+        max-height: calc(100vh - 1rem);
+    }
+
+    .row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .quickDates {
+        flex-wrap: wrap;
+    }
+
+    .quickDateBtn {
+        font-size: 0.875rem !important;
+    }
 }
 
 .readOnly {
@@ -151,21 +182,28 @@
 }
 
 .actions {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
 
-.cancelBtn {
-    padding: 0.5rem 1rem;
-    background-color: #ffffff;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--foreground);
-    font-weight: 500;
+.cancelBtn,
+.saveBtn {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    /* Updated to radius-md */
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.cancelBtn {
+    background-color: var(--surface-100);
+    border: 1px solid var(--border-subtle);
+    color: var(--foreground);
 }
 
 .cancelBtn:hover {
@@ -173,21 +211,106 @@
 }
 
 .saveBtn {
-    padding: 0.5rem 1rem;
     background-color: var(--primary);
     border: none;
-    border-radius: var(--radius-sm);
     color: #ffffff;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
 }
 
 .saveBtn:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .saveBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
+}
+
+/* Prominent Envelope Field */
+.prominentGroup {
+    background-color: var(--surface-100);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    /* More rounded panel */
+    border: none;
+    /* Borderless as requested */
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease;
+    /* Smooth transition for dynamic themes */
+}
+
+.prominentLabel {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+
+.prominentSelect {
+    font-size: 1.25rem !important;
+    font-weight: 700;
+    color: var(--foreground);
+    border: 2px solid var(--primary);
+    /* Keep as fallback, inline style will override */
+    border-radius: var(--radius-md) !important;
+    /* Explicit rounding for combo boxes */
+    background-color: #ffffff !important;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    /* Smooth transition for dynamic themes */
+}
+
+/* Date Selection UX */
+.dateGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dateInput {
+    font-weight: 600 !important;
+}
+
+.quickDates {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.quickDateBtn {
+    flex: 1;
+    min-height: 48px;
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: var(--surface-200);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    /* Rounded edges for quick date buttons */
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quickDateBtn:hover {
+    background-color: var(--surface-300);
+    border-color: var(--primary);
+}
+
+.todayBtn {
+    background-color: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
+.todayBtn:hover {
+    filter: brightness(1.1);
 }

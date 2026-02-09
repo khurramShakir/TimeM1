@@ -2,6 +2,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
+    '--no-cache',
     '--build-arg', 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${_CLERK_KEY}',
     '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/timem1:latest',
     '.'

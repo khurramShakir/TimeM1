@@ -28,8 +28,10 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     const formattedTransactions = (transactions as any[]).map(t => ({
         id: t.id,
         amount: Number(t.amount),
-        type: t.type || "EXPENSE", // Include transaction type for styling
+        type: t.type || "EXPENSE",
         description: t.description || "",
+        entity: t.entity || null,
+        refNumber: t.refNumber || null,
         date: t.date,
         startTime: t.startTime,
         endTime: t.endTime,
@@ -37,11 +39,12 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
             id: t.envelope.id,
             name: t.envelope.name,
             color: t.envelope.color || "default"
-        }
+        },
+        toEnvelopeId: t.toEnvelopeId
     }));
 
     return (
-        <div className={styles.container}>
+        <>
             <header className={styles.header}>
                 <div className={styles.titleGroup}>
                     <h1 className={styles.title}>Money Transactions</h1>
@@ -55,6 +58,6 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                 domain="MONEY"
                 currency={settings.currency}
             />
-        </div>
+        </>
     );
 }

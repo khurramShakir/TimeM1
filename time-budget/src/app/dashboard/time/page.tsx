@@ -99,6 +99,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                         {...envelope}
                         domain="TIME"
                         currency={data.currency}
+                        allEnvelopes={data.envelopes}
                     />
                 ))}
             </div>

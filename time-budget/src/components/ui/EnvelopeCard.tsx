@@ -17,11 +17,12 @@ interface EnvelopeProps {
     color?: string | null;
     domain?: string;
     currency?: string;
+    allEnvelopes?: { id: number; name: string; color?: string | null }[];
 }
 
 
 
-export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, color, domain = "TIME", currency = "USD" }: EnvelopeProps) {
+export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, color, domain = "TIME", currency = "USD", allEnvelopes }: EnvelopeProps) {
     const router = useRouter();
 
     // Handle card click for details
@@ -83,7 +84,7 @@ export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, col
             <div className={styles.header}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                     <LogTimeTrigger
-                        envelopes={[{ id, name }]}
+                        envelopes={allEnvelopes || [{ id, name }]}
                         initialEnvelopeId={id}
                         compact={true}
                         domain={domain}

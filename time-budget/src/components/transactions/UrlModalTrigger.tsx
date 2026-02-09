@@ -7,9 +7,10 @@ interface UrlModalTriggerProps {
     envelopes: any[];
     domain: "TIME" | "MONEY";
     currency?: string;
+    periodId?: number;
 }
 
-export function UrlModalTrigger({ envelopes, domain, currency }: UrlModalTriggerProps) {
+export function UrlModalTrigger({ envelopes, domain, currency, periodId }: UrlModalTriggerProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
