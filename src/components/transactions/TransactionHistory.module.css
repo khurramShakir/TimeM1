@@ -1,7 +1,5 @@
 .container {
-    padding: 1rem;
-    max-width: 900px;
-    margin: 0 auto;
+    width: 100%;
 }
 
 .header {
@@ -97,6 +95,10 @@
     border-bottom: none;
 }
 
+.table td:last-child {
+    padding-right: 2rem;
+}
+
 .table tr:hover td {
     background-color: var(--surface-50);
 }
@@ -122,7 +124,7 @@
 
 .actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     justify-content: flex-end;
 }
 
