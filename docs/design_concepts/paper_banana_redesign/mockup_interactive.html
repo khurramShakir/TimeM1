@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeBudget - Redesign Concept</title>
+    <style>
+        :root {
+            --bg-crm: #f8f7f4;
+            --bg-wht: #ffffff;
+            --txt-prm: #2d2d2d;
+            --txt-sec: #6b6b6b;
+            --brd-sbt: #e8e6e1;
+            --acc-grn: #7c9885;
+            --acc-hvr: #6a8573;
+            --font-main: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+        }
+
+        body {
+            background-color: var(--bg-crm);
+            color: var(--txt-prm);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Top Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 48px;
+            background: var(--bg-crm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu {
+            display: flex;
+            gap: 32px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: var(--txt-prm);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .menu a.active {
+            border-bottom: 2px solid var(--acc-grn);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin: 0 0 48px 0;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin: 0 0 24px 0;
+        }
+
+        /* Envelopes Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 64px;
+        }
+
+        .card {
+            background: var(--bg-wht);
+            border: 1px solid var(--brd-sbt);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .amount {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .progress-bg {
+            height: 8px;
+            background: var(--bg-crm);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--acc-grn);
+            border-radius: 4px;
+        }
+
+        /* Transaction Table */
+        .table-container {
+            background: var(--bg-wht);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--brd-sbt);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 24px 32px;
+            border-bottom: 2px solid var(--brd-sbt);
+            color: var(--txt-sec);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--brd-sbt);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--bg-crm);
+            border-radius: 16px;
+            font-size: 14px;
+            border: 1px solid var(--brd-sbt);
+        }
+
+        .btn {
+            background: var(--acc-grn);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--acc-hvr);
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="nav">
+        <div class="logo">
+            <span>🕐</span> TimeBudget
+        </div>
+        <div class="menu">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Envelopes</a>
+            <a href="#">History</a>
+            <a href="#">Reports</a>
+        </div>
+        <div style="width: 100px;"></div> <!-- Spacer for balance -->
+    </nav>
+
+    <div class="container">
+        <h1>Money Budget</h1>
+
+        <div class="grid">
+            <!-- Card 1 -->
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 20px; font-weight: 600;">Work</span>
+                    <span style="color: var(--txt-sec);">Weekly</span>
+                </div>
+                <div class="amount">40 hrs</div>
+                <div style="color: var(--txt-sec); font-size: 14px;">Allocated: 40 hrs</div>
+                <div class="progress-bg">
+                    <div class="progress-fill" style="width: 85%;"></div>
+                </div>
+                <div style="margin-top: 8px; text-align: right; font-size: 14px; color: var(--acc-grn);">85% Used</div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 20px; font-weight: 600;">Sleep</span>
+                    <span style="color: var(--txt-sec);">Weekly</span>
+                </div>
+                <div class="amount">56 hrs</div>
+                <div style="color: var(--txt-sec); font-size: 14px;">Allocated: 56 hrs</div>
+                <div class="progress-bg">
+                    <div class="progress-fill" style="width: 100%; background: #e8e6e1;"></div>
+                </div>
+                <div style="margin-top: 8px; text-align: right; font-size: 14px; color: var(--txt-sec);">On Track</div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 20px; font-weight: 600;">Leisure</span>
+                    <span style="color: var(--txt-sec);">Weekly</span>
+                </div>
+                <div class="amount">24 hrs</div>
+                <div style="color: var(--txt-sec); font-size: 14px;">Allocated: 30 hrs</div>
+                <div class="progress-bg">
+                    <div class="progress-fill" style="width: 45%;"></div>
+                </div>
+                <div style="margin-top: 8px; text-align: right; font-size: 14px; color: var(--acc-grn);">45% Used</div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <h2>Recent Transactions</h2>
+            <button class="btn">+ Log Time</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Payee / Activity</th>
+                        <th>Envelope</th>
+                        <th>Notes</th>
+                        <th style="text-align: right;">Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Feb 09, 2026</td>
+                        <td>Deep Work Session</td>
+                        <td><span class="badge">Work</span></td>
+                        <td style="color: var(--txt-sec);">Coding new features for dashboard...</td>
+                        <td style="text-align: right; font-weight: bold;">4 hrs</td>
+                    </tr>
+                    <tr>
+                        <td>Feb 09, 2026</td>
+                        <td>Gym Workout</td>
+                        <td><span class="badge">Health</span></td>
+                        <td style="color: var(--txt-sec);">Morning cardio session</td>
+                        <td style="text-align: right; font-weight: bold;">1.5 hrs</td>
+                    </tr>
+                    <tr>
+                        <td>Feb 08, 2026</td>
+                        <td>Grocery Shopping</td>
+                        <td><span class="badge">Chores</span></td>
+                        <td style="color: var(--txt-sec);">Weekly supplies</td>
+                        <td style="text-align: right; font-weight: bold;">1 hr</td>
+                    </tr>
+                    <tr>
+                        <td>Feb 08, 2026</td>
+                        <td>Family Dinner</td>
+                        <td><span class="badge">Social</span></td>
+                        <td style="color: var(--txt-sec);">Birthday celebration</td>
+                        <td style="text-align: right; font-weight: bold;">3 hrs</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
