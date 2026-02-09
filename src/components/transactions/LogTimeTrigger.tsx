@@ -8,6 +8,7 @@ import styles from "./LogTimeTrigger.module.css";
 interface Envelope {
     id: number;
     name: string;
+    color?: string | null;
 }
 
 interface LogTimeTriggerProps {

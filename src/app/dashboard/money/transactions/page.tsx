@@ -28,8 +28,10 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     const formattedTransactions = (transactions as any[]).map(t => ({
         id: t.id,
         amount: Number(t.amount),
-        type: t.type || "EXPENSE", // Include transaction type for styling
+        type: t.type || "EXPENSE",
         description: t.description || "",
+        entity: t.entity || null,
+        refNumber: t.refNumber || null,
         date: t.date,
         startTime: t.startTime,
         endTime: t.endTime,
@@ -37,7 +39,8 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
             id: t.envelope.id,
             name: t.envelope.name,
             color: t.envelope.color || "default"
-        }
+        },
+        toEnvelopeId: t.toEnvelopeId
     }));
 
     return (

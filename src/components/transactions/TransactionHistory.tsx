@@ -8,15 +8,18 @@ import styles from "./TransactionHistory.module.css";
 
 interface Transaction {
     id: number;
-    amount: number; // number
-    type?: string; // "EXPENSE", "INCOME", "TRANSFER"
+    amount: number;
+    type?: string;
     description: string;
+    entity?: string | null;
+    refNumber?: string | null;
     date: Date;
     envelope: {
         id: number;
         name: string;
         color: string;
     };
+    toEnvelopeId?: number | null;
     startTime?: Date | null;
     endTime?: Date | null;
 }
@@ -73,8 +76,12 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
     const modalTransaction = React.useMemo(() => editingTransaction ? {
         id: editingTransaction.id,
         envelopeId: editingTransaction.envelope.id,
+        toEnvelopeId: editingTransaction.toEnvelopeId,
+        type: editingTransaction.type || "EXPENSE",
         amount: editingTransaction.amount,
         description: editingTransaction.description,
+        entity: editingTransaction.entity || null,
+        refNumber: editingTransaction.refNumber || null,
         date: editingTransaction.date,
         startTime: editingTransaction.startTime,
         endTime: editingTransaction.endTime
@@ -110,8 +117,9 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                         <thead>
                             <tr>
                                 <th>Date</th>
+                                <th>{domain === "TIME" ? "Activity" : "Payee/Payer"}</th>
                                 <th>Envelope</th>
-                                <th>Description</th>
+                                <th>Notes</th>
                                 <th>{domain === "TIME" ? "Hours" : "Amount"}</th>
                                 <th></th>
                             </tr>
@@ -127,6 +135,12 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                             </span>
                                         </td>
                                         <td>
+                                            <div className={styles.entityColumn}>
+                                                <div className={styles.entityName}>{t.entity || "-"}</div>
+                                                {t.refNumber && <div className={styles.refNumber}>#{t.refNumber}</div>}
+                                            </div>
+                                        </td>
+                                        <td>
                                             <span
                                                 className={styles.envelopeBadge}
                                                 style={{ backgroundColor: colorStyle.bg, color: colorStyle.text }}
@@ -134,7 +148,7 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                                 {t.envelope.name}
                                             </span>
                                         </td>
-                                        <td>{t.description || "-"}</td>
+                                        <td className={styles.description}>{t.description || "-"}</td>
                                         <td className={`${styles.amount} ${t.type === "INCOME" ? styles.amountPositive : ""} ${t.type === "TRANSFER" ? styles.amountTransfer : ""}`}>
                                             {t.type === "INCOME" ? "+" : ""}
                                             {formatValue(Number(t.amount), domain, currency)}

@@ -94,28 +94,8 @@ async function ensureUserExists(clerkId: string, domain: string = "TIME", period
         });
 
         if (!existingP) {
-            const capacity = d.name === "TIME" ? Number(settings.timeCapacity) : 0;
-            const period = await db.budgetPeriod.create({
-                data: {
-                    userId: clerkId,
-                    startDate: startOfP,
-                    type: d.period,
-                    domain: d.name,
-                    capacity: capacity,
-                    envelopes: {
-                        create: d.name === "TIME" ? [
-                            { name: "Work", budgeted: 40, color: "blue" },
-                            { name: "Sleep", budgeted: 56, color: "purple" },
-                            { name: "Leisure", budgeted: 20, color: "green" },
-                        ] : [
-                            { name: "Rent", budgeted: 1500, color: "blue" },
-                            { name: "Groceries", budgeted: 400, color: "green" },
-                            { name: "Entertainment", budgeted: 100, color: "purple" },
-                        ]
-                    }
-                } as any
-            });
-            await syncUnallocated(period.id);
+            // Use initNewPeriod to benefit from cloning and rollover logic
+            await initNewPeriod(startOfP, d.name, d.period);
         }
     }
 
@@ -296,8 +276,12 @@ export async function addIncome(periodId: number, amount: number) {
 
 interface CreateTransactionParams {
     envelopeId: number;
+    toEnvelopeId?: number; // For TRANSFERS
+    type?: string;         // EXPENSE, INCOME, TRANSFER
     amount: number;
-    description: string;
+    description?: string;
+    entity?: string;       // Payee/Payer
+    refNumber?: string;    // Check #
     date: Date;
     startTime?: Date;
     endTime?: Date;
@@ -305,13 +289,13 @@ interface CreateTransactionParams {
 
 export async function createTransaction(params: CreateTransactionParams) {
     const userId = await getAuthenticatedUser();
-    const { envelopeId, amount, description, date, startTime, endTime } = params;
+    const { envelopeId, toEnvelopeId, type = "EXPENSE", amount, description, entity, refNumber, date, startTime, endTime } = params;
 
     if (amount <= 0) {
         throw new Error("Amount must be positive");
     }
 
-    // Verify envelope belongs to user
+    // Verify primary envelope belongs to user
     const envelope = await db.envelope.findUnique({
         where: { id: envelopeId },
         include: { period: true }
@@ -321,15 +305,48 @@ export async function createTransaction(params: CreateTransactionParams) {
         throw new Error("Unauthorized");
     }
 
-    await db.transaction.create({
-        data: {
-            envelopeId,
-            amount,
-            description,
-            date,
-            startTime: startTime || null,
-            endTime: endTime || null,
-        } as any,
+    // Logic for different transaction types
+    await db.$transaction(async (tx) => {
+        // 1. Create the transaction record
+        await tx.transaction.create({
+            data: {
+                envelopeId,
+                toEnvelopeId,
+                type,
+                amount,
+                description,
+                entity,
+                refNumber,
+                date,
+                startTime: startTime || null,
+                endTime: endTime || null,
+            } as any,
+        });
+
+        // 2. Adjust Funded balances if it's a TRANSFER or INCOME (since Fill Envelopes might already do this, we need care)
+        // Note: Generic LogTimeModal transactions usually just record Spent.
+        // But if type is TRANSFER, we must move funded capacity.
+        if (type === "TRANSFER" && toEnvelopeId) {
+            await tx.envelope.update({
+                where: { id: envelopeId },
+                data: { funded: { decrement: amount } }
+            });
+            await tx.envelope.update({
+                where: { id: toEnvelopeId },
+                data: { funded: { increment: amount } }
+            });
+        }
+
+        // If it's an INCOME recorded via the general modal, we update the envelope's funded amount
+        if (type === "INCOME") {
+            await tx.envelope.update({
+                where: { id: envelopeId },
+                data: { funded: { increment: amount } }
+            });
+
+            // If it's to a specific envelope, we might also need to update period capacity 
+            // but addIncome already handles that. This is for the manual "Log" flow.
+        }
     });
 
     const domain = envelope.period.domain.toLowerCase();
@@ -396,19 +413,43 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
         capacity = Number(settings.baseMoneyCapacity || 0);
     }
 
-    // Determine Envelope Cloning Strategy
+    // Determine Envelope Cloning Strategy & Rollover
     let envelopesToCreate = [];
     const shouldCopy = settings.autoBudget !== false; // Default to true
 
+    let totalRollover = 0;
+
     if (latestPeriod && shouldCopy) {
-        // Clone previous envelopes AND their budget amounts
+        // Clone previous envelopes AND their budget amounts + rollover unspent funds
         envelopesToCreate = latestPeriod.envelopes
             .filter((env: any) => env.name !== "Unallocated")
-            .map((env: any) => ({
-                name: env.name,
-                budgeted: env.budgeted, // Copy amount
-                color: env.color
-            }));
+            .map((env: any) => {
+                // Calculate remaining balance from previous period
+                const spent = (env.transactions || [])
+                    .filter((t: any) => t.type === "EXPENSE" || !t.type)
+                    .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
+
+                const remaining = Number(env.funded) - spent;
+
+                // For Money domain, we rollover the balance
+                const funded = domain === "MONEY" ? remaining : env.budgeted;
+                if (domain === "MONEY") totalRollover += remaining;
+
+                return {
+                    name: env.name,
+                    budgeted: env.budgeted, // Copy target
+                    funded: funded,         // Set rollover as start balance
+                    color: env.color
+                };
+            });
+
+        // Also rollover Unallocated balance
+        const prevUnallocated = latestPeriod.envelopes.find((e: any) => e.name === "Unallocated");
+        if (prevUnallocated && domain === "MONEY") {
+            const unSpent = Number(prevUnallocated.funded); // Unallocated doesn't have expenses usually, just transfers
+            totalRollover += unSpent;
+        }
+
     } else if (latestPeriod && !shouldCopy) {
         // Clone NAMES only, set budget to 0 (Zero-Based Budgeting)
         envelopesToCreate = latestPeriod.envelopes
@@ -416,20 +457,24 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
             .map((env: any) => ({
                 name: env.name,
                 budgeted: 0, // Reset to 0
+                funded: 0,
                 color: env.color
             }));
     } else {
         // Fresh Start (No previous period)
         envelopesToCreate = domain === "TIME" ? [
-            { name: "Work", budgeted: 40, color: "blue" },
-            { name: "Sleep", budgeted: 56, color: "purple" },
-            { name: "Leisure", budgeted: 20, color: "green" },
+            { name: "Work", budgeted: 40, funded: 40, color: "blue" },
+            { name: "Sleep", budgeted: 56, funded: 56, color: "purple" },
+            { name: "Leisure", budgeted: 20, funded: 20, color: "green" },
         ] : [
-            { name: "Rent", budgeted: 0, color: "blue" },
-            { name: "Groceries", budgeted: 0, color: "green" },
-            { name: "Entertainment", budgeted: 0, color: "purple" },
+            { name: "Rent", budgeted: 0, funded: 0, color: "blue" },
+            { name: "Groceries", budgeted: 0, funded: 0, color: "green" },
+            { name: "Entertainment", budgeted: 0, funded: 0, color: "purple" },
         ];
     }
+
+    // New Period Capacity = Base Income + Rollover Surplus
+    const finalCapacity = capacity + totalRollover;
 
     const newPeriod = await db.budgetPeriod.create({
         data: {
@@ -437,7 +482,7 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
             startDate: startOfTargetPeriod,
             type: type,
             domain: domain,
-            capacity: capacity,
+            capacity: finalCapacity,
             envelopes: {
                 create: envelopesToCreate
             }
@@ -739,8 +784,12 @@ export async function getTransactions(domain: string = "TIME") {
 
 export async function updateTransaction(id: number, data: {
     envelopeId?: number;
+    toEnvelopeId?: number;
+    type?: string;
     amount?: number;
     description?: string;
+    entity?: string;
+    refNumber?: string;
     date?: Date;
     startTime?: Date;
     endTime?: Date;
@@ -749,12 +798,19 @@ export async function updateTransaction(id: number, data: {
         throw new Error("Amount must be positive");
     }
 
+    // Basic update for now. 
+    // Complex balance corrections for type changes or amount changes 
+    // in TRANSFER/INCOME could be added later if needed.
     const transaction = await db.transaction.update({
         where: { id },
         data: {
             envelopeId: data.envelopeId,
+            toEnvelopeId: data.toEnvelopeId,
+            type: data.type,
             amount: data.amount,
             description: data.description,
+            entity: data.entity,
+            refNumber: data.refNumber,
             date: data.date,
             startTime: data.startTime || null,
             endTime: data.endTime || null,
@@ -766,6 +822,32 @@ export async function updateTransaction(id: number, data: {
     revalidatePath(`/dashboard/${domain}`);
     revalidatePath(`/dashboard/${domain}/budget`);
     revalidatePath(`/dashboard/${domain}/transactions`);
+}
+
+/**
+ * Fetch unique entities (Payees/Payers) for autocomplete
+ */
+export async function getRecentEntities(type: string, domain: string) {
+    const userId = await getAuthenticatedUser();
+
+    const transactions = await db.transaction.findMany({
+        where: {
+            type,
+            envelope: {
+                period: {
+                    userId,
+                    domain
+                }
+            },
+            entity: { not: null }
+        },
+        select: { entity: true },
+        distinct: ['entity'],
+        take: 15,
+        orderBy: { createdAt: 'desc' }
+    });
+
+    return transactions.map(t => t.entity as string);
 }
 
 export async function deleteTransaction(id: number) {

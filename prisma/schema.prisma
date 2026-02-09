@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -32,7 +32,7 @@ model UserSettings {
   weekStart       Int      @default(0) // 0=Sunday, 1=Monday
   defaultDomain   String   @default("TIME")
   defaultPeriod   String   @default("WEEKLY")
-  timeCapacity    Int      @default(168)
+  timeCapacity    Decimal  @default(168) @db.Decimal(12, 2)
   
   // Income Management
   baseMoneyCapacity Float   @default(0) // Replacing fixed 0 capacity
@@ -52,7 +52,7 @@ model BudgetPeriod {
   // State of the period
   isClosed  Boolean  @default(false)
   domain    String   @default("MONEY") // "TIME" or "MONEY"
-  capacity  Decimal  @default(0)       // Total income or hours for this specific period
+  capacity  Decimal  @default(0) @db.Decimal(12, 2)       // Total income or hours for this specific period
   
   envelopes Envelope[]
 
@@ -66,25 +66,35 @@ model Envelope {
   name        String   // e.g., "Work", "Sleep", "Unallocated"
   color       String?  // UI color code
   
-  budgeted    Decimal  // The plan/target amount (e.g., 40.00)
-  funded      Decimal  @default(0) // Actual money deposited (for MONEY domain)
+  budgeted    Decimal  @db.Decimal(12, 2)  // The plan/target amount (e.g., 40.00)
+  funded      Decimal  @default(0) @db.Decimal(12, 2) // Actual money deposited (for MONEY domain)
   
   periodId    Int
   period      BudgetPeriod @relation(fields: [periodId], references: [id])
   
-  transactions Transaction[]
+  transactions   Transaction[] @relation("EnvelopeTransactions")
+  transfersTo    Transaction[] @relation("TransferToTransactions")
 }
 
 // The actual spending of time
 model Transaction {
   id          Int      @id @default(autoincrement())
-  amount      Decimal  // e.g., 2.5 hours
+  amount      Decimal  @db.Decimal(12, 2)  // e.g., 2.5 hours
   type        String   @default("EXPENSE") // "EXPENSE", "INCOME", "TRANSFER"
+  
+  // New Metadata
+  entity      String?  // Acts as "Payee" for Expenses or "Payer" for Income
+  refNumber   String?  // Reference number (Check #, Invoice #)
+  
   description String?  // "Deep work on Project X"
   date        DateTime // When it happened
   
-  envelopeId  Int
-  envelope    Envelope @relation(fields: [envelopeId], references: [id])
+  envelopeId  Int      // Primary envelope (Source for Expense/Transfer, Target for Income)
+  envelope    Envelope @relation("EnvelopeTransactions", fields: [envelopeId], references: [id])
+  
+  // New: Transfer Support
+  toEnvelopeId Int?    // Target envelope (Only for TRANSFER type)
+  toEnvelope   Envelope? @relation("TransferToTransactions", fields: [toEnvelopeId], references: [id])
   
   createdAt   DateTime @default(now())
   startTime   DateTime? // Optional: For Time Range entries

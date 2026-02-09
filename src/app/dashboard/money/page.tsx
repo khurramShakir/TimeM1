@@ -104,6 +104,7 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
                         {...envelope}
                         domain="MONEY"
                         currency={data.currency}
+                        allEnvelopes={data.envelopes}
                     />
                 ))}
             </div>

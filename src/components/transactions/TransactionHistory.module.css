@@ -165,5 +165,31 @@
 .amountTransfer {
     color: var(--foreground);
     opacity: 0.5;
-    /* Muted */
+}
+
+.entityColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.entityName {
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.refNumber {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.description {
+    opacity: 0.7;
+    font-style: italic;
+    font-size: 0.8rem;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
