@@ -264,11 +264,13 @@
             background: var(--acc-grn);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 8px 20px;
+            /* Reduced from 12px 24px */
             border-radius: 8px;
             font-family: inherit;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
+            /* Slightly smaller font */
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -279,7 +281,14 @@
 
         .header-actions {
             display: flex;
-            /* ... */
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        /* Fix alignment of H2 inside header actions */
+        .header-actions h2 {
+            margin: 0;
         }
 
         /* Charts Section */
