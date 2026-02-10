@@ -209,6 +209,13 @@ Transform the current application from its current design to a clean, minimalist
   outline: none;
   box-shadow: 0 0 0 3px rgba(124, 152, 133, 0.1);
 }
+
+/* Date Quick Controls (-1 Day, Today, +1 Day) */
+.date-controls {
+  display: flex; 
+  gap: 8px; 
+  margin-top: 8px;
+}
 ```
 
 **Files**: Multiple button and form components
