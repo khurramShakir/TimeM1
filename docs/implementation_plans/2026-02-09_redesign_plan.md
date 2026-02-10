@@ -59,6 +59,13 @@ Transform the current application from its current design to a clean, minimalist
 
 **Effort**: Low - Simple CSS variable updates
 
+#### Semantic Theming & CSS Variables
+> [!IMPORTANT]
+> **Centralized Theme Management**
+> All design tokens (colors, fonts, spacing, border-radius) will be defined as CSS Custom Properties (variables) in `globals.css`. 
+> - We will use **semantic names** (e.g., `--bg-surface`, `--text-primary`, `--accent-color`) instead of hardcoded values.
+> - This enables easy theme switching (e.g., Dark Mode or other color themes) by simply changing the variable values in a data attribute (e.g., `[data-theme="dark"]`).
+
 ---
 
 ### 2. Typography Overhaul
@@ -101,6 +108,25 @@ Transform the current application from its current design to a clean, minimalist
 - Update: [DashboardLayoutClient.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/app/dashboard/DashboardLayoutClient.tsx)
 
 **Effort**: High - Major structural change affecting all pages
+
+### 3a. Mobile Responsiveness Strategy
+> [!NOTE]
+> **Mobile-First Adaptation**
+> The "PaperBanana" aesthetic must remain functional on smaller screens. 
+
+**Navigation**:
+- **Desktop**: Top Navigation Bar with visible links.
+- **Mobile**: Hamburger menu icon on top-left/right, expanding to a slide-out drawer or full-screen menu.
+
+**Journal Tabs (Log Money Modal)**:
+- **Desktop**: Vertical right-side tabs (as mocked up).
+- **Mobile**: 
+    - *Option A*: Horizontal scrollable tabs at the top.
+    - *Option B*: A "Bottom Sheet" where the tabs become a bottom navigation bar for the modal.
+    - *Selected Approach*: Convert to **Horizontal Top Tabs** for simplicity and standard usability on mobile.
+    
+**Grids**:
+- Auto-collapse from 3 columns to 1 column on mobile.
 
 ---
 
@@ -418,7 +444,12 @@ const chartColors = {
 3. Test thoroughly
 4. Deploy all at once
 
-### Recommended: **Option 1** for production safety
+### Selected Strategy: **Option 1 (Gradual Rollout)**
+> [!ACCEPTED]
+> **User Approved**
+> We will proceed with **Option 1**. This allows us to build the new theme alongside the old one, verifying each component (like the new Journal Tabs) without breaking the existing experience. 
+> - A generic "Theme Toggle" will be added to the dev environment first.
+> - `globals.css` will be refactored to support multiple themes.
 
 ---
 
