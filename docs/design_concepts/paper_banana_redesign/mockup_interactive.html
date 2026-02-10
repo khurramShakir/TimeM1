@@ -273,9 +273,97 @@
 
         .header-actions {
             display: flex;
-            justify-content: space-between;
+            /* ... */
+        }
+
+        /* Charts Section */
+        .charts-container {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .chart-card {
+            background: var(--bg-wht);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            flex: 1;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 24px 0;
+            font-size: 18px;
+            color: var(--txt-sec);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Pie Chart Visual */
+        .pie-chart {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(#3b82f6 0% 33%,
+                    #a855f7 33% 66%,
+                    #22c55e 66% 100%);
+            margin: 0 auto;
+        }
+
+        /* Bar Chart Visual */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bar-row {
+            display: flex;
             align-items: center;
-            margin-bottom: 32px;
+            gap: 16px;
+        }
+
+        .bar-label {
+            width: 80px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+            color: var(--txt-sec);
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: var(--bg-crm);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--brd-sbt);
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .bar-fill.blue {
+            background: #3b82f6;
+        }
+
+        .bar-fill.purple {
+            background: #a855f7;
+        }
+
+        .bar-fill.green {
+            background: #22c55e;
+        }
+
+        .bar-value {
+            width: 40px;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--txt-prm);
         }
     </style>
 </head>
@@ -302,6 +390,56 @@
 
     <div class="container">
         <h1>Money Budget</h1>
+
+        <!-- Graphs Section -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Allocation</h3>
+                <div class="pie-chart"></div>
+                <!-- Legend -->
+                <div style="display: flex; gap: 16px; margin-top: 16px; justify-content: center; font-size: 13px;">
+                    <span style="display: flex; align-items: center; gap: 6px;"><span
+                            style="width: 10px; height: 10px; background: #3b82f6; border-radius: 50%;"></span>
+                        Work</span>
+                    <span style="display: flex; align-items: center; gap: 6px;"><span
+                            style="width: 10px; height: 10px; background: #a855f7; border-radius: 50%;"></span>
+                        Sleep</span>
+                    <span style="display: flex; align-items: center; gap: 6px;"><span
+                            style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></span>
+                        Leisure</span>
+                </div>
+            </div>
+
+            <div class="chart-card" style="flex: 2;">
+                <h3>Spending vs Budget</h3>
+                <div class="bar-chart">
+                    <!-- Bar 1 -->
+                    <div class="bar-row">
+                        <span class="bar-label">Work</span>
+                        <div class="bar-track">
+                            <div class="bar-fill blue" style="width: 85%;"></div>
+                        </div>
+                        <span class="bar-value">85%</span>
+                    </div>
+                    <!-- Bar 2 -->
+                    <div class="bar-row">
+                        <span class="bar-label">Sleep</span>
+                        <div class="bar-track">
+                            <div class="bar-fill purple" style="width: 100%;"></div>
+                        </div>
+                        <span class="bar-value">100%</span>
+                    </div>
+                    <!-- Bar 3 -->
+                    <div class="bar-row">
+                        <span class="bar-label">Leisure</span>
+                        <div class="bar-track">
+                            <div class="bar-fill green" style="width: 45%;"></div>
+                        </div>
+                        <span class="bar-value">45%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="grid">
             <!-- Card 1: Blue -->

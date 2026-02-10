@@ -272,11 +272,14 @@ Transform the current application from its current design to a clean, minimalist
 ---
 
 #### D. Charts & Visualizations
-
-**Current**: Google Charts  
-**Target**: Keep charts but update colors to match palette
+> [!IMPORTANT]
+> **Retaining Graphs**
+> The current Pie (Expense Allocation) and Bar (Spending vs Budget) charts will be retained and prominently displayed at the top of the dashboard.
+> - **Container**: We'll wrap them in the new `card` style (white bg, subtle shadow).
+> - **Colors**: Chart colors will be updated to match the new semantic palette (Sage Green, Muted Blue, etc.) instead of the default library colors.
 
 ```javascript
+/* Updated Chart Config Colors */
 const chartColors = {
   primary: '#7c9885',    // Sage green
   secondary: '#c4b5a0',  // Warm beige
