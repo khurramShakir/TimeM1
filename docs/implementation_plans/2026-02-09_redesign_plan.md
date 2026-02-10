@@ -85,19 +85,22 @@ Transform the current application from its current design to a clean, minimalist
 ### 3. Layout & Navigation
 
 #### Current: Sidebar Navigation
-#### Target: Sidebar Navigation (Refined)
+#### Target: Top Navigation Bar
 
 **Changes**:
-- **Keep existing sidebar structure**
-- Update sidebar styling to match new aesthetic (cream background, clean typography)
-- Simplify sidebar items if needed
-- No structural layout changes required
+- Remove sidebar completely
+- Create horizontal navigation bar
+- Logo on left, menu items on right
+- Sticky header on scroll
+- Increase main content max-width to 1400px
 
 **Files to Modify**:
-- Update styles: [Sidebar.module.css](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.module.css)
-- Minor updates: [Sidebar.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.tsx)
+- Delete/refactor: [Sidebar.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.tsx)
+- Delete/refactor: [Sidebar.module.css](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.module.css)
+- Create new: `TopNav.tsx` and `TopNav.module.css`
+- Update: [DashboardLayoutClient.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/app/dashboard/DashboardLayoutClient.tsx)
 
-**Effort**: Low - Styling updates only
+**Effort**: High - Major structural change affecting all pages
 
 ---
 
@@ -106,21 +109,26 @@ Transform the current application from its current design to a clean, minimalist
 #### A. Envelope Cards
 
 **Current**: Cards with shadows and colored backgrounds  
-**Target**: Minimal white cards with subtle shadows
+**Target**: Colored cards (Retained) with specific aesthetic
+
+> [!TIP]
+> **Retaining Color Coding**
+> We will keep the unique colors for each envelope but adapt them to fit the PaperBanana aesthetic. We will use **soft pastel variants** of the envelope colors to ensure good contrast with the text and the graph paper background.
 
 ```css
-/* Minimalist Card Style */
+/* Colored Card Style */
 .envelopeCard {
-  background: white;
-  border: 1px solid var(--border-subtle);
+  /* background-color set dynamically based on envelope color (pastel version) */
+  border: 1px solid rgba(0,0,0,0.05);
   border-radius: 12px;
   padding: 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
 }
 
 .envelopeCard:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
 ```
 
@@ -411,10 +419,10 @@ const chartColors = {
 | Phase | Estimated Hours | Complexity |
 |-------|----------------|------------|
 | Foundation | 2-3 | Medium |
-| Layout Styling | 1-2 | Low |
+| Layout Restructure | 3-4 | High |
 | Component Updates | 4-6 | Medium |
 | Polish & Details | 2-3 | Low |
 | Testing & Refinement | 2-3 | Medium |
-| **Total** | **11-17 hours** | **Medium** |
+| **Total** | **13-19 hours** | **Medium-High** |
 
 The redesign is feasible but represents a significant visual refresh that touches most UI components. Plan for 2-3 weeks if working part-time, or 1 week if full-time.
