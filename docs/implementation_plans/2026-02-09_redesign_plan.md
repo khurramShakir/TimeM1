@@ -327,6 +327,8 @@ const chartColors = {
 > I've created an interactive HTML mockup that you can view directly in your browser to get a real feel for the design:
 > 
 > **[View Interactive Mockup](file:///c:/development/workspace/TimeM1/docs/design_concepts/paper_banana_redesign/mockup_interactive.html)**
+> 
+> **[View Log Money Mockup](file:///c:/development/workspace/TimeM1/docs/design_concepts/paper_banana_redesign/mockup_log_money.html)**
 
 ### Mockup 1: Dashboard
 ```
