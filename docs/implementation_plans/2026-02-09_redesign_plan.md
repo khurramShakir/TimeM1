@@ -46,6 +46,17 @@ Transform the current application from its current design to a clean, minimalist
 --border-subtle: #e8e6e1;      /* Warm gray borders */
 ```
 
+> [!TIP]
+> **Graph Paper Background**
+> We will use a subtle CSS pattern to create a "graph paper" effect on the background, reinforcing the academic/notebook aesthetic.
+> 
+> ```css
+> background-image: 
+>   linear-gradient(#e8e6e1 1px, transparent 1px),
+>   linear-gradient(90deg, #e8e6e1 1px, transparent 1px);
+> background-size: 20px 20px;
+> ```
+
 **Effort**: Low - Simple CSS variable updates
 
 ---

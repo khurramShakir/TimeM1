@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,12 @@
 
         body {
             background-color: var(--bg-crm);
+            /* Graph Paper Pattern */
+            background-image:
+                linear-gradient(var(--brd-sbt) 1px, transparent 1px),
+                linear-gradient(90deg, var(--brd-sbt) 1px, transparent 1px);
+            background-size: 20px 20px;
+
             color: var(--txt-prm);
             font-family: var(--font-main);
             margin: 0;
@@ -94,13 +101,13 @@
             border: 1px solid var(--brd-sbt);
             border-radius: 12px;
             padding: 32px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
         }
 
         .card-header {
@@ -195,9 +202,9 @@
             align-items: center;
             margin-bottom: 32px;
         }
-
     </style>
 </head>
+
 <body>
 
     <nav class="nav">
@@ -311,4 +318,5 @@
     </div>
 
 </body>
+
 </html>
