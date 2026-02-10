@@ -157,6 +157,15 @@ Transform the current application from its current design to a clean, minimalist
   padding: 24px 20px;  /* More padding */
 }
 
+.table .badge {
+  border-radius: 4px; /* Rectangular */
+  border: none;       /* No border */
+  padding: 4px 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .table thead {
   background: #fafaf9;
   border-bottom: 2px solid #e8e6e1;
