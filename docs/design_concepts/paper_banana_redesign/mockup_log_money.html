@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeBudget - Log Money Mockup</title>
+    <title>TimeBudget - Log Money Mockup (Side Tabs)</title>
     <style>
         :root {
             --bg-crm: #f8f7f4;
@@ -40,25 +40,28 @@
         .modal {
             background: var(--bg-wht);
             width: 100%;
-            max-width: 500px;
+            max-width: 700px;
+            /* Wider for side tabs */
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            /* Slightly deeper shadow for modal */
             border: 1px solid rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
         }
 
         .modal-header {
-            padding: 32px 32px 24px 32px;
+            padding: 24px 32px;
             border-bottom: 2px solid var(--bg-crm);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--bg-wht);
         }
 
         h2 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             margin: 0;
             letter-spacing: -0.5px;
@@ -75,7 +78,54 @@
         }
 
         .modal-body {
+            display: flex;
+            /* Flex container for Side Tabs + Content */
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Side Tabs */
+        .modal-sidebar {
+            width: 200px;
+            background: var(--bg-crm);
+            border-right: 1px solid var(--brd-sbt);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--txt-sec);
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--txt-prm);
+        }
+
+        .tab-btn.active {
+            background: var(--bg-wht);
+            color: var(--txt-prm);
+            border: 1px solid var(--brd-sbt);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Form Content */
+        .modal-form-content {
+            flex: 1;
             padding: 32px;
+            overflow-y: auto;
         }
 
         /* Form Elements */
@@ -85,7 +135,7 @@
 
         label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--txt-sec);
             margin-bottom: 8px;
@@ -97,12 +147,12 @@
         select,
         textarea {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 2px solid var(--brd-sbt);
             background: var(--bg-crm);
             border-radius: 8px;
             font-family: var(--font-main);
-            font-size: 16px;
+            font-size: 15px;
             color: var(--txt-prm);
             box-sizing: border-box;
             transition: all 0.2s;
@@ -117,41 +167,11 @@
             box-shadow: 0 0 0 3px rgba(124, 152, 133, 0.1);
         }
 
-        /* Type Toggles (Income/Expense) */
-        .type-toggle {
-            display: flex;
-            background: var(--bg-crm);
-            padding: 4px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            border: 1px solid var(--brd-sbt);
-        }
-
-        .toggle-option {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--txt-sec);
-            transition: all 0.2s;
-        }
-
-        .toggle-option.active {
-            background: var(--bg-wht);
-            color: var(--txt-prm);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* Envelope Select Custom Style mockup */
         .envelope-select-display {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 2px solid var(--brd-sbt);
             background: var(--bg-crm);
             border-radius: 8px;
@@ -163,15 +183,15 @@
             align-items: center;
             gap: 12px;
             font-weight: 500;
+            font-size: 15px;
         }
 
-        /* Badge Reuse */
+        /* Valid Badge styles */
         .badge {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
-            /* Rectangular */
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -182,31 +202,20 @@
             color: #1e40af;
         }
 
-        .badge.purple {
-            background-color: #f3e8ff;
-            color: #6b21a8;
-        }
-
-        .badge.green {
-            background-color: #f0fdf4;
-            color: #166534;
-        }
-
-        /* Buttons */
+        /* Actions */
         .modal-footer {
-            padding: 24px 32px 32px 32px;
-            /* border-top: 2px solid var(--bg-crm); */
+            padding-top: 24px;
             display: flex;
             justify-content: flex-end;
-            gap: 16px;
+            gap: 12px;
         }
 
         .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
             font-family: inherit;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: background 0.2s;
             border: none;
@@ -230,6 +239,37 @@
             color: var(--txt-prm);
             background: rgba(0, 0, 0, 0.03);
         }
+
+        /* Date Controls */
+        .date-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .date-btn {
+            flex: 1;
+            padding: 6px;
+            background: var(--bg-wht);
+            border: 1px solid var(--brd-sbt);
+            border-radius: 6px;
+            color: var(--txt-sec);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-btn:hover {
+            background: var(--bg-crm);
+            color: var(--txt-prm);
+        }
+
+        .date-btn.active {
+            background: var(--acc-grn);
+            color: white;
+            border-color: var(--acc-grn);
+        }
     </style>
 </head>
 
@@ -242,86 +282,63 @@
         </div>
 
         <div class="modal-body">
-
-            <!-- Type Toggle -->
-            <div class="type-toggle">
-                <div class="toggle-option active">Expense</div>
-                <div class="toggle-option">Income</div>
-                <div class="toggle-option">Transfer</div>
+            <!-- Side Tabs -->
+            <div class="modal-sidebar">
+                <button class="tab-btn active">Expense</button>
+                <button class="tab-btn">Income</button>
+                <button class="tab-btn">Transfer</button>
             </div>
 
-            <div class="form-group">
-                <label>Amount</label>
-                <div style="position: relative;">
-                    <span
-                        style="position: absolute; left: 16px; top: 14px; color: var(--txt-sec); font-weight: bold;">C$</span>
-                    <input type="text" value="45.00" style="padding-left: 48px; font-weight: bold; font-size: 18px;">
-                </div>
-            </div>
+            <!-- Content Area -->
+            <div class="modal-form-content">
 
-            <div class="form-group">
-                <label>Payee / Description</label>
-                <input type="text" value="Whole Foods Market" placeholder="Where did you spend it?">
-            </div>
-
-            <div class="form-group">
-                <label>Envelope</label>
-                <!-- Simulated Select -->
-                <div class="envelope-select-display">
-                    <div class="selected-envelope">
-                        <span class="badge blue">Groceries</span>
-                        <span>Groceries & Food</span>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <div style="position: relative;">
+                        <span
+                            style="position: absolute; left: 14px; top: 12px; color: var(--txt-sec); font-weight: bold;">C$</span>
+                        <input type="text" value="45.00"
+                            style="padding-left: 42px; font-weight: bold; font-size: 18px;">
                     </div>
-                    <span style="color: var(--txt-sec);">▼</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Payee / Description</label>
+                    <input type="text" value="Whole Foods Market" placeholder="Where did you spend it?">
+                </div>
+
+                <div class="form-group">
+                    <label>Envelope</label>
+                    <!-- Simulated Select -->
+                    <div class="envelope-select-display">
+                        <div class="selected-envelope">
+                            <span class="badge blue">Groceries</span>
+                            <span>Groceries & Food</span>
+                        </div>
+                        <span style="color: var(--txt-sec);">▼</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" value="2026-02-09">
+                    <div class="date-controls">
+                        <button class="date-btn">-1 Day</button>
+                        <button class="date-btn active">Today</button>
+                        <button class="date-btn">+1 Day</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea rows="2" placeholder="Add details..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary">Cancel</button>
+                    <button class="btn btn-primary">Save Transaction</button>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" value="2026-02-09">
-                <div class="date-controls" style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="date-btn">-1 Day</button>
-                    <button class="date-btn active">Today</button>
-                    <button class="date-btn">+1 Day</button>
-                </div>
-            </div>
-
-            <style>
-                .date-btn {
-                    flex: 1;
-                    padding: 8px;
-                    background: var(--bg-wht);
-                    border: 1px solid var(--brd-sbt);
-                    border-radius: 6px;
-                    color: var(--txt-sec);
-                    font-size: 13px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-
-                .date-btn:hover {
-                    background: var(--bg-crm);
-                    color: var(--txt-prm);
-                }
-
-                .date-btn.active {
-                    background: var(--acc-grn);
-                    color: white;
-                    border-color: var(--acc-grn);
-                }
-            </style>
-
-            <div class="form-group">
-                <label>Notes (Optional)</label>
-                <textarea rows="3" placeholder="Add details..."></textarea>
-            </div>
-
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn btn-secondary">Cancel</button>
-            <button class="btn btn-primary">Save Transaction</button>
         </div>
     </div>
 

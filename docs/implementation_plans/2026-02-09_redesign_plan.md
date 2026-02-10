@@ -216,6 +216,16 @@ Transform the current application from its current design to a clean, minimalist
   gap: 8px; 
   margin-top: 8px;
 }
+
+/* Modal Layout (Desktop) */
+/* Use side tabs for Expense/Income/Transfer to reduce vertical height */
+.modal-body {
+  display: flex;
+}
+.modal-sidebar {
+  width: 200px;
+  /* ... styling ... */
+}
 ```
 
 **Files**: Multiple button and form components
