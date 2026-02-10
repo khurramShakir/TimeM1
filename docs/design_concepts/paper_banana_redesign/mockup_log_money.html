@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeBudget - Log Money Mockup (Side Tabs)</title>
+    <title>TimeBudget - Log Money Mockup (Journal Tabs)</title>
     <style>
         :root {
             --bg-crm: #f8f7f4;
@@ -36,28 +36,129 @@
             justify-content: center;
         }
 
-        /* Modal Container */
-        .modal {
-            background: var(--bg-wht);
-            width: 100%;
-            max-width: 700px;
-            /* Wider for side tabs */
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            overflow: hidden;
+        /* Journal Layout Container */
+        .journal-container {
             display: flex;
-            flex-direction: column;
-            max-height: 90vh;
+            align-items: flex-start;
+            position: relative;
+            filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.08));
         }
 
+        /* Main Card (The "Page") */
+        .modal {
+            background: var(--bg-wht);
+            width: 500px;
+            border-radius: 12px 0 0 12px;
+            /* Square on right to meet tabs? Or rounded if tabs sit behind */
+            /* Let's keep smooth rounded corners for the main book feel */
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+            /* Sits above tabs if they overlap */
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tabs Column (The "Index") */
+        .journal-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-top: 48px;
+            /* Start tabs a bit down */
+            margin-left: -4px;
+            /* Slight overlap for connectedness */
+            z-index: 1;
+        }
+
+        .tab {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding: 24px 12px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #666;
+            transition: transform 0.2s, background-color 0.2s;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab:hover {
+            transform: translateX(4px);
+        }
+
+        .tab.active {
+            transform: translateX(2px);
+            box-shadow: none;
+            z-index: 3;
+            /* Bring to front if overlapping? */
+            /* Active Styling */
+            /* border-left: 4px solid white; */
+            /* Attempt to merge */
+        }
+
+        /* Tab Colors */
+        .tab.expense {
+            background-color: #fff1f2;
+            color: #9f1239;
+            border-color: #fecdd3;
+        }
+
+        /* Rose */
+        .tab.income {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        /* Green */
+        .tab.transfer {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+
+        /* Blue */
+
+        .tab.active.expense {
+            background-color: #ffe4e6;
+            border-left: 1px solid #ffe4e6;
+            font-weight: 800;
+        }
+
+        .tab.active.income {
+            background-color: #dcfce7;
+            border-left: 1px solid #dcfce7;
+            font-weight: 800;
+        }
+
+        .tab.active.transfer {
+            background-color: #dbeafe;
+            border-left: 1px solid #dbeafe;
+            font-weight: 800;
+        }
+
+
+        /* Modal Header */
         .modal-header {
             padding: 24px 32px;
             border-bottom: 2px solid var(--bg-crm);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-wht);
         }
 
         h2 {
@@ -78,53 +179,8 @@
         }
 
         .modal-body {
-            display: flex;
-            /* Flex container for Side Tabs + Content */
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* Side Tabs */
-        .modal-sidebar {
-            width: 200px;
-            background: var(--bg-crm);
-            border-right: 1px solid var(--brd-sbt);
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .tab-btn {
-            text-align: left;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--txt-sec);
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            background: transparent;
-            font-family: inherit;
-        }
-
-        .tab-btn:hover {
-            background: rgba(0, 0, 0, 0.03);
-            color: var(--txt-prm);
-        }
-
-        .tab-btn.active {
-            background: var(--bg-wht);
-            color: var(--txt-prm);
-            border: 1px solid var(--brd-sbt);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Form Content */
-        .modal-form-content {
-            flex: 1;
             padding: 32px;
+            flex: 1;
             overflow-y: auto;
         }
 
@@ -147,12 +203,12 @@
         select,
         textarea {
             width: 100%;
-            padding: 10px 14px;
+            padding: 12px 16px;
             border: 2px solid var(--brd-sbt);
             background: var(--bg-crm);
             border-radius: 8px;
             font-family: var(--font-main);
-            font-size: 15px;
+            font-size: 16px;
             color: var(--txt-prm);
             box-sizing: border-box;
             transition: all 0.2s;
@@ -167,26 +223,7 @@
             box-shadow: 0 0 0 3px rgba(124, 152, 133, 0.1);
         }
 
-        .envelope-select-display {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            border: 2px solid var(--brd-sbt);
-            background: var(--bg-crm);
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .selected-envelope {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        /* Valid Badge styles */
+        /* Valid Badge styles from previous step */
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -202,20 +239,38 @@
             color: #1e40af;
         }
 
+        .envelope-select-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border: 2px solid var(--brd-sbt);
+            background: var(--bg-crm);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .selected-envelope {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
         /* Actions */
         .modal-footer {
-            padding-top: 24px;
+            padding: 24px 32px 32px 32px;
             display: flex;
-            justify-content: flex-end;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 8px;
             font-family: inherit;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
             transition: background 0.2s;
             border: none;
@@ -249,12 +304,12 @@
 
         .date-btn {
             flex: 1;
-            padding: 6px;
+            padding: 8px;
             background: var(--bg-wht);
             border: 1px solid var(--brd-sbt);
             border-radius: 6px;
             color: var(--txt-sec);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -270,45 +325,46 @@
             color: white;
             border-color: var(--acc-grn);
         }
+
+        .active-label-indicator {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--txt-sec);
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="modal">
-        <div class="modal-header">
-            <h2>Log Transaction</h2>
-            <button class="close-btn">×</button>
-        </div>
-
-        <div class="modal-body">
-            <!-- Side Tabs -->
-            <div class="modal-sidebar">
-                <button class="tab-btn active">Expense</button>
-                <button class="tab-btn">Income</button>
-                <button class="tab-btn">Transfer</button>
+    <div class="journal-container">
+        <!-- Main Form Card -->
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Log Transaction</h2>
+                <div class="active-label-indicator" style="color: #9f1239;">Expense</div>
             </div>
 
-            <!-- Content Area -->
-            <div class="modal-form-content">
+            <div class="modal-body">
 
                 <div class="form-group">
                     <label>Amount</label>
                     <div style="position: relative;">
                         <span
-                            style="position: absolute; left: 14px; top: 12px; color: var(--txt-sec); font-weight: bold;">C$</span>
+                            style="position: absolute; left: 16px; top: 14px; color: var(--txt-sec); font-weight: bold;">C$</span>
                         <input type="text" value="45.00"
-                            style="padding-left: 42px; font-weight: bold; font-size: 18px;">
+                            style="padding-left: 48px; font-weight: bold; font-size: 18px;">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Payee / Description</label>
-                    <input type="text" value="Whole Foods Market" placeholder="Where did you spend it?">
+                    <label>Payee</label>
+                    <input type="text" value="Whole Foods Market" placeholder="Company, Person, etc.">
                 </div>
 
                 <div class="form-group">
-                    <label>Envelope</label>
+                    <label>Spending From</label>
                     <!-- Simulated Select -->
                     <div class="envelope-select-display">
                         <div class="selected-envelope">
@@ -331,14 +387,22 @@
 
                 <div class="form-group">
                     <label>Notes (Optional)</label>
-                    <textarea rows="2" placeholder="Add details..."></textarea>
+                    <textarea rows="3" placeholder="Add details..."></textarea>
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-secondary">Cancel</button>
-                    <button class="btn btn-primary">Save Transaction</button>
-                </div>
             </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-primary">Save</button>
+            </div>
+        </div>
+
+        <!-- Right Side Tabs -->
+        <div class="journal-tabs">
+            <div class="tab expense active">Expense</div>
+            <div class="tab income">Income</div>
+            <div class="tab transfer">Transfer</div>
         </div>
     </div>
 

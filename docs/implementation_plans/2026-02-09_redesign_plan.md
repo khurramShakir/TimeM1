@@ -218,13 +218,24 @@ Transform the current application from its current design to a clean, minimalist
 }
 
 /* Modal Layout (Desktop) */
-/* Use side tabs for Expense/Income/Transfer to reduce vertical height */
-.modal-body {
+/* Journal Style: Main Card with vertical tabs sticking out on the right */
+.journal-container {
   display: flex;
+  align-items: flex-start;
 }
-.modal-sidebar {
-  width: 200px;
-  /* ... styling ... */
+
+.journal-tabs {
+  display: flex;
+  flex-direction: column;
+  margin-left: -4px; /* Connect to card */
+}
+
+.tab {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 24px 12px;
+  background: #fff;
+  border-radius: 0 12px 12px 0; /* Tabs protrude right */
 }
 ```
 
