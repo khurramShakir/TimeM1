@@ -85,22 +85,19 @@ Transform the current application from its current design to a clean, minimalist
 ### 3. Layout & Navigation
 
 #### Current: Sidebar Navigation
-#### Target: Top Navigation Bar
+#### Target: Sidebar Navigation (Refined)
 
 **Changes**:
-- Remove sidebar completely
-- Create horizontal navigation bar
-- Logo on left, menu items on right
-- Sticky header on scroll
-- Increase main content max-width to 1400px
+- **Keep existing sidebar structure**
+- Update sidebar styling to match new aesthetic (cream background, clean typography)
+- Simplify sidebar items if needed
+- No structural layout changes required
 
 **Files to Modify**:
-- Delete/refactor: [Sidebar.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.tsx)
-- Delete/refactor: [Sidebar.module.css](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.module.css)
-- Create new: `TopNav.tsx` and `TopNav.module.css`
-- Update: [DashboardLayoutClient.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/app/dashboard/DashboardLayoutClient.tsx)
+- Update styles: [Sidebar.module.css](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.module.css)
+- Minor updates: [Sidebar.tsx](file:///c:/development/workspace/TimeM1/time-budget/src/components/layout/Sidebar.tsx)
 
-**Effort**: High - Major structural change affecting all pages
+**Effort**: Low - Styling updates only
 
 ---
 
@@ -414,10 +411,10 @@ const chartColors = {
 | Phase | Estimated Hours | Complexity |
 |-------|----------------|------------|
 | Foundation | 2-3 | Medium |
-| Layout Restructure | 3-4 | High |
+| Layout Styling | 1-2 | Low |
 | Component Updates | 4-6 | Medium |
 | Polish & Details | 2-3 | Low |
 | Testing & Refinement | 2-3 | Medium |
-| **Total** | **13-19 hours** | **Medium-High** |
+| **Total** | **11-17 hours** | **Medium** |
 
 The redesign is feasible but represents a significant visual refresh that touches most UI components. Plan for 2-3 weeks if working part-time, or 1 week if full-time.

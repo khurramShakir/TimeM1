@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeBudget - Redesign Concept</title>
+    <title>TimeBudget - Redesign Concept (Sidebar)</title>
     <style>
         :root {
             --bg-crm: #f8f7f4;
@@ -30,17 +30,22 @@
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
         }
 
-        /* Top Navigation */
-        .nav {
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-wht);
+            border-right: 1px solid var(--brd-sbt);
+            padding: 32px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 48px;
-            background: var(--bg-crm);
-            position: sticky;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
             top: 0;
+            left: 0;
             z-index: 100;
         }
 
@@ -50,32 +55,78 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--brd-sbt);
         }
 
-        .menu {
+        .nav-links {
             display: flex;
-            gap: 32px;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        .menu a {
+        .nav-link {
             text-decoration: none;
-            color: var(--txt-prm);
+            color: var(--txt-sec);
             font-size: 16px;
             font-weight: 500;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .menu a.active {
-            border-bottom: 2px solid var(--acc-grn);
+        .nav-link:hover {
+            color: var(--txt-prm);
+            background: var(--bg-crm);
         }
 
-        /* Layout */
-        .container {
+        .nav-link.active {
+            color: var(--txt-prm);
+            background: var(--bg-crm);
+            border: 1px solid var(--brd-sbt);
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            /* Sidebar width */
+            flex: 1;
+            padding: 48px 64px;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 48px 24px;
         }
 
-        /* Typography */
+        /* Top Bar (Search/User) - Optional, simplified for mock */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 48px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--acc-grn);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Layout & Components (Reused from previous mock) */
         h1 {
             font-size: 56px;
             font-weight: 700;
@@ -207,20 +258,38 @@
 
 <body>
 
-    <nav class="nav">
+    <!-- Sidebar -->
+    <aside class="sidebar">
         <div class="logo">
             <span>🕐</span> TimeBudget
         </div>
-        <div class="menu">
-            <a href="#" class="active">Dashboard</a>
-            <a href="#">Envelopes</a>
-            <a href="#">History</a>
-            <a href="#">Reports</a>
-        </div>
-        <div style="width: 100px;"></div> <!-- Spacer for balance -->
-    </nav>
+        <nav class="nav-links">
+            <a href="#" class="nav-link active">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="#" class="nav-link">
+                <span>✉️</span> Envelopes
+            </a>
+            <a href="#" class="nav-link">
+                <span>📝</span> History
+            </a>
+            <a href="#" class="nav-link">
+                <span>📈</span> Reports
+            </a>
+            <a href="#" class="nav-link" style="margin-top: auto;">
+                <span>⚙️</span> Settings
+            </a>
+        </nav>
+    </aside>
 
-    <div class="container">
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="user-profile">
+                <span>Khurram Shakir</span>
+                <div class="avatar">KS</div>
+            </div>
+        </div>
+
         <h1>Money Budget</h1>
 
         <div class="grid">
@@ -315,7 +384,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
 </body>
 
