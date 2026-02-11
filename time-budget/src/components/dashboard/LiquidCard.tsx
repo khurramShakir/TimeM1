@@ -2,6 +2,7 @@
 
 import React from "react";
 import styles from "./LiquidCard.module.css";
+import { Card } from "@/components/ui/Card";
 
 interface LiquidCardProps {
     label: string;
@@ -32,7 +33,7 @@ export function LiquidCard({ label, value, unit, prefix = "", threshold = 100 }:
     });
 
     return (
-        <div className={`${styles.card} ${styles[status]}`}>
+        <Card className={`${styles.liquidCard} ${styles[status]}`}>
             <span className={styles.label}>{label}</span>
             <div className={styles.valueGroup}>
                 {prefix && <span className={styles.unit}>{prefix}</span>}
@@ -44,6 +45,6 @@ export function LiquidCard({ label, value, unit, prefix = "", threshold = 100 }:
                     {status === "danger" ? "Over Budget!" : "Running Low"}
                 </span>
             )}
-        </div>
+        </Card>
     );
 }

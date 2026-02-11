@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import styles from "./BudgetChart.module.css";
 import { formatValue } from "@/lib/format";
+import { Card } from "@/components/ui/Card";
 
 interface EnvelopeData {
     id: number;
@@ -33,7 +34,7 @@ interface BudgetChartProps {
 }
 
 // Map app colors to 'Badge' background colors (Pastel) for Pie Chart
-import { getLightColor } from "@/lib/colors";
+import { getLightColor, desaturateColor } from "@/lib/colors";
 
 export function BudgetChart({
     envelopes,
@@ -60,24 +61,42 @@ export function BudgetChart({
         pieData.push(["Unallocated", totalUnallocated]);
     }
 
-    const pieColors = [
-        ...otherEnvelopes.map(env => getLightColor(env.color)),
-        "#f1f5f9" // unallocated
-    ];
+    // --- PaperBanana Color Palette (Pastel) ---
+    const pastelPalette = ["#93c5fd", "#d8b4fe", "#86efac", "#fca5a5", "#fcd34d"];
+    const UNALLOCATED_COLOR = "#e2e8f0"; // slate-200
+
+    const getPastelColor = (index: number) => desaturateColor(pastelPalette[index % pastelPalette.length], 0.5);
+
+    const pieColors = isTime ?
+        [
+            ...otherEnvelopes.map((_, i) => getPastelColor(i)),
+            UNALLOCATED_COLOR
+        ] :
+        [
+            ...otherEnvelopes.map(env => desaturateColor(getLightColor(env.color), 0.5)),
+            UNALLOCATED_COLOR
+        ];
+
+    // Update Bar Chart colors below as well
+    const spentColor = desaturateColor("#7c9885", 0.4); // Muted Sage
+    const budgetColor = "#e2e8f0"; // Consistent light gray
 
     const pieOptions = {
-        is3D: true,
+        is3D: false, // Flat for PaperBanana
+        pieHole: 0.4, // Donut chart looks cleaner
         backgroundColor: "transparent",
-        chartArea: { left: "10%", top: "10%", width: "80%", height: "80%" }, // Reduced margin to prevent overlap
+        chartArea: { left: "5%", top: "5%", width: "90%", height: "90%" },
         legend: "none",
         colors: pieColors,
         tooltip: {
             text: "value",
             showColorCode: true,
-            trigger: "focus"
+            trigger: "focus",
+            textStyle: { fontName: 'inherit' }
         },
         pieSliceText: 'none',
-        fontSize: 12
+        fontSize: 12,
+        fontName: 'inherit'
     };
 
     // --- Recharts: Bar Chart Data (Budget vs Spent) ---
@@ -93,16 +112,16 @@ export function BudgetChart({
     const hoursLabel = isTime ? `${totalAvailable} hours` : "your budget";
 
     return (
-        <div className={styles.chartCard}>
+        <Card className={styles.chartCard}>
             <div className={styles.header}>
-                <h3 className={styles.title}>{isTime ? `${periodLabel} Budget Allocation` : "Expense Allocation"}</h3>
+                <h3 className={styles.title}>{isTime ? `${periodLabel} Budget` : "Expense Allocation"}</h3>
                 <span className={styles.subtitle}>
                     {isTime ? `Where your ${hoursLabel} are going` : "Budget distribution across categories"}
                 </span>
             </div>
 
             <div className={styles.content}>
-                {/* Left: Google Charts 3D Pie Chart */}
+                {/* Left: Pie Chart */}
                 <div className={styles.chartWrapper}>
                     <Chart
                         chartType="PieChart"
@@ -145,23 +164,28 @@ export function BudgetChart({
                                     barGap={2}
                                     barCategoryGap="20%"
                                 >
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                                     <XAxis type="number" hide />
                                     <YAxis
                                         dataKey="name"
                                         type="category"
                                         width={70}
-                                        tick={{ fontSize: 11, fill: '#64748b' }}
+                                        tick={{ fontSize: 11, fill: '#525252', fontFamily: 'inherit' }}
                                         axisLine={false}
                                         tickLine={false}
                                     />
                                     <RechartsTooltip
                                         cursor={{ fill: 'transparent' }}
-                                        contentStyle={{ fontSize: '12px', padding: '8px', borderRadius: '6px', border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                                        contentStyle={{
+                                            fontSize: '12px',
+                                            padding: '8px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #e2e8f0',
+                                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                                        }}
                                     />
-                                    <RechartsLegend wrapperStyle={{ fontSize: '11px' }} iconSize={8} />
-                                    <Bar dataKey="Budget" fill="#cbd5e1" radius={[0, 3, 3, 0]} barSize={12} />
-                                    <Bar dataKey="Spent" fill="#3b82f6" radius={[0, 3, 3, 0]} barSize={12} />
+                                    <Bar dataKey="Budget" fill={budgetColor} radius={[0, 4, 4, 0]} barSize={10} />
+                                    <Bar dataKey="Spent" fill={spentColor} radius={[0, 4, 4, 0]} barSize={10} />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
@@ -170,6 +194,6 @@ export function BudgetChart({
                     </div>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

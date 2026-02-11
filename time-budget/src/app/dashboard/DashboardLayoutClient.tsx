@@ -4,18 +4,40 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { FloatingActionButton } from "@/components/layout/FloatingActionButton";
 import { MoreMenu } from "@/components/layout/MoreMenu";
+import { TopNav } from "@/components/layout/topnav/TopNav";
 import { Suspense } from "react";
 import styles from "./layout.module.css";
 import { usePathname } from "next/navigation";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 
-export default function DashboardLayoutClient({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+function DashboardInner({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isGateway = pathname === "/dashboard";
+    const { theme } = useTheme();
 
+    // PaperBanana Layout (TopNav)
+    if (theme === "paper-banana") {
+        return (
+            <div className={styles.layoutPaperBanana}>
+                {!isGateway && <TopNav />}
+
+                <main className={styles.mainPaperBanana}>
+                    <div className={styles.containerPaperBanana}>
+                        {children}
+                    </div>
+                </main>
+
+                <Suspense fallback={null}>
+                    <FloatingActionButton />
+                </Suspense>
+                <Suspense fallback={null}>
+                    <MoreMenu />
+                </Suspense>
+            </div>
+        );
+    }
+
+    // Default Layout (Sidebar)
     return (
         <div className={styles.layout}>
             {/* Sidebar - Hidden on mobile and gateway page */}
@@ -43,5 +65,17 @@ export default function DashboardLayoutClient({
                 <MoreMenu />
             </Suspense>
         </div>
+    );
+}
+
+export default function DashboardLayoutClient({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <ThemeProvider>
+            <DashboardInner>{children}</DashboardInner>
+        </ThemeProvider>
     );
 }

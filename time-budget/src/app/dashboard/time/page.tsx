@@ -1,4 +1,4 @@
-import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
+import { getBudgetSummary, initNewPeriod, getUserSettings, getTransactions } from "@/lib/actions";
 export const dynamic = "force-dynamic";
 import { EnvelopeCard } from "@/components/ui/EnvelopeCard";
 import { TransferTrigger } from "@/components/transfers/TransferTrigger";
@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
 import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
 import { Suspense } from "react";
+import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
@@ -20,7 +21,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     const settings = await getUserSettings();
     const periodType = "WEEKLY"; // Force Weekly for Time
 
-    const data = await getBudgetSummary(dateStr, "TIME", periodType);
+    const [data, recentTransactions] = await Promise.all([
+        getBudgetSummary(dateStr, "TIME", periodType),
+        getTransactions("TIME", 5)
+    ]);
+
     const currentDate = dateStr ? new Date(dateStr) : new Date();
 
     const handleInitPeriod = async () => {
@@ -63,6 +68,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         remaining: Number(e.remaining)
     }));
 
+    console.log("Rendering Dashboard. Envelopes count:", data.envelopes.length);
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -79,16 +86,25 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <UnifiedHUD date={dateStr} />
             </Suspense>
 
-            <div className={styles.chartSection}>
-                <BudgetChart
-                    envelopes={data.envelopes}
-                    totalBudgeted={data.totalBudgeted}
-                    totalAvailable={data.totalAvailable}
-                    domain="TIME"
-                />
+            <div className={styles.contentGrid}>
+                <div className={styles.chartSection}>
+                    <BudgetChart
+                        envelopes={data.envelopes}
+                        totalBudgeted={data.totalBudgeted}
+                        totalAvailable={data.totalAvailable}
+                        domain="TIME"
+                    />
+                </div>
+                <div className={styles.transactionsSection}>
+                    <RecentTransactions
+                        transactions={recentTransactions as any[]}
+                        domain="TIME"
+                        currency={settings.currency}
+                    />
+                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', marginTop: '2rem' }}>
                 <TransferTrigger envelopes={salvagedEnvelopesForTransfer} />
             </div>
 

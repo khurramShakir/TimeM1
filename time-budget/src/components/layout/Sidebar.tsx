@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, PieChart, Settings, LogOut, Clock, List, Banknote, ArrowRight, TrendingUp } from "lucide-react";
+import { Home, PieChart, Settings, List, Banknote, Clock, ArrowRight, TrendingUp, Moon, Sun } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import styles from "./Sidebar.module.css";
+import { useTheme } from "@/context/ThemeContext";
+import React from "react";
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -61,9 +63,35 @@ export function Sidebar() {
 
             <div className={styles.footer}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem' }}>
+                    <ThemeToggle />
                     <UserButton afterSignOutUrl="/" showName />
                 </div>
             </div>
         </div>
+    );
+}
+
+function ThemeToggle() {
+    const { theme, toggleTheme } = useTheme();
+    return (
+        <button
+            onClick={toggleTheme}
+            style={{
+                border: '1px solid var(--border-subtle)',
+                background: 'var(--surface-100)',
+                cursor: 'pointer',
+                padding: '6px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--foreground)',
+                minWidth: '32px',
+                minHeight: '32px'
+            }}
+            title={`Switch to ${theme === 'default' ? 'PaperBanana' : 'Default'} Theme`}
+        >
+            {theme === 'default' ? <Moon size={16} /> : <Sun size={16} />}
+        </button>
     );
 }

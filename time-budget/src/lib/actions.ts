@@ -110,18 +110,26 @@ export async function getUserSettings() {
     });
 
     if (!settings) {
-        // Fallback or init if missing for some reason
         await ensureUserExists(userId);
         settings = await (db as any).userSettings.findUnique({
-            where: { userId }
+            where: { userId },
+            include: { user: true }
         });
     }
 
-    // Convert Decimals to numbers for Client Component serialization
+    if (!settings) throw new Error("Could not find or create user settings");
+
     return {
-        ...settings,
+        id: settings.id,
+        userId: settings.userId,
+        currency: settings.currency,
+        weekStart: settings.weekStart,
+        defaultDomain: settings.defaultDomain,
+        defaultPeriod: settings.defaultPeriod,
         timeCapacity: Number(settings.timeCapacity),
-        baseMoneyCapacity: Number(settings.baseMoneyCapacity || 0)
+        baseMoneyCapacity: Number(settings.baseMoneyCapacity || 0),
+        autoBudget: settings.autoBudget,
+        updatedAt: settings.updatedAt
     };
 }
 
@@ -560,8 +568,13 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
             color: env.color || "gray",
             periodId: env.periodId,
             transactions: (env.transactions as any[]).map(t => ({
-                ...t,
-                amount: Number(t.amount)
+                id: t.id,
+                amount: Number(t.amount),
+                type: t.type,
+                description: t.description,
+                date: t.date,
+                entity: t.entity,
+                refNumber: t.refNumber
             }))
         };
     });
@@ -575,7 +588,10 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     const totalFunded = envelopes.reduce((sum: number, e: any) => sum + e.funded, 0);
 
     return {
-        period,
+        period: {
+            id: period.id,
+            capacity: Number(period.capacity)
+        },
         envelopes,
         totalBudgeted,
         totalFunded,
@@ -760,7 +776,7 @@ export async function deleteEnvelope(id: number) {
     revalidatePath(`${path}/budget`);
 }
 
-export async function getTransactions(domain: string = "TIME") {
+export async function getTransactions(domain: string = "TIME", limit?: number) {
     const userId = await getAuthenticatedUser();
     const transactions = await db.transaction.findMany({
         where: {
@@ -774,12 +790,29 @@ export async function getTransactions(domain: string = "TIME") {
         orderBy: {
             date: 'desc',
         },
+        take: limit,
         include: {
             envelope: true,
         },
     });
 
-    return transactions;
+    return transactions.map(t => ({
+        id: t.id,
+        amount: Number(t.amount),
+        type: t.type,
+        description: t.description,
+        date: t.date,
+        entity: t.entity,
+        refNumber: t.refNumber,
+        envelopeId: t.envelopeId,
+        envelope: t.envelope ? {
+            id: t.envelope.id,
+            name: t.envelope.name,
+            color: t.envelope.color,
+            budgeted: Number(t.envelope.budgeted),
+            funded: Number(t.envelope.funded)
+        } : null
+    }));
 }
 
 export async function updateTransaction(id: number, data: {

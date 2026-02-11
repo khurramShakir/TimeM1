@@ -44,3 +44,22 @@
         /* Space for Bottom Nav + Floating FAB */
     }
 }
+
+/* PaperBanana Layout */
+.layoutPaperBanana {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* background-color: var(--background); - Removed to show graph paper from globals */
+}
+
+.mainPaperBanana {
+    flex: 1;
+    width: 100%;
+}
+
+.containerPaperBanana {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}

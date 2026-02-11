@@ -42,8 +42,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   touch-action: manipulation;
   /* Disables double-tap to zoom */
 }
@@ -55,6 +54,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  /* Prevent horizontal scrollbar from modal tab overflow */
 }
 
 /* Utility Classes for Layout */
@@ -89,6 +94,95 @@ body {
   color: var(--primary-foreground);
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
+
+/* PaperBanana Theme - Minimalist Aesthetic */
+[data-theme='paper-banana'] {
+  /* Core Palette */
+  --background: #f8f7f4;
+  /* Warm Cream */
+  --foreground: #2d2d2d;
+  /* Softer Dark Gray */
+
+  /* Graph Paper Pattern */
+  background-color: var(--background);
+  background-image: linear-gradient(#e8e6e1 1px, transparent 1px),
+    linear-gradient(90deg, #e8e6e1 1px, transparent 1px);
+  background-size: 20px 20px;
+
+  /* Surfaces */
+  --surface-100: #ffffff;
+  /* Pure White Cards */
+  --surface-200: #f3f2ef;
+  /* Slightly darker cream for secondary areas */
+  --surface-300: #e8e6e1;
+  /* Borders / Dividers */
+
+  /* Accents */
+  --primary: #7c9885;
+  /* Sage Green */
+  --primary-hover: #6a8573;
+  --primary-light: #e6ebe8;
+  /* Very light sage */
+  --primary-foreground: #ffffff;
+
+  /* Functional Colors */
+  --success: #86efac;
+  /* Pastel Green */
+  --warning: #fcd34d;
+  /* Pastel Amber */
+  --danger: #f87171;
+  /* Pastel Red */
+  --info: #93c5fd;
+  /* Pastel Blue */
+
+  /* Chart Colors (Pastel) */
+  --chart-1: #93c5fd;
+  /* Soft Blue */
+  --chart-2: #d8b4fe;
+  /* Soft Purple */
+  --chart-3: #86efac;
+  /* Soft Green */
+  --chart-4: #fca5a5;
+  /* Soft Red */
+  --chart-5: #fcd34d;
+  /* Soft Yellow */
+
+  /* Spacing Scale (Doubled) */
+  --radius-sm: 0.75rem;
+  /* 12px */
+  --radius-md: 1rem;
+  /* 16px */
+  --radius-lg: 1.5rem;
+  /* 24px */
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Base style overrides for PaperBanana */
+[data-theme='paper-banana'] body {
+  font-family: 'Lucida Sans Typewriter', 'Lucida Console', monospace;
+  /* Monospace aesthetic */
+  letter-spacing: -0.01em;
+  background: transparent;
+  /* Allow graph paper on HTML to show through */
+}
+
+[data-theme='paper-banana'] h1,
+[data-theme='paper-banana'] h2,
+[data-theme='paper-banana'] h3 {
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='paper-banana'] .btn {
+  padding: 0.75rem 1.5rem;
+  /* Larger touch targets */
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.875rem;
 }
