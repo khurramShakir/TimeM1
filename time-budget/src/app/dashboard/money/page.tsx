@@ -84,9 +84,8 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
             </header>
 
             <Suspense fallback={<div style={{ height: '100px' }} />}>
-                <UnifiedHUD date={dateStr} />
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', padding: '0 1rem' }}>
-                    {data.period && <AddIncomeButton periodId={data.period.id} />}
+                <div className={styles.hudSection}>
+                    <UnifiedHUD date={dateStr} domain="MONEY" />
                 </div>
             </Suspense>
 
@@ -110,7 +109,8 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '2rem' }}>
+                {data.period && <AddIncomeButton periodId={data.period.id} />}
                 <TransferTrigger envelopes={salvagedEnvelopesForTransfer} domain="MONEY" currency={data.currency} />
             </div>
 

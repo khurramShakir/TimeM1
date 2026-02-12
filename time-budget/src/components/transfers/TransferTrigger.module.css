@@ -1,8 +1,11 @@
 .triggerBtn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0;
+    width: 180px;
+    height: 42px;
     background-color: var(--primary);
     border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
@@ -12,6 +15,7 @@
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
 }
 
 .triggerBtn:hover {
@@ -22,8 +26,8 @@
 }
 
 .icon {
-    width: 1rem;
-    height: 1rem;
+    width: 18px;
+    height: 18px;
     color: currentColor;
     opacity: 1;
 }

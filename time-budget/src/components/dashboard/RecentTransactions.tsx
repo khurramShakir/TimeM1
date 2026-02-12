@@ -45,7 +45,7 @@ export function RecentTransactions({ transactions, domain = "TIME", currency = "
                 </Link>
             }
         >
-            <div className={styles.list}>
+            <div className={styles.list} style={{ paddingTop: '0.25rem' }}>
                 {transactions.map((t) => (
                     <div key={t.id} className={styles.item}>
                         <div className={styles.left}>

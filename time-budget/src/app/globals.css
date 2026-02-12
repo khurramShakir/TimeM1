@@ -62,6 +62,10 @@ body {
   /* Prevent horizontal scrollbar from modal tab overflow */
 }
 
+html {
+  font-size: 90%;
+}
+
 /* Utility Classes for Layout */
 .container {
   max-width: 1200px;

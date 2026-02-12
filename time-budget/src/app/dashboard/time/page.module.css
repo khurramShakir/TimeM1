@@ -31,7 +31,7 @@
 
 .chartSection {
     margin-bottom: 2rem;
-    height: auto;
+    height: 100%;
 }
 
 .contentGrid {
@@ -39,6 +39,7 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
+    align-items: stretch;
 }
 
 @media (min-width: 1024px) {
@@ -168,4 +169,14 @@
     max-width: 900px;
     margin: 0 auto;
     padding: 1rem;
+}
+
+.hudSection {
+    max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .hudSection {
+        width: 100%;
+    }
 }

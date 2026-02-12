@@ -1,35 +1,45 @@
 .liquidCard {
+    cursor: default;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-    min-width: 140px;
-    height: 100%;
+    justify-content: space-between;
+    background-color: rgba(251, 250, 246, 0.75) !important;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem;
+    min-width: 100px;
+    flex: 1;
 }
 
-/* Status variants - applied to the card */
-.healthy {
-    border-left: 4px solid var(--success);
+.liquidCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: rgba(251, 250, 246, 1) !important;
 }
 
-.warning {
-    border-left: 4px solid var(--warning);
-    background: linear-gradient(to right, rgba(254, 252, 232, 0.5), transparent);
-}
-
-.danger {
-    border-left: 4px solid var(--danger);
-    background: linear-gradient(to right, rgba(254, 242, 242, 0.5), transparent);
+.topBorder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 10;
 }
 
 .label {
-    font-family: var(--font-sans);
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     color: var(--foreground);
     opacity: 0.6;
     letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    padding-top: 0.25rem;
 }
 
 .valueGroup {
@@ -37,7 +47,6 @@
     align-items: baseline;
     gap: 0.25rem;
     margin-top: auto;
-    /* Push value to bottom if height varies */
 }
 
 .value {
@@ -59,17 +68,17 @@
     font-family: var(--font-sans);
     font-size: 0.75rem;
     font-weight: 600;
-    padding-top: 0.25rem;
+    margin-top: 0.5rem;
 }
 
 .status_healthy {
-    color: var(--success);
+    color: #7c9885;
 }
 
 .status_warning {
-    color: var(--warning);
+    color: #d4a373;
 }
 
 .status_danger {
-    color: var(--danger);
+    color: #e57373;
 }

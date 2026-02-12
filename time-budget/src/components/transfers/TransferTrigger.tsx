@@ -26,7 +26,7 @@ export function TransferTrigger({ envelopes, domain = "TIME", currency = "USD" }
                 onClick={() => setIsOpen(true)}
                 className={styles.triggerBtn}
             >
-                <ArrowLeftRight className={styles.icon} />
+                <ArrowLeftRight size={18} className={styles.icon} />
                 Transfer
             </button>
 

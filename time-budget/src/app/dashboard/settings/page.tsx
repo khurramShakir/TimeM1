@@ -42,9 +42,11 @@ export default function SettingsPage() {
             });
 
             // Save Profile
-            await updateUserProfile({
-                name: settings.user.name
-            });
+            if (settings.user) {
+                await updateUserProfile({
+                    name: settings.user.name
+                });
+            }
 
             setMessage("Settings saved successfully!");
         } catch (error) {
@@ -114,10 +116,12 @@ export default function SettingsPage() {
                                 <div className={styles.inputControl}>
                                     <input
                                         type="text"
-                                        value={settings.user.name || ""}
+                                        value={settings.user?.name || ""}
                                         onChange={(e) => setSettings({
                                             ...settings,
-                                            user: { ...settings.user, name: e.target.value }
+                                            user: settings.user
+                                                ? { ...settings.user, name: e.target.value }
+                                                : { name: e.target.value }
                                         })}
                                         placeholder="Enter your name"
                                     />
@@ -131,7 +135,7 @@ export default function SettingsPage() {
                                 <div className={styles.inputControl}>
                                     <input
                                         type="email"
-                                        value={settings.user.email}
+                                        value={settings.user?.email || ""}
                                         disabled
                                         className={styles.disabledInput}
                                     />

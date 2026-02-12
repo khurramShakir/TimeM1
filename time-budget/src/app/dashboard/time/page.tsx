@@ -9,6 +9,7 @@ import styles from "./page.module.css";
 import { revalidatePath } from "next/cache";
 import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
 import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
+import { AddIncomeButton } from "@/components/dashboard/AddIncomeButton";
 import { Suspense } from "react";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 
@@ -83,7 +84,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </header>
 
             <Suspense fallback={<div style={{ height: '100px' }} />}>
-                <UnifiedHUD date={dateStr} />
+                <div className={styles.hudSection}>
+                    <UnifiedHUD date={dateStr} />
+                </div>
             </Suspense>
 
             <div className={styles.contentGrid}>
@@ -104,7 +107,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '2rem' }}>
+                <AddIncomeButton periodId={data.period.id} />
                 <TransferTrigger envelopes={salvagedEnvelopesForTransfer} />
             </div>
 

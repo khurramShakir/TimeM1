@@ -20,7 +20,7 @@ export function AddIncomeButton({ periodId }: { periodId: number }) {
             onClick={handleClick}
             title="Fill Envelopes / Add Income"
         >
-            <Wallet size={20} />
+            <Wallet size={18} />
             <span>Fill Envelopes</span>
         </button>
     );

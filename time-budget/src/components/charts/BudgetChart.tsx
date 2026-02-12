@@ -83,9 +83,9 @@ export function BudgetChart({
 
     const pieOptions = {
         is3D: false, // Flat for PaperBanana
-        pieHole: 0.4, // Donut chart looks cleaner
+        pieHole: 0.5, // Slightly larger hole for elegance
         backgroundColor: "transparent",
-        chartArea: { left: "5%", top: "5%", width: "90%", height: "90%" },
+        chartArea: { left: "0%", top: "0%", width: "100%", height: "100%" },
         legend: "none",
         colors: pieColors,
         tooltip: {
@@ -112,85 +112,84 @@ export function BudgetChart({
     const hoursLabel = isTime ? `${totalAvailable} hours` : "your budget";
 
     return (
-        <Card className={styles.chartCard}>
-            <div className={styles.header}>
-                <h3 className={styles.title}>{isTime ? `${periodLabel} Budget` : "Expense Allocation"}</h3>
-                <span className={styles.subtitle}>
+        <Card title={isTime ? `${periodLabel} Budget` : "Expense Allocation"} className={styles.chartCard}>
+            <div className={styles.contentWrapper}>
+                <div className={styles.subtitle}>
                     {isTime ? `Where your ${hoursLabel} are going` : "Budget distribution across categories"}
-                </span>
-            </div>
-
-            <div className={styles.content}>
-                {/* Left: Pie Chart */}
-                <div className={styles.chartWrapper}>
-                    <Chart
-                        chartType="PieChart"
-                        data={pieData}
-                        options={pieOptions}
-                        width={"100%"}
-                        height={"100%"}
-                    />
                 </div>
 
-                {/* Right: Side Panel with Stats & Bar Chart */}
-                <div className={styles.sidePanel}>
-                    {/* Top: Stats Row */}
-                    <div className={styles.statsRow}>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Total Capacity</span>
-                            <span className={styles.statValueProminent}>
-                                {formatValue(isTime ? totalAvailable : totalAvailable, domain, currency)}
-                            </span>
-                        </div>
-                        {isTime && (
-                            <>
-                                <div className={styles.statDivider} />
-                                <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Target Plan</span>
-                                    <span className={styles.statValueSecondary}>{trueAllocated.toFixed(1)}h</span>
-                                </div>
-                            </>
-                        )}
+                <div className={styles.content}>
+                    {/* Left: Pie Chart */}
+                    <div className={styles.chartWrapper}>
+                        <Chart
+                            chartType="PieChart"
+                            data={pieData}
+                            options={pieOptions}
+                            width={"100%"}
+                            height={"100%"}
+                        />
                     </div>
 
-                    {/* Bottom: Bar Chart (Comparison) */}
-                    <div className={styles.barContainer}>
-                        {barData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={barData}
-                                    layout="vertical"
-                                    margin={{ top: 0, right: 10, left: 30, bottom: 0 }}
-                                    barGap={2}
-                                    barCategoryGap="20%"
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                                    <XAxis type="number" hide />
-                                    <YAxis
-                                        dataKey="name"
-                                        type="category"
-                                        width={70}
-                                        tick={{ fontSize: 11, fill: '#525252', fontFamily: 'inherit' }}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
-                                    <RechartsTooltip
-                                        cursor={{ fill: 'transparent' }}
-                                        contentStyle={{
-                                            fontSize: '12px',
-                                            padding: '8px',
-                                            borderRadius: '8px',
-                                            border: '1px solid #e2e8f0',
-                                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
-                                        }}
-                                    />
-                                    <Bar dataKey="Budget" fill={budgetColor} radius={[0, 4, 4, 0]} barSize={10} />
-                                    <Bar dataKey="Spent" fill={spentColor} radius={[0, 4, 4, 0]} barSize={10} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className={styles.emptyState}>No budgets set</div>
-                        )}
+                    {/* Right: Side Panel with Stats & Bar Chart */}
+                    <div className={styles.sidePanel}>
+                        {/* Top: Stats Row */}
+                        <div className={styles.statsRow}>
+                            <div className={styles.statItem}>
+                                <span className={styles.statLabel}>Total Capacity</span>
+                                <span className={styles.statValueProminent}>
+                                    {formatValue(isTime ? totalAvailable : totalAvailable, domain, currency)}
+                                </span>
+                            </div>
+                            {isTime && (
+                                <>
+                                    <div className={styles.statDivider} />
+                                    <div className={styles.statItem}>
+                                        <span className={styles.statLabel}>Target Plan</span>
+                                        <span className={styles.statValueSecondary}>{trueAllocated.toFixed(1)}h</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Bottom: Bar Chart (Comparison) */}
+                        <div className={styles.barContainer}>
+                            {barData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        data={barData}
+                                        layout="vertical"
+                                        margin={{ top: 0, right: 10, left: 30, bottom: 0 }}
+                                        barGap={2}
+                                        barCategoryGap="20%"
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                                        <XAxis type="number" hide />
+                                        <YAxis
+                                            dataKey="name"
+                                            type="category"
+                                            width={70}
+                                            tick={{ fontSize: 11, fill: '#525252', fontFamily: 'inherit' }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <RechartsTooltip
+                                            cursor={{ fill: 'transparent' }}
+                                            contentStyle={{
+                                                fontSize: '12px',
+                                                padding: '8px',
+                                                borderRadius: '8px',
+                                                border: '1px solid #e2e8f0',
+                                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                                            }}
+                                        />
+                                        <Bar dataKey="Budget" fill={budgetColor} radius={[0, 4, 4, 0]} barSize={10} />
+                                        <Bar dataKey="Spent" fill={spentColor} radius={[0, 4, 4, 0]} barSize={10} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className={styles.emptyState}>No budgets set</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

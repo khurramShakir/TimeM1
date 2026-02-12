@@ -54,7 +54,9 @@ export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, col
 
     return (
         <Card className={styles.envelopeCard}>
-            <div className={styles.topBorder} style={{ backgroundColor: themeColor }} />
+            <div className={styles.topBorder}>
+                <div className={styles.indicator} style={{ backgroundColor: themeColor }} />
+            </div>
             <div onClick={handleCardClick} style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: '0.25rem' }}>
                 <div className={styles.header}>
                     <div style={{ flex: 1 }}>

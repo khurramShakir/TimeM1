@@ -129,7 +129,12 @@ export async function getUserSettings() {
         timeCapacity: Number(settings.timeCapacity),
         baseMoneyCapacity: Number(settings.baseMoneyCapacity || 0),
         autoBudget: settings.autoBudget,
-        updatedAt: settings.updatedAt
+        updatedAt: settings.updatedAt,
+        user: {
+            id: settings.user.id,
+            email: settings.user.email,
+            name: settings.user.name
+        }
     };
 }
 
@@ -898,59 +903,42 @@ export async function deleteTransaction(id: number) {
 // --- HUD Data Logic ---
 
 export async function getUnifiedHudData(dateStr?: string) {
-    const userId = await getAuthenticatedUser();
-    const settings = await getUserSettings();
     const targetDate = dateStr ? new Date(dateStr) : new Date();
 
-    // Parallel fetch for both domains
-    const [timePeriod, moneyPeriod] = await Promise.all([
-        getBudgetPeriodByDate(targetDate, userId, "TIME", "WEEKLY"),
-        getBudgetPeriodByDate(targetDate, userId, "MONEY", "MONTHLY")
+    // Parallel fetch for both domains using the master summary function
+    const [timeSummary, moneySummary] = await Promise.all([
+        getBudgetSummary(targetDate, "TIME", "WEEKLY"),
+        getBudgetSummary(targetDate, "MONEY", "MONTHLY")
     ]);
 
-    // Calculate Time Metrics
-    let timeLiquid = 0;
-    let timeTotal = Number(settings.timeCapacity);
+    // Extract Time Metrics
+    const timeUnallocated = timeSummary.envelopes.find(e => e.name === "Unallocated");
+    const timeLiquid = timeUnallocated ? timeUnallocated.budgeted : 0;
 
-    if (timePeriod) {
-        // 1. Get Capacity from this specific period (or fallback to settings)
-        const capacity = Number(timePeriod.capacity) > 0 ? Number(timePeriod.capacity) : Number(settings.timeCapacity);
-        timeTotal = capacity;
+    // Extract Money Metrics
+    const moneyUnallocated = moneySummary.envelopes.find(e => e.name === "Unallocated");
+    const moneyLiquid = moneyUnallocated ? moneyUnallocated.funded : 0;
 
-        // 2. Sum up all "Allocated" budgets (Everything EXCEPT "Unallocated")
-        const allocatedBudget = timePeriod.envelopes
-            .filter(e => e.name !== "Unallocated")
-            .reduce((sum, e) => sum + Number(e.budgeted), 0);
-
-        // 3. Liquid = Total Capacity - Allocated Budget
-        timeLiquid = capacity - allocatedBudget;
-    }
-
-    // Calculate Money Metrics
-    let moneyLiquid = 0;
-    let moneyTotal = 0; // Ideally this comes from "Income" setting later
-
-    if (moneyPeriod) {
-        // For Money:
-        // 1. Total = The actual Income/Capacity set for this period
-        // 2. Liquid = Unallocated Funded (Cash not yet assigned to an envelope)
-        const capacity = Number(moneyPeriod.capacity);
-        const unallocatedEnv = moneyPeriod.envelopes.find(e => e.name === "Unallocated");
-
-        moneyLiquid = unallocatedEnv ? Number(unallocatedEnv.funded) : 0;
-        moneyTotal = capacity;
-    }
+    const currencyPrefix = moneySummary.currency === "USD" ? "$" : moneySummary.currency;
 
     return {
         time: {
             liquid: timeLiquid,
-            total: timeTotal,
+            total: timeSummary.totalAvailable,
+            budgeted: timeSummary.totalBudgeted,
+            funded: timeSummary.totalFunded,
+            spent: timeSummary.totalSpent,
             unit: "h"
         },
         money: {
             liquid: moneyLiquid,
-            total: moneyTotal, // Placeholder until Income logic
-            unit: settings.currency === "USD" ? "$" : settings.currency
+            total: moneySummary.period?.capacity || 0,
+            budgeted: moneySummary.totalBudgeted,
+            funded: moneySummary.totalFunded,
+            spent: moneySummary.totalSpent,
+            unallocatedFunds: moneyLiquid,
+            unit: "",
+            prefix: currencyPrefix
         }
     };
 }

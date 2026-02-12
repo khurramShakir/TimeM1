@@ -18,7 +18,9 @@ export function Card({ children, className = "", title, action }: CardProps) {
                     {action && <div className={styles.action}>{action}</div>}
                 </div>
             )}
-            <div className={styles.content}>{children}</div>
+            <div className={`${styles.content} ${!(title || action) ? styles.noHeader : ""}`}>
+                {children}
+            </div>
         </div>
     );
 }
