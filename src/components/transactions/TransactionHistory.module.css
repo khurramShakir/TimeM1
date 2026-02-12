@@ -191,7 +191,9 @@
     font-style: italic;
     font-size: 0.8rem;
     max-width: 200px;
+    min-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: break-all;
 }

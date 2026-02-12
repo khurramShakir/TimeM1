@@ -79,3 +79,23 @@ export function darkenHexColor(hex: string, percent: number): string {
     const B = Math.max((num & 0x0000FF) - amt, 0);
     return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 }
+/**
+ * Desaturates a hex color by a given amount (0-1).
+ */
+export function desaturateColor(hex: string, factor: number = 0.5): string {
+    if (!hex.startsWith("#")) return hex;
+
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    // Convert to grayscale equivalent (Luminance)
+    const gray = r * 0.299 + g * 0.587 + b * 0.114;
+
+    const mix = (c: number) => {
+        const value = Math.round(c * (1 - factor) + gray * factor);
+        return Math.min(255, value).toString(16).padStart(2, '0');
+    };
+
+    return `#${mix(r)}${mix(g)}${mix(b)}`;
+}

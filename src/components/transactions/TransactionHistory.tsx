@@ -56,6 +56,17 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
         ? transactions
         : transactions.filter(t => t.envelope.id.toString() === filterEnvelopeId);
 
+    // Truncate notes to a fixed length to prevent alignment issues
+    const formatNote = (note: string | null) => {
+        if (!note) return "-";
+
+        const maxLength = 30;
+        if (note.length > maxLength) {
+            return note.substring(0, maxLength - 3) + "...";
+        }
+        return note;
+    };
+
     const handleEdit = (t: Transaction) => {
         setEditingTransaction(t);
         setIsModalOpen(true);
@@ -148,7 +159,7 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                                 {t.envelope.name}
                                             </span>
                                         </td>
-                                        <td className={styles.description}>{t.description || "-"}</td>
+                                        <td className={styles.description}>{formatNote(t.description)}</td>
                                         <td className={`${styles.amount} ${t.type === "INCOME" ? styles.amountPositive : ""} ${t.type === "TRANSFER" ? styles.amountTransfer : ""}`}>
                                             {t.type === "INCOME" ? "+" : ""}
                                             {formatValue(Number(t.amount), domain, currency)}

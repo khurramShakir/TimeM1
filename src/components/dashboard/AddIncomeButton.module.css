@@ -1,22 +1,28 @@
 .triggerBtn {
-    background: transparent;
-    border: none;
-    color: var(--primary);
-    font-weight: 600;
-    font-size: 0.9rem;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    padding: 0;
+    width: 180px;
+    height: 42px;
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary-foreground);
+    font-size: 0.875rem;
+    font-weight: 700;
     cursor: pointer;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    background: var(--surface-200);
     transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
 }
 
 .triggerBtn:hover {
-    background: var(--surface-300);
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .overlay {

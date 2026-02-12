@@ -65,6 +65,18 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
         setMounted(true);
     }, []);
 
+    // Lock body scroll when modal is open (prevents horizontal scrollbar from tabs)
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        };
+    }, [isOpen]);
+
     // Fetch suggestions for autocomplete
     useEffect(() => {
         if (isOpen && tab !== "TRANSFER") {
@@ -214,240 +226,251 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                 onMouseDown={stopPropagation}
                 onMouseUp={stopPropagation}
             >
-                <h2 className={styles.title}>{domain === "TIME" ? "Log Activity" : "Add Transaction"}</h2>
-
-                {/* Main Transaction Type Tabs */}
-                <div className={styles.tabs}>
-                    <button
-                        type="button"
-                        className={`${styles.tab} ${tab === "EXPENSE" ? styles.activeTab : ""}`}
-                        onClick={() => setTab("EXPENSE")}
-                    >
-                        {domain === "TIME" ? "Log Activity" : "Expense/Credit"}
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.tab} ${tab === "TRANSFER" ? styles.activeTab : ""}`}
-                        onClick={() => setTab("TRANSFER")}
-                    >
-                        Transfer
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.tab} ${tab === "INCOME" ? styles.activeTab : ""}`}
-                        onClick={() => setTab("INCOME")}
-                    >
-                        Income
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* Primary Decisions: Envelope */}
-                    <div
-                        className={styles.prominentGroup}
-                        style={{
-                            backgroundColor: getLightColor(selectedEnvelope?.color)
-                        }}
-                    >
-                        <label
-                            className={styles.prominentLabel}
-                            style={{ color: getThemeColor(selectedEnvelope?.color) }}
-                        >
-                            {tab === "EXPENSE" ? "Spending From" : (tab === "TRANSFER" ? "Move From" : "Target Envelope")}
-                        </label>
-                        <select
-                            value={envelopeId}
-                            onChange={(e) => setEnvelopeId(Number(e.target.value))}
-                            required
-                            className={styles.prominentSelect}
-                            style={{ borderColor: getThemeColor(selectedEnvelope?.color) }}
-                        >
-                            {envelopes.map(env => (
-                                <option key={env.id} value={env.id}>{env.name}</option>
-                            ))}
-                        </select>
+                <div className={styles.modalLayout}>
+                    {/* Sidebar / Top Navigation (Tabs) */}
+                    <div className={styles.sidebar}>
+                        <div className={styles.tabs}>
+                            <button
+                                type="button"
+                                data-tab="EXPENSE"
+                                className={`${styles.tab} ${tab === "EXPENSE" ? styles.activeTab : ""}`}
+                                onClick={() => setTab("EXPENSE")}
+                            >
+                                {domain === "TIME" ? "Log Activity" : "Expense"}
+                            </button>
+                            <button
+                                type="button"
+                                data-tab="INCOME"
+                                className={`${styles.tab} ${tab === "INCOME" ? styles.activeTab : ""}`}
+                                onClick={() => setTab("INCOME")}
+                            >
+                                Income
+                            </button>
+                            <button
+                                type="button"
+                                data-tab="TRANSFER"
+                                className={`${styles.tab} ${tab === "TRANSFER" ? styles.activeTab : ""}`}
+                                onClick={() => setTab("TRANSFER")}
+                            >
+                                Transfer
+                            </button>
+                        </div>
                     </div>
 
-                    <div className={styles.row}>
-                        <div className={styles.group}>
-                            <label>Date</label>
-                            <div className={styles.dateGroup}>
-                                <input
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    required
-                                    className={styles.dateInput}
-                                />
-                                <div className={styles.quickDates}>
-                                    <button
-                                        type="button"
-                                        className={styles.quickDateBtn}
-                                        onClick={() => adjustDate(-1)}
-                                        title="Previous Day"
-                                    >
-                                        -1 Day
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`${styles.quickDateBtn} ${styles.todayBtn}`}
-                                        onClick={() => setDate(new Date().toISOString().split("T")[0])}
-                                    >
-                                        Today
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={styles.quickDateBtn}
-                                        onClick={() => adjustDate(1)}
-                                        title="Next Day"
-                                    >
-                                        +1 Day
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Main Form Content */}
+                    <div className={styles.contentArea} data-watermark={tab}>
+                        <h2 className={styles.title}>{domain === "TIME" ? "Log Activity" : "Add Transaction"}</h2>
 
-                        {tab === "EXPENSE" && (
-                            <div className={styles.group}>
-                                <label>{domain === "TIME" ? "Description" : "Payee"}</label>
-                                <input
-                                    type="text"
-                                    value={entity}
-                                    onChange={(e) => setEntity(e.target.value)}
-                                    placeholder={domain === "TIME" ? "Short summary" : "Company, Person, etc."}
-                                    required
-                                    list="entity-suggestions"
-                                />
-                            </div>
-                        )}
-
-                        {tab === "INCOME" && (
-                            <div className={styles.group}>
-                                <label>Payer</label>
-                                <input
-                                    type="text"
-                                    value={entity}
-                                    onChange={(e) => setEntity(e.target.value)}
-                                    placeholder="Source of funds"
-                                    required
-                                    list="entity-suggestions"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className={styles.row}>
-                        <div className={styles.group}>
-                            <label>Amount</label>
-                            <div className={`${styles.inputWithPrefix} ${domain === "MONEY" ? styles.hasPrefix : ""}`}>
-                                {domain === "MONEY" && (
-                                    <span className={styles.prefix}>
-                                        {SYMBOL_MAP[currency] || currency}
-                                    </span>
-                                )}
-                                <input
-                                    type="number"
-                                    step={domain === "TIME" ? "0.1" : "0.01"}
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    required
-                                    placeholder={domain === "TIME" ? "e.g. 1.5" : "0.00"}
-                                    readOnly={mode === "range" && tab === "EXPENSE"}
-                                />
-                            </div>
-                        </div>
-
-                        {tab === "TRANSFER" && (
-                            <div className={styles.group}>
-                                <label>Move To</label>
+                        <form onSubmit={handleSubmit} className={styles.form}>
+                            {/* Primary Decisions: Envelope */}
+                            <div
+                                className={styles.prominentGroup}
+                                style={{
+                                    borderTopColor: getThemeColor(selectedEnvelope?.color)
+                                }}
+                            >
+                                <label
+                                    className={styles.prominentLabel}
+                                >
+                                    {tab === "EXPENSE" ? "Spending From" : (tab === "TRANSFER" ? "Move From" : "Target Envelope")}
+                                </label>
                                 <select
-                                    value={toEnvelopeId}
-                                    onChange={(e) => setToEnvelopeId(Number(e.target.value))}
+                                    value={envelopeId}
+                                    onChange={(e) => setEnvelopeId(Number(e.target.value))}
                                     required
+                                    className={styles.prominentSelect}
                                 >
                                     {envelopes.map(env => (
                                         <option key={env.id} value={env.id}>{env.name}</option>
                                     ))}
                                 </select>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Time Range - Specific to EXPENSE in TIME domain */}
-                    {domain === "TIME" && tab === "EXPENSE" && (
-                        <>
-                            <div className={styles.tabsSmall}>
-                                <button
-                                    type="button"
-                                    className={`${styles.tabSmall} ${mode === "duration" ? styles.activeTabSmall : ""}`}
-                                    onClick={() => setMode("duration")}
-                                >
-                                    Duration
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`${styles.tabSmall} ${mode === "range" ? styles.activeTabSmall : ""}`}
-                                    onClick={() => setMode("range")}
-                                >
-                                    Time Range
-                                </button>
-                            </div>
+                            {tab === "TRANSFER" && (
+                                <div className={styles.prominentGroup}>
+                                    <label className={styles.prominentLabel}>Move To</label>
+                                    <select
+                                        value={toEnvelopeId}
+                                        onChange={(e) => setToEnvelopeId(Number(e.target.value))}
+                                        required
+                                        className={styles.prominentSelect}
+                                    >
+                                        {envelopes.map(env => (
+                                            <option key={env.id} value={env.id}>{env.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
-                            {mode === "range" && (
-                                <div className={styles.row}>
-                                    <div className={styles.group}>
-                                        <label>Start</label>
+                            <div className={styles.row}>
+                                <div className={styles.group}>
+                                    <label>Date</label>
+                                    <div className={styles.dateGroup}>
                                         <input
-                                            type="time"
-                                            value={startTime}
-                                            onChange={(e) => setStartTime(e.target.value)}
+                                            type="date"
+                                            value={date}
+                                            onChange={(e) => setDate(e.target.value)}
                                             required
+                                            className={styles.dateInput}
+                                        />
+                                        <div className={styles.quickDates}>
+                                            <button
+                                                type="button"
+                                                className={styles.quickDateBtn}
+                                                onClick={() => adjustDate(-1)}
+                                                title="Previous Day"
+                                            >
+                                                -1
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.quickDateBtn} ${styles.todayBtn}`}
+                                                onClick={() => setDate(new Date().toISOString().split("T")[0])}
+                                            >
+                                                Today
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.quickDateBtn}
+                                                onClick={() => adjustDate(1)}
+                                                title="Next Day"
+                                            >
+                                                +1
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {tab === "EXPENSE" && (
+                                    <div className={styles.group}>
+                                        <label>{domain === "TIME" ? "Description" : "Payee"}</label>
+                                        <input
+                                            type="text"
+                                            value={entity}
+                                            onChange={(e) => setEntity(e.target.value)}
+                                            placeholder={domain === "TIME" ? "Short summary" : "Company, Person, etc."}
+                                            required
+                                            list="entity-suggestions"
                                         />
                                     </div>
+                                )}
+
+                                {tab === "INCOME" && (
                                     <div className={styles.group}>
-                                        <label>End</label>
+                                        <label>Payer</label>
                                         <input
-                                            type="time"
-                                            value={endTime}
-                                            onChange={(e) => setEndTime(e.target.value)}
+                                            type="text"
+                                            value={entity}
+                                            onChange={(e) => setEntity(e.target.value)}
+                                            placeholder="Source of funds"
                                             required
+                                            list="entity-suggestions"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.row}>
+                                <div className={styles.group}>
+                                    <label>Amount</label>
+                                    <div className={`${styles.inputWithPrefix} ${domain === "MONEY" ? styles.hasPrefix : ""}`}>
+                                        {domain === "MONEY" && (
+                                            <span className={styles.prefix}>
+                                                {SYMBOL_MAP[currency] || currency}
+                                            </span>
+                                        )}
+                                        <input
+                                            type="number"
+                                            step={domain === "TIME" ? "0.1" : "0.01"}
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            required
+                                            placeholder={domain === "TIME" ? "e.g. 1.5" : "0.00"}
+                                            readOnly={mode === "range" && tab === "EXPENSE"}
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+
+
+                            {/* Time Range - Specific to EXPENSE in TIME domain */}
+                            {domain === "TIME" && tab === "EXPENSE" && (
+                                <>
+                                    <div className={styles.tabsSmall}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.tabSmall} ${mode === "duration" ? styles.activeTabSmall : ""}`}
+                                            onClick={() => setMode("duration")}
+                                        >
+                                            Duration
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`${styles.tabSmall} ${mode === "range" ? styles.activeTabSmall : ""}`}
+                                            onClick={() => setMode("range")}
+                                        >
+                                            Time Range
+                                        </button>
+                                    </div>
+
+                                    {mode === "range" && (
+                                        <div className={styles.row}>
+                                            <div className={styles.group}>
+                                                <label>Start</label>
+                                                <input
+                                                    type="time"
+                                                    value={startTime}
+                                                    onChange={(e) => setStartTime(e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className={styles.group}>
+                                                <label>End</label>
+                                                <input
+                                                    type="time"
+                                                    value={endTime}
+                                                    onChange={(e) => setEndTime(e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
-                        </>
-                    )}
 
-                    {tab === "EXPENSE" && domain === "MONEY" && (
-                        <div className={styles.group}>
-                            <label>Check # (Optional)</label>
-                            <input
-                                type="text"
-                                value={refNumber}
-                                onChange={(e) => setRefNumber(e.target.value)}
-                                placeholder="1234"
-                            />
-                        </div>
-                    )}
+                            {tab === "EXPENSE" && domain === "MONEY" && (
+                                <div className={styles.group}>
+                                    <label>Check # (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={refNumber}
+                                        onChange={(e) => setRefNumber(e.target.value)}
+                                        placeholder="1234"
+                                    />
+                                </div>
+                            )}
 
-                    <div className={styles.group}>
-                        <label>Notes (Optional)</label>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={2}
-                        />
+                            <div className={styles.group}>
+                                <label>Notes (Optional)</label>
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={2}
+                                />
+                            </div>
+
+                            <div className={styles.actions}>
+                                <button type="button" className={styles.cancelBtn} onClick={onClose}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className={styles.saveBtn} disabled={isSubmitting}>
+                                    {isSubmitting ? "Saving..." : "Save"}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <div className={styles.actions}>
-                        <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                            Cancel
-                        </button>
-                        <button type="submit" className={styles.saveBtn} disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save"}
-                        </button>
-                    </div>
-                </form>
+                </div>
 
                 {/* Autocomplete Datalist */}
                 <datalist id="entity-suggestions">

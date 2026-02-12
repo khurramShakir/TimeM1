@@ -1,4 +1,4 @@
-import { getBudgetSummary, initNewPeriod, getUserSettings } from "@/lib/actions";
+import { getBudgetSummary, initNewPeriod, getUserSettings, getTransactions } from "@/lib/actions";
 export const dynamic = "force-dynamic";
 import { EnvelopeCard } from "@/components/ui/EnvelopeCard";
 import { TransferTrigger } from "@/components/transfers/TransferTrigger";
@@ -11,6 +11,7 @@ import { UrlModalTrigger } from "@/components/transactions/UrlModalTrigger";
 import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
 import { AddIncomeButton } from "@/components/dashboard/AddIncomeButton";
 import { Suspense } from "react";
+import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
@@ -21,7 +22,11 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
     const settings = await getUserSettings();
     const periodType = "MONTHLY"; // Force Monthly for Money
 
-    const data = await getBudgetSummary(dateStr, "MONEY", periodType);
+    const [data, recentTransactions] = await Promise.all([
+        getBudgetSummary(dateStr, "MONEY", periodType),
+        getTransactions("MONEY", 5)
+    ]);
+
     const currentDate = dateStr ? new Date(dateStr) : new Date();
 
     const handleInitPeriod = async () => {
@@ -64,6 +69,8 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
         remaining: Number(e.remaining)
     }));
 
+    console.log("Rendering Money Dashboard. Envelopes count:", data.envelopes.length, "Transactions count:", (recentTransactions as any[]).length);
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -77,23 +84,33 @@ export default async function MoneyDashboardPage({ searchParams }: PageProps) {
             </header>
 
             <Suspense fallback={<div style={{ height: '100px' }} />}>
-                <UnifiedHUD date={dateStr} />
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', padding: '0 1rem' }}>
-                    {data.period && <AddIncomeButton periodId={data.period.id} />}
+                <div className={styles.hudSection}>
+                    <UnifiedHUD date={dateStr} domain="MONEY" />
                 </div>
             </Suspense>
 
-            <div className={styles.chartSection}>
-                <BudgetChart
-                    envelopes={data.envelopes}
-                    totalBudgeted={data.totalBudgeted}
-                    totalAvailable={data.totalAvailable}
-                    domain="MONEY"
-                    currency={data.currency}
-                />
+            <div className={styles.contentGrid}>
+                <div className={styles.chartSection}>
+                    <BudgetChart
+                        envelopes={data.envelopes}
+                        totalBudgeted={data.totalBudgeted}
+                        totalAvailable={data.totalAvailable}
+                        domain="MONEY"
+                        currency={data.currency}
+                        periodType={periodType}
+                    />
+                </div>
+                <div className={styles.transactionsSection}>
+                    <RecentTransactions
+                        transactions={recentTransactions as any[]}
+                        domain="MONEY"
+                        currency={data.currency}
+                    />
+                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '2rem' }}>
+                {data.period && <AddIncomeButton periodId={data.period.id} />}
                 <TransferTrigger envelopes={salvagedEnvelopesForTransfer} domain="MONEY" currency={data.currency} />
             </div>
 
