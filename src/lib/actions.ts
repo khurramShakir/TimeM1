@@ -233,8 +233,8 @@ export async function updatePeriodCapacity(periodId: number, capacity: number) {
     await syncUnallocated(periodId);
 
     const domain = period.domain.toLowerCase();
-    revalidatePath(`/dashboard/${domain}`);
-    revalidatePath(`/dashboard/${domain}/budget`);
+    revalidatePath(`/dashboard/${domain}`, 'layout');
+    revalidatePath(`/dashboard/${domain}/budget`, 'layout');
 }
 
 
@@ -284,7 +284,7 @@ export async function addIncome(periodId: number, amount: number) {
     }
 
     const domain = period.domain.toLowerCase();
-    revalidatePath(`/dashboard/${domain}`);
+    revalidatePath(`/dashboard/${domain}`, 'layout');
 }
 
 interface CreateTransactionParams {
@@ -352,20 +352,35 @@ export async function createTransaction(params: CreateTransactionParams) {
 
         // If it's an INCOME recorded via the general modal, we update the envelope's funded amount
         if (type === "INCOME") {
+            // 1. Update the actual envelope's funded balance
             await tx.envelope.update({
                 where: { id: envelopeId },
                 data: { funded: { increment: amount } }
             });
 
-            // If it's to a specific envelope, we might also need to update period capacity 
-            // but addIncome already handles that. This is for the manual "Log" flow.
+            // 2. Increment total period capacity so Unallocated matches
+            await tx.budgetPeriod.update({
+                where: { id: envelope.periodId },
+                data: { capacity: { increment: amount } }
+            });
         }
     });
 
+    // 3. Sync unallocated after transaction completes (outside $transaction to avoid locks if possible, or inside if needed)
+    if (type === "INCOME") {
+        await syncUnallocated(envelope.periodId);
+    }
+
     const domain = envelope.period.domain.toLowerCase();
-    revalidatePath(`/dashboard/${domain}`);
-    revalidatePath(`/dashboard/${domain}/budget`);
-    revalidatePath(`/dashboard/${domain}/transactions`);
+    revalidatePath(`/dashboard/${domain}`, 'layout');
+    revalidatePath(`/dashboard/${domain}/budget`, 'layout');
+    revalidatePath(`/dashboard/${domain}/transactions`, 'layout');
+    revalidatePath(`/dashboard/${domain}/envelope/${envelopeId}`, 'layout');
+    if (toEnvelopeId) {
+        revalidatePath(`/dashboard/${domain}/envelope/${toEnvelopeId}`, 'layout');
+    }
+    // Also invalidate the gateway dashboard as it shows HUD data
+    revalidatePath('/dashboard', 'layout');
 }
 
 // Fetch the budget period for a specific date (or current if omitted)
@@ -687,8 +702,10 @@ export async function transferBudget(fromId: number, toId: number, amount: numbe
         });
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/budget");
+    revalidatePath("/dashboard", 'layout');
+    revalidatePath("/dashboard/budget", 'layout'); // In case of generic paths
+    revalidatePath("/dashboard/money", 'layout');
+    revalidatePath("/dashboard/time", 'layout');
 }
 
 // --- Envelope Management CRUD ---
@@ -729,8 +746,10 @@ export async function createEnvelope(params: CreateEnvelopeParams) {
     await syncUnallocated(period.id);
 
     const path = `/dashboard/${domain.toLowerCase()}`;
-    revalidatePath(path);
-    revalidatePath(`${path}/budget`);
+    revalidatePath(path, 'layout');
+    revalidatePath(`${path}/budget`, 'layout');
+    // Crucial: Invalidate the gateway dashboard too
+    revalidatePath('/dashboard', 'layout');
 }
 
 export async function updateEnvelope(id: number, data: { name?: string; budgeted?: number; color?: string }) {
@@ -757,8 +776,9 @@ export async function updateEnvelope(id: number, data: { name?: string; budgeted
     await syncUnallocated(updatedEnv.periodId);
 
     const path = `/dashboard/${updatedEnv.period.domain.toLowerCase()}`;
-    revalidatePath(path);
-    revalidatePath(`${path}/budget`);
+    revalidatePath(path, 'layout');
+    revalidatePath(`${path}/budget`, 'layout');
+    revalidatePath('/dashboard', 'layout');
 }
 
 export async function deleteEnvelope(id: number) {
@@ -777,8 +797,9 @@ export async function deleteEnvelope(id: number) {
     await syncUnallocated(env.periodId);
 
     const path = `/dashboard/${env.period.domain.toLowerCase()}`;
-    revalidatePath(path);
-    revalidatePath(`${path}/budget`);
+    revalidatePath(path, 'layout');
+    revalidatePath(`${path}/budget`, 'layout');
+    revalidatePath('/dashboard', 'layout');
 }
 
 export async function getTransactions(domain: string = "TIME", limit?: number) {

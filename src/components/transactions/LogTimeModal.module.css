@@ -380,9 +380,23 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: 100%;
+}
+
+.labelSpan {
+    flex-shrink: 0;
+    /* Don't let labels squash */
+    min-width: 100px;
+    /* Ensure labels have consistent space */
 }
 
 .prominentSelect {
+    flex: 1;
+    /* Grow to take up remaining space */
     padding: 0.75rem;
     font-size: 1rem !important;
     font-weight: normal;
@@ -452,19 +466,29 @@
 
 .actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
     margin-top: 1rem;
 }
 
 .cancelBtn,
 .saveBtn {
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem;
     font-weight: 600;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-align: center;
+    white-space: nowrap;
+}
+
+.saveAndNewBtn {
+    background-color: #4d7c0f;
+    /* Darker Green */
+}
+
+.saveAndNewBtn:hover {
+    background-color: #3f6212;
 }
 
 .cancelBtn {
