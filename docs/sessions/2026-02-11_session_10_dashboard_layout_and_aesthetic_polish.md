@@ -23,7 +23,12 @@ Refine the dashboard layout for better space utilization, visual balance, and st
 -   **Action Button Twins**: Standardized "Fill Envelopes" and "Transfer" buttons to an identical **180x42px** fixed size with unified **18px** icons.
 -   **Premium Envelope Borders**: Redesigned category card borders to feature a dark gray base with a prominent **80px colored "tab"** on the left, improving sophistication while maintaining color-coding.
 
-#### 5. Bug Fixes
+#### 5. Cloud Run Deployment
+-   **Release Automation**: Merged `dev` into `main` and successfully triggered the Cloud Build pipeline.
+-   **Service Update**: Deployed the latest production image to the `timem1` Cloud Run service.
+-   **Automated Migrations**: Confirmed that schema changes are automatically applied via the container entrypoint.
+
+#### 6. Bug Fixes
 -   **Settings Page**: Resolved a runtime error caused by missing user data in the settings retrieval logic.
 
 ### Files Modified
