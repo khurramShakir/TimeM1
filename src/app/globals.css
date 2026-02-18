@@ -60,7 +60,9 @@ body {
 html,
 body {
   overflow-x: hidden;
-  /* Prevent horizontal scrollbar from modal tab overflow */
+  /* Prevent horizontal scrollbar universally */
+  position: relative;
+  width: 100%;
 }
 
 html {

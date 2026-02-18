@@ -11,10 +11,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
+    padding: 1.5rem min(2rem, 5vw);
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .logo {
@@ -76,7 +78,7 @@
 }
 
 .title {
-    font-size: 4rem;
+    font-size: clamp(2.5rem, 8vw, 4rem);
     font-weight: 800;
     line-height: 1.1;
     margin-bottom: 1.5rem;
