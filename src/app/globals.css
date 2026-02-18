@@ -31,8 +31,10 @@
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-courier-prime), 'Courier New', Courier, Consolas, Monaco, monospace;
-  --user-font: var(--font-sans);
-  /* Default user font */
+  --user-font: var(--font-mono);
+  /* Default user font (Paper Banana Native) */
+  --app-font-size: 18px;
+  /* Default font size */
 
   /* Spacing */
   --radius-sm: 0.5rem;
@@ -53,6 +55,7 @@ body {
   touch-action: manipulation;
   /* Disables double-tap to zoom */
   font-family: var(--user-font, var(--font-sans));
+  font-size: var(--app-font-size);
 }
 
 body {
@@ -182,8 +185,6 @@ html {
 [data-theme='paper-banana'] body {
   font-family: var(--user-font, var(--font-mono)) !important;
   /* Monospace aesthetic */
-  font-size: 1.125rem;
-  /* 18px base */
   letter-spacing: -0.01em;
   background: transparent;
   /* Allow graph paper on HTML to show through */

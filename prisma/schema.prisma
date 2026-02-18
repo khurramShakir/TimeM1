@@ -37,7 +37,8 @@ model UserSettings {
   // Income Management
   baseMoneyCapacity Float   @default(0) // Replacing fixed 0 capacity
   autoBudget        Boolean @default(true) // Copy previous budget values?
-  fontFamily        String? @default("var(--font-inter)")
+  fontFamily        String? @default("var(--font-courier-prime)")
+  fontSize          Int     @default(18) // 16=Standard, 18=Large (Default/Courier), 20=Larger
   
   updatedAt       DateTime @default(now()) @updatedAt
 }

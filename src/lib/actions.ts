@@ -130,6 +130,7 @@ export async function getUserSettings() {
         baseMoneyCapacity: Number(settings.baseMoneyCapacity || 0),
         autoBudget: settings.autoBudget,
         fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize,
         updatedAt: settings.updatedAt,
         user: {
             id: settings.user.id,
@@ -148,6 +149,7 @@ export async function updateUserSettings(data: {
     baseMoneyCapacity?: number;
     autoBudget?: boolean;
     fontFamily?: string;
+    fontSize?: number;
 }) {
     const userId = await getAuthenticatedUser();
 
@@ -161,6 +163,7 @@ export async function updateUserSettings(data: {
     if (data.baseMoneyCapacity !== undefined) cleanData.baseMoneyCapacity = Number(data.baseMoneyCapacity); // Float
     if (data.autoBudget !== undefined) cleanData.autoBudget = Boolean(data.autoBudget);
     if (data.fontFamily) cleanData.fontFamily = data.fontFamily;
+    if (data.fontSize) cleanData.fontSize = Number(data.fontSize);
 
     await (db as any).userSettings.upsert({
         where: { userId },

@@ -12,7 +12,7 @@ type Tab = "profile" | "general" | "appearance" | "time" | "money";
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile");
-    const { setFontFamily: setGlobalFont } = usePreference();
+    const { setFontFamily: setGlobalFont, setFontSize: setGlobalFontSize } = usePreference();
     const [settings, setSettings] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
     const router = useRouter();
@@ -41,7 +41,8 @@ export default function SettingsPage() {
                 timeCapacity: Number(settings.timeCapacity),
                 baseMoneyCapacity: Number(settings.baseMoneyCapacity),
                 autoBudget: settings.autoBudget,
-                fontFamily: settings.fontFamily
+                fontFamily: settings.fontFamily,
+                fontSize: settings.fontSize
             });
 
             // Save Profile
@@ -217,9 +218,10 @@ export default function SettingsPage() {
                                 type="button"
                                 className={styles.resetBtn}
                                 onClick={() => {
-                                    const defaultFont = "var(--font-inter)";
-                                    setSettings({ ...settings, fontFamily: defaultFont });
+                                    const defaultFont = "var(--font-courier-prime)";
+                                    setSettings({ ...settings, fontFamily: defaultFont, fontSize: 18 });
                                     setGlobalFont(defaultFont);
+                                    setGlobalFontSize(18);
                                 }}
                                 title="Reset to default font"
                             >
@@ -235,26 +237,50 @@ export default function SettingsPage() {
                                 </div>
                                 <div className={styles.inputControl}>
                                     <select
-                                        value={settings.fontFamily || "var(--font-inter)"}
+                                        value={settings.fontFamily || "var(--font-courier-prime)"}
                                         onChange={(e) => {
                                             const val = e.target.value;
-                                            setSettings({ ...settings, fontFamily: val });
+                                            const newSize = val === "var(--font-courier-prime)" ? 18 : 16;
+                                            setSettings({ ...settings, fontFamily: val, fontSize: newSize });
                                             setGlobalFont(val);
+                                            setGlobalFontSize(newSize);
                                         }}
                                     >
-                                        <optgroup label="Sans-Serif">
-                                            <option value="var(--font-inter)">Inter (App Default)</option>
-                                            <option value="system-ui, -apple-system, sans-serif">System Sans</option>
-                                            <option value="'Roboto', sans-serif">Roboto</option>
-                                            <option value="'Open Sans', sans-serif">Open Sans</option>
-                                        </optgroup>
                                         <optgroup label="Monospaced">
-                                            <option value="var(--font-courier-prime)">Courier Prime (Theme Default)</option>
+                                            <option value="var(--font-courier-prime)">Courier Prime (Default)</option>
+                                            <option value="var(--font-space-mono)">Space Mono (Retro)</option>
+                                            <option value="var(--font-ibm-plex-mono)">IBM Plex Mono (Engineered)</option>
+                                            <option value="var(--font-jetbrains-mono)">JetBrains Mono (Code)</option>
+                                            <option value="var(--font-dm-mono)">DM Mono (Soft)</option>
                                             <option value="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace">System Mono</option>
-                                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                                            <option value="'Fira Code', monospace">Fira Code</option>
-                                            <option value="'Courier New', Courier, monospace">Courier New</option>
                                         </optgroup>
+                                        <optgroup label="Sans-Serif">
+                                            <option value="var(--font-inter)">Inter (Clean)</option>
+                                            <option value="var(--font-outfit)">Outfit (Modern)</option>
+                                            <option value="var(--font-manrope)">Manrope (Geometric)</option>
+                                            <option value="system-ui, -apple-system, sans-serif">System Sans</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Font Size</label>
+                                    <p className={styles.hint}>Base text size for the application.</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <select
+                                        value={settings.fontSize || 18}
+                                        onChange={(e) => {
+                                            const val = Number(e.target.value);
+                                            setSettings({ ...settings, fontSize: val });
+                                            setGlobalFontSize(val);
+                                        }}
+                                    >
+                                        <option value={16}>Standard (16px)</option>
+                                        <option value={18}>Large (18px)</option>
+                                        <option value={20}>Larger (20px)</option>
                                     </select>
                                 </div>
                             </div>
