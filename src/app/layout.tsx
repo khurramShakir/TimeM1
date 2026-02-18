@@ -33,8 +33,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.className} ${courierPrime.variable}`}>
+      <html lang="en" className={`${inter.variable} ${courierPrime.variable}`}>
+        <body className={inter.className}>
           {children}
         </body>
       </html>
