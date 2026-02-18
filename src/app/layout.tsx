@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${inter.variable} ${courierPrime.variable}`}>
-        <body className={inter.className}>
+        <body>
           {children}
         </body>
       </html>
