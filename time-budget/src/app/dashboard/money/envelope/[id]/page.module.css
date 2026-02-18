@@ -37,6 +37,30 @@
     opacity: 1;
 }
 
+.actionSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.logBtn:hover {
+    opacity: 0.9;
+}
+
 .summaryCard {
     background-color: #ffffff;
     padding: 0.5rem 1rem;
@@ -86,4 +110,9 @@
 
 .table tr:last-child td {
     border-bottom: none;
+}
+
+.amountIncome {
+    color: #16a34a;
+    /* Green-600 */
 }

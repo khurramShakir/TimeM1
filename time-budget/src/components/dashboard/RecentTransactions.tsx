@@ -74,14 +74,17 @@ export function RecentTransactions({ transactions, domain = "TIME", currency = "
 }
 
 function getAvatarColor(type: string) {
-    return "rgba(107, 114, 128, 0.1)"; // Consistent light gray for all
+    if (type === "INCOME") return "rgba(34, 197, 94, 0.15)"; // Green-500 tint
+    return "rgba(107, 114, 128, 0.1)"; // Consistent light gray for all others
 }
 
 function getAvatarIcon(type: string) {
     const size = 18;
     const color = "#6b7280"; // Consistent neutral gray
+    const green = "#16a34a"; // Green-600
+
     switch (type) {
-        case "INCOME": return <ArrowDownLeft size={size} color={color} />;
+        case "INCOME": return <ArrowDownLeft size={size} color={green} />;
         case "TRANSFER": return <ArrowLeftRight size={size} color={color} />;
         default: return <ArrowUpRight size={size} color={color} />; // EXPENSE
     }

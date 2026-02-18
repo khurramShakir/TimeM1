@@ -44,7 +44,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     }));
 
     return (
-        <>
+        <div className={styles.container}>
             <header className={styles.header}>
                 <div className={styles.titleGroup}>
                     <h1 className={styles.title}>Money Transactions</h1>
@@ -58,6 +58,6 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                 domain="MONEY"
                 currency={settings.currency}
             />
-        </>
+        </div>
     );
 }
