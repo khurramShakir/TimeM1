@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Home, PieChart, Settings, List, Banknote, Clock, ArrowRight, TrendingUp, Moon, Sun } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import styles from "./Sidebar.module.css";
-import { useTheme } from "@/context/ThemeContext";
+import { usePreference as useTheme } from "@/context/PreferenceContext";
 import React from "react";
 
 export function Sidebar() {

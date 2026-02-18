@@ -2,15 +2,17 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { Clock, Banknote, Globe, Save, Loader2, User, ChevronLeft } from "lucide-react";
+import { Palette, Clock, Banknote, Globe, Save, Loader2, User, ChevronLeft, RotateCcw } from "lucide-react";
 import { getUserSettings, updateUserSettings, updateUserProfile } from "@/lib/actions";
+import { usePreference } from "@/context/PreferenceContext";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
-type Tab = "profile" | "general" | "time" | "money";
+type Tab = "profile" | "general" | "appearance" | "time" | "money";
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<Tab>("profile");
+    const { setFontFamily: setGlobalFont } = usePreference();
     const [settings, setSettings] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
     const router = useRouter();
@@ -38,7 +40,8 @@ export default function SettingsPage() {
                 defaultPeriod: settings.defaultPeriod,
                 timeCapacity: Number(settings.timeCapacity),
                 baseMoneyCapacity: Number(settings.baseMoneyCapacity),
-                autoBudget: settings.autoBudget
+                autoBudget: settings.autoBudget,
+                fontFamily: settings.fontFamily
             });
 
             // Save Profile
@@ -88,6 +91,12 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab("general")}
                 >
                     <Globe size={18} /> General
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === "appearance" ? styles.activeTab : ""}`}
+                    onClick={() => setActiveTab("appearance")}
+                >
+                    <Palette size={18} /> Appearance
                 </button>
                 <button
                     className={`${styles.tab} ${activeTab === "time" ? styles.activeTab : ""}`}
@@ -200,6 +209,58 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                {activeTab === "appearance" && (
+                    <div className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2 className={styles.sectionTitle}>Appearance</h2>
+                            <button
+                                type="button"
+                                className={styles.resetBtn}
+                                onClick={() => {
+                                    const defaultFont = "var(--font-inter)";
+                                    setSettings({ ...settings, fontFamily: defaultFont });
+                                    setGlobalFont(defaultFont);
+                                }}
+                                title="Reset to default font"
+                            >
+                                <RotateCcw size={16} /> Reset Default
+                            </button>
+                        </div>
+
+                        <div className={styles.settingsGrid}>
+                            <div className={styles.group}>
+                                <div className={styles.labelInfo}>
+                                    <label>Font Family</label>
+                                    <p className={styles.hint}>Choose your preferred application font.</p>
+                                </div>
+                                <div className={styles.inputControl}>
+                                    <select
+                                        value={settings.fontFamily || "var(--font-inter)"}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setSettings({ ...settings, fontFamily: val });
+                                            setGlobalFont(val);
+                                        }}
+                                    >
+                                        <optgroup label="Sans-Serif">
+                                            <option value="var(--font-inter)">Inter (App Default)</option>
+                                            <option value="system-ui, -apple-system, sans-serif">System Sans</option>
+                                            <option value="'Roboto', sans-serif">Roboto</option>
+                                            <option value="'Open Sans', sans-serif">Open Sans</option>
+                                        </optgroup>
+                                        <optgroup label="Monospaced">
+                                            <option value="var(--font-courier-prime)">Courier Prime (Theme Default)</option>
+                                            <option value="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace">System Mono</option>
+                                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                                            <option value="'Fira Code', monospace">Fira Code</option>
+                                            <option value="'Courier New', Courier, monospace">Courier New</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {activeTab === "time" && (
                     <div className={styles.section}>
                         <h2 className={styles.sectionTitle}>Time Management</h2>

@@ -8,12 +8,12 @@ import { TopNav } from "@/components/layout/topnav/TopNav";
 import { Suspense } from "react";
 import styles from "./layout.module.css";
 import { usePathname } from "next/navigation";
-import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { PreferenceProvider, usePreference } from "@/context/PreferenceContext";
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isGateway = pathname === "/dashboard";
-    const { theme } = useTheme();
+    const { theme } = usePreference();
 
     // PaperBanana Layout (TopNav)
     if (theme === "paper-banana") {
@@ -74,8 +74,6 @@ export default function DashboardLayoutClient({
     children: React.ReactNode;
 }) {
     return (
-        <ThemeProvider>
-            <DashboardInner>{children}</DashboardInner>
-        </ThemeProvider>
+        <DashboardInner>{children}</DashboardInner>
     );
 }

@@ -31,11 +31,18 @@
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-courier-prime), 'Courier New', Courier, Consolas, Monaco, monospace;
+  --user-font: var(--font-sans);
+  /* Default user font */
 
   /* Spacing */
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
+
+  /* Shadows & Transitions */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html,
@@ -45,14 +52,14 @@ body {
   min-height: 100%;
   touch-action: manipulation;
   /* Disables double-tap to zoom */
-  font-family: var(--font-sans);
+  font-family: var(--user-font, var(--font-sans));
 }
 
 body {
   color: var(--foreground);
   background: var(--surface-200);
   /* Slightly off-white background for the app */
-  font-family: var(--font-sans);
+  font-family: var(--user-font, var(--font-sans));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -173,7 +180,7 @@ html {
 
 /* Base style overrides for PaperBanana */
 [data-theme='paper-banana'] body {
-  font-family: var(--font-mono) !important;
+  font-family: var(--user-font, var(--font-mono)) !important;
   /* Monospace aesthetic */
   font-size: 1.125rem;
   /* 18px base */

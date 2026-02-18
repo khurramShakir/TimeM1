@@ -26,19 +26,35 @@ export const metadata: Metadata = {
 };
 
 import { ClerkProvider } from "@clerk/nextjs";
+import { PreferenceProvider } from "@/context/PreferenceContext";
+import { getUserSettings } from "@/lib/actions";
+import { auth } from "@clerk/nextjs/server";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
+  let initialSettings = null;
+
+  if (userId) {
+    try {
+      initialSettings = await getUserSettings();
+    } catch (e) {
+      console.error("Failed to fetch settings for layout", e);
+    }
+  }
+
   return (
     <ClerkProvider>
-      <html lang="en" className={`${inter.variable} ${courierPrime.variable}`}>
-        <body>
-          {children}
-        </body>
-      </html>
+      <PreferenceProvider initialSettings={initialSettings as any}>
+        <html lang="en" className={`${inter.variable} ${courierPrime.variable}`}>
+          <body>
+            {children}
+          </body>
+        </html>
+      </PreferenceProvider>
     </ClerkProvider>
   );
 }

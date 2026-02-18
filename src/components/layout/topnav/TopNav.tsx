@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Home, PieChart, Settings, List, TrendingUp, Sun, Moon, Banknote, Clock } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
-import { useTheme } from "@/context/ThemeContext";
+import { usePreference as useTheme } from "@/context/PreferenceContext";
 import styles from "./TopNav.module.css";
 
 export function TopNav() {
