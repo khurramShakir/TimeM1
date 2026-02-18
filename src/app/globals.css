@@ -45,6 +45,7 @@ body {
   min-height: 100%;
   touch-action: manipulation;
   /* Disables double-tap to zoom */
+  font-family: var(--font-sans);
 }
 
 body {

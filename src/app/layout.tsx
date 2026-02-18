@@ -9,6 +9,7 @@ const courierPrime = Courier_Prime({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-courier-prime",
+  display: "block",
 });
 
 export const viewport: Viewport = {
