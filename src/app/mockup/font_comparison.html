@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Font Comparison</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Roboto+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Cousine:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --background: #f8f7f4;
+            --foreground: #2d2d2d;
+            --primary: #7c9885;
+            --surface-100: #ffffff;
+            --surface-200: #f3f2ef;
+            --border-subtle: #e8e6e1;
+            --radius-md: 1rem;
+        }
+
+        body {
+            background-color: var(--background);
+            background-image: linear-gradient(#e8e6e1 1px, transparent 1px),
+                linear-gradient(90deg, #e8e6e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--foreground);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .font-section {
+            background: var(--surface-100);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .font-label {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Envelopes Mockup Styles */
+        .envelope {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .env-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .env-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .env-fill {
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .env-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9em;
+        }
+
+        /* Font Specific Classes */
+        .font-courier {
+            font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+        }
+
+        .font-consolas {
+            font-family: Consolas, 'Lucida Console', Monaco, monospace;
+        }
+
+        .font-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .font-roboto {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .font-ibm {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .font-lucida {
+            font-family: 'Lucida Sans Typewriter', 'Lucida Console', Monaco, monospace;
+        }
+
+        .font-cousine {
+            font-family: 'Cousine', monospace;
+        }
+
+        .font-noto {
+            font-family: 'Noto Sans Mono', monospace;
+        }
+
+        .font-courier-new {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .size-14 {
+            font-size: 14px;
+        }
+
+        .size-16 {
+            font-size: 16px;
+        }
+
+        .size-18 {
+            font-size: 18px;
+        }
+
+        .note {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard Font Comparison</h1>
+            <p>Comparing monospaced fonts for the "Paper Banana" theme. Courier Prime is currently used.</p>
+        </div>
+
+        <div class="comparison-grid">
+            <!-- COURIER PRIME (CURRENT) -->
+            <div class="font-section font-courier">
+                <span class="font-label">Courier Prime (Current - 16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Current default. Very "typewriter" feel, but thin.</div>
+            </div>
+
+            <!-- CONSOLAS -->
+            <div class="font-section font-consolas">
+                <span class="font-label">Consolas (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Classic programming font. Highly legible, slightly taller.</div>
+            </div>
+
+            <!-- COURIER PRIME (LARGE) -->
+            <div class="font-section font-courier size-18">
+                <span class="font-label">Courier Prime (18px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Current font, just larger. Does this fix the "smallness"?</div>
+            </div>
+
+            <!-- JETBRAINS MONO -->
+            <div class="font-section font-jetbrains">
+                <span class="font-label">JetBrains Mono (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Modern, high x-height, easy on the eyes.</div>
+            </div>
+
+            <!-- ROBOTO MONO -->
+            <div class="font-section font-roboto">
+                <span class="font-label">Roboto Mono (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Very clean, uniform, and slightly more "tech".</div>
+            </div>
+
+            <!-- IBM PLEX MONO -->
+            <div class="font-section font-ibm">
+                <span class="font-label">IBM Plex Mono (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Balanced technical look with good character distinction.</div>
+            </div>
+
+            <!-- LUCIDA SANS TYPEWRITER -->
+            <div class="font-section font-lucida">
+                <span class="font-label">Lucida Sans Typewriter (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Clean, proportional monospaced font. Often found on Windows.</div>
+            </div>
+
+            <!-- COURIER NEW -->
+            <div class="font-section font-courier-new">
+                <span class="font-label">Courier New (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">Classic monospaced system font. Clean zero.</div>
+            </div>
+
+            <!-- COUSINE -->
+            <div class="font-section font-cousine">
+                <span class="font-label">Cousine (16px)</span>
+                <div class="envelope">
+                    <div class="env-name">Savings & Goals</div>
+                    <div class="env-bar">
+                        <div class="env-fill" style="width: 75%;"></div>
+                    </div>
+                    <div class="env-stats">
+                        <span>Remaining: $1,250.00</span>
+                        <span>Budget: $2,000</span>
+                    </div>
+                </div>
+                <p>The quick brown fox jumps over the lazy dog. 0123456789</p>
+                <p><strong>0O (Zero vs Oscar)</strong></p>
+                <div class="note">ChromeOS and Android's equivalent of Courier/Consolas. Clean zero.</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

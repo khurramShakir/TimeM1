@@ -64,7 +64,7 @@ body {
 }
 
 html {
-  font-size: 90%;
+  font-size: 100%;
 }
 
 /* Utility Classes for Layout */
@@ -173,6 +173,8 @@ html {
 [data-theme='paper-banana'] body {
   font-family: var(--font-mono) !important;
   /* Monospace aesthetic */
+  font-size: 1.125rem;
+  /* 18px base */
   letter-spacing: -0.01em;
   background: transparent;
   /* Allow graph paper on HTML to show through */
