@@ -3,6 +3,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+import { Courier_Prime } from "next/font/google";
+
+const courierPrime = Courier_Prime({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-courier-prime",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -27,7 +34,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={inter.className}>
+        <body className={`${inter.className} ${courierPrime.variable}`}>
           {children}
         </body>
       </html>

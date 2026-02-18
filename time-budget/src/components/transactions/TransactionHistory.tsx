@@ -147,7 +147,12 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                         </td>
                                         <td>
                                             <div className={styles.entityColumn}>
-                                                <div className={styles.entityName}>{t.entity || "-"}</div>
+                                                <div className={styles.entityRow}>
+                                                    <div className={styles.entityName}>{t.entity || "-"}</div>
+                                                    <span className={`${styles.typeBadge} ${styles[`type_${t.type?.toLowerCase()}`]}`}>
+                                                        {t.type}
+                                                    </span>
+                                                </div>
                                                 {t.refNumber && <div className={styles.refNumber}>#{t.refNumber}</div>}
                                             </div>
                                         </td>

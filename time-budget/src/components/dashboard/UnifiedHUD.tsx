@@ -1,3 +1,4 @@
+import React from "react";
 import { getUnifiedHudData } from "@/lib/actions";
 import { LiquidCard } from "./LiquidCard";
 import styles from "./UnifiedHUD.module.css";
@@ -9,17 +10,17 @@ export async function UnifiedHUD({ date, domain }: { date?: string; domain?: str
         <div className={styles.hud}>
             <LiquidCard
                 label="Liquid Time"
-                value={data.time.liquid}
+                value={data.time.liquid || 0}
                 unit={data.time.unit}
-                threshold={data.time.total}
+                threshold={data.time.total || 168}
             />
             {domain !== "MONEY" && (
                 <LiquidCard
                     label="Unallocated Cash"
-                    value={data.money.liquid}
+                    value={data.money.liquid || 0}
                     unit=""
                     prefix={data.money.prefix}
-                    threshold={data.money.total}
+                    threshold={data.money.total || 0}
                 />
             )}
 
@@ -27,25 +28,25 @@ export async function UnifiedHUD({ date, domain }: { date?: string; domain?: str
                 <>
                     <LiquidCard
                         label="Total Budgeted"
-                        value={data.money.budgeted}
+                        value={data.money.budgeted || 0}
                         unit={data.money.unit}
                         prefix={data.money.prefix}
                     />
                     <LiquidCard
                         label="Total Funded"
-                        value={data.money.funded}
+                        value={data.money.funded || 0}
                         unit={data.money.unit}
                         prefix={data.money.prefix}
                     />
                     <LiquidCard
                         label="Total Spent"
-                        value={data.money.spent}
+                        value={data.money.spent || 0}
                         unit={data.money.unit}
                         prefix={data.money.prefix}
                     />
                     <LiquidCard
                         label="Unallocated Funds"
-                        value={data.money.unallocatedFunds}
+                        value={data.money.unallocatedFunds || 0}
                         unit={data.money.unit}
                         prefix={data.money.prefix}
                     />

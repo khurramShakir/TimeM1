@@ -1,0 +1,126 @@
+.envelopeCard {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: rgba(251, 250, 246, 0.75) !important;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.topBorder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 10;
+    background-color: #525252;
+    /* Dark Neutral Gray */
+}
+
+.indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 80px;
+    z-index: 11;
+}
+
+.envelopeCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background-color: rgba(251, 250, 246, 1) !important;
+}
+
+/* Header Grid */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.title {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: var(--foreground);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.badge {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background-color: var(--surface-200);
+    color: var(--foreground);
+    letter-spacing: 0.02em;
+}
+
+/* Stats Row */
+.stats {
+    margin-top: auto;
+    margin-bottom: 1rem;
+}
+
+.amountLarge {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--foreground);
+    display: block;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.amountSmall {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: #666;
+    display: block;
+}
+
+/* Progress Bar */
+.progressBar {
+    height: 8px;
+    background-color: var(--surface-200);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.progressSegment {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.progressUnfunded {
+    background: repeating-linear-gradient(45deg,
+            #e5e7eb,
+            #e5e7eb 4px,
+            #d1d5db 4px,
+            #d1d5db 8px);
+}

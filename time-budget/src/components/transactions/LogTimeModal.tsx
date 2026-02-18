@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { createTransaction, updateTransaction, getRecentEntities } from "@/lib/actions";
+import { formatValue } from "@/lib/format";
 import styles from "./LogTimeModal.module.css";
 import { getLightColor, getThemeColor } from "@/lib/colors";
 
@@ -10,6 +11,7 @@ interface Envelope {
     id: number;
     name: string;
     color?: string | null;
+    funded?: number;
 }
 
 interface LogTimeModalProps {
@@ -155,8 +157,8 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
         setDate(d.toISOString().split("T")[0]);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent, shouldClose = true) => {
+        if (e) e.preventDefault();
         setIsSubmitting(true);
 
         try {
@@ -186,7 +188,19 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                 await createTransaction(payload);
             }
 
-            onClose();
+            if (shouldClose) {
+                onClose();
+            } else {
+                // Reset form for "Save & New" - Keep Date and Category
+                setAmount("");
+                setEntity("");
+                setRefNumber("");
+                setDescription("");
+                setStartTime("");
+                setEndTime("");
+                // Briefly show a success state or just keep going
+                console.log("Transaction saved, form reset for new entry");
+            }
         } catch (error) {
             console.error(error);
             alert("Failed to save transaction");
@@ -272,33 +286,48 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                                 <label
                                     className={styles.prominentLabel}
                                 >
-                                    {tab === "EXPENSE" ? "Spending From" : (tab === "TRANSFER" ? "Move From" : "Target Envelope")}
+                                    <span className={styles.labelSpan}>
+                                        {tab === "EXPENSE" ? "Spending From" : (tab === "TRANSFER" ? "Move From" : "Target Envelope")}
+                                    </span>
+                                    <select
+                                        className={styles.prominentSelect}
+                                        value={envelopeId}
+                                        onChange={(e) => setEnvelopeId(Number(e.target.value))}
+                                        required
+                                    >
+                                        <option value="">Select Envelope</option>
+                                        {envelopes.map((env) => (
+                                            <option key={env.id} value={env.id}>
+                                                {env.name} {env.funded !== undefined ? `(${formatValue(env.funded, domain, currency)})` : ""}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </label>
-                                <select
-                                    value={envelopeId}
-                                    onChange={(e) => setEnvelopeId(Number(e.target.value))}
-                                    required
-                                    className={styles.prominentSelect}
-                                >
-                                    {envelopes.map(env => (
-                                        <option key={env.id} value={env.id}>{env.name}</option>
-                                    ))}
-                                </select>
                             </div>
 
                             {tab === "TRANSFER" && (
-                                <div className={styles.prominentGroup}>
-                                    <label className={styles.prominentLabel}>Move To</label>
-                                    <select
-                                        value={toEnvelopeId}
-                                        onChange={(e) => setToEnvelopeId(Number(e.target.value))}
-                                        required
-                                        className={styles.prominentSelect}
-                                    >
-                                        {envelopes.map(env => (
-                                            <option key={env.id} value={env.id}>{env.name}</option>
-                                        ))}
-                                    </select>
+                                <div
+                                    className={styles.prominentGroup}
+                                    style={{
+                                        borderTopColor: getThemeColor(envelopes.find(e => e.id === Number(toEnvelopeId))?.color)
+                                    }}
+                                >
+                                    <label className={styles.prominentLabel}>
+                                        <span className={styles.labelSpan}>Move To</span>
+                                        <select
+                                            className={styles.prominentSelect}
+                                            value={toEnvelopeId || ""}
+                                            onChange={(e) => setToEnvelopeId(Number(e.target.value))}
+                                            required
+                                        >
+                                            <option value="">Select Envelope</option>
+                                            {envelopes.map((env) => (
+                                                <option key={env.id} value={env.id}>
+                                                    {env.name} {env.funded !== undefined ? `(${formatValue(env.funded, domain, currency)})` : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
                                 </div>
                             )}
 
@@ -461,11 +490,21 @@ export function LogTimeModal({ isOpen, onClose, envelopes, initialEnvelopeId, tr
                             </div>
 
                             <div className={styles.actions}>
-                                <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                                    Cancel
-                                </button>
                                 <button type="submit" className={styles.saveBtn} disabled={isSubmitting}>
                                     {isSubmitting ? "Saving..." : "Save"}
+                                </button>
+                                {!transaction && (
+                                    <button
+                                        type="button"
+                                        className={`${styles.saveBtn} ${styles.saveAndNewBtn}`}
+                                        disabled={isSubmitting}
+                                        onClick={(e) => handleSubmit(e, false)}
+                                    >
+                                        Save & New
+                                    </button>
+                                )}
+                                <button type="button" className={styles.cancelBtn} onClick={onClose}>
+                                    Cancel
                                 </button>
                             </div>
                         </form>

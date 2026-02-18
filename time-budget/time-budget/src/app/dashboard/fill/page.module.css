@@ -1,0 +1,369 @@
+.page {
+    padding: 1rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+}
+
+/* Layout Grid */
+.layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Source Card */
+.sourceCard {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    position: sticky;
+    top: 2rem;
+}
+
+.inputLabel {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.inflowInputContainer {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.currency {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.inflowInput {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #111827;
+    font-family: var(--font-mono, monospace);
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Hide number input spinners */
+.inflowInput::-webkit-outer-spin-button,
+.inflowInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.inflowInput::placeholder {
+    color: #e5e7eb;
+}
+
+.descRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.descRow:focus-within {
+    opacity: 1;
+}
+
+.descIcon {
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.descInput {
+    flex: 1;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px dashed transparent;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #6b7280;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.descInput::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.descInput:focus {
+    border-bottom-color: #10b981;
+    color: #111827;
+}
+
+/* Stats */
+.statsBox {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.statLabel {
+    color: #6b7280;
+}
+
+.statValue {
+    font-weight: 600;
+    color: #111827;
+}
+
+.statValueLarge {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.remainingPositive {
+    color: #10b981;
+}
+
+.remainingNegative {
+    color: #ef4444;
+}
+
+/* Envelope Grid */
+.envelopesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.envelopeCard {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 1.25rem 1.25rem 1.5rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.envelopeCard:focus-within {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.envHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.envIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.envName {
+    font-weight: 700;
+    color: #111827;
+    font-size: 1rem;
+}
+
+.envStats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.envInputContainer {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+}
+
+.envInputIcon {
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.envInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-family: var(--font-mono, monospace);
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: right;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Hide number input spinners */
+.envInput::-webkit-outer-spin-button,
+.envInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.envInput::placeholder {
+    color: #d1d5db;
+}
+
+.envInputContainer:focus-within {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.submitBtn {
+    width: 100%;
+    margin-top: 2rem;
+    background: #10b981;
+    color: white;
+    padding: 1rem;
+    border-radius: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.submitBtn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+.submitBtn:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.backBtn:hover {
+    color: #111827;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+    .page {
+        padding: 1rem 0.5rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .sourceCard {
+        padding: 1.25rem;
+        position: static;
+        /* Stop sticking on mobile to save vertical space */
+        margin-bottom: 1.5rem;
+    }
+
+    .inflowInput {
+        font-size: 2rem;
+    }
+
+    .envelopesGrid {
+        grid-template-columns: 1fr;
+        /* Full width cards on mobile */
+    }
+
+    .envelopeCard {
+        border-radius: 16px;
+        padding: 1rem;
+    }
+
+    .descRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    .descInput {
+        width: 100%;
+    }
+
+    .inflowInputContainer {
+        flex-wrap: wrap;
+    }
+}
