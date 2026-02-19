@@ -525,6 +525,22 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
 
     await syncUnallocated(newPeriod.id);
 
+    // --- LAZY TRIGGER: Auto-Fill ---
+    // Try to trigger auto-fill if the user has an enabled template for this domain
+    try {
+        const { executeBudgetTemplate } = await import("./budget-actions");
+        const template = await (db as any).budgetTemplate.findFirst({
+            where: { userId, domain, isAutoFillEnabled: true }
+        });
+
+        if (template) {
+            await executeBudgetTemplate(template.id, newPeriod.id);
+        }
+    } catch (error) {
+        console.error("Failed to execute auto-fill trigger:", error);
+        // We don't want to crash the whole initialization if auto-fill fails
+    }
+
     return newPeriod;
 }
 
@@ -569,8 +585,9 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     // Calculate totals and sanitize for Client Components (No Decimals)
     const envelopes = (period.envelopes as any[]).map((env: any) => {
         // Only sum up EXPENSE transactions for "Spent"
+        // EXCLUDE system adjustments from reporting totals
         const spent = (env.transactions as any[])
-            .filter((t: any) => t.type === "EXPENSE" || !t.type) // Default to expense if null
+            .filter((t: any) => (t.type === "EXPENSE" || !t.type) && !t.isSystemAdjustment)
             .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
         const budgeted = Number(env.budgeted);

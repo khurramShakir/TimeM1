@@ -12,6 +12,7 @@ import { UnifiedHUD } from "@/components/dashboard/UnifiedHUD";
 import { AddIncomeButton } from "@/components/dashboard/AddIncomeButton";
 import { Suspense } from "react";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { ReconcileTrigger } from "@/components/budget/ReconcileTrigger";
 
 interface PageProps {
     searchParams: Promise<{ date?: string; type?: string }>;
@@ -109,6 +110,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '2rem' }}>
                 <AddIncomeButton periodId={data.period.id} />
+                <ReconcileTrigger
+                    periodId={data.period.id}
+                    currentUnallocated={data.envelopes.find((e: any) => e.name === "Unallocated")?.funded || 0}
+                    currency={data.currency}
+                />
                 <TransferTrigger envelopes={salvagedEnvelopesForTransfer} />
             </div>
 

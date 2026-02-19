@@ -1,0 +1,337 @@
+.container,
+.editor {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.headerInfo h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+}
+
+.headerInfo p {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.createBtn,
+.addBtn,
+.saveBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.createBtn {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+.createBtn:hover {
+    background: var(--primary-dark, #166534);
+    transform: translateY(-1px);
+}
+
+.templatesList {
+    display: grid;
+    gap: 1rem;
+}
+
+.templateCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1.25rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.templateTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.templateTitleRow h3 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 0.125rem 0.5rem;
+    background: #dcfce7;
+    color: #166534;
+    border-radius: 99px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.templateInfo p {
+    font-size: 0.8125rem;
+    color: #888;
+}
+
+.templateActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    background: white;
+    font-size: 0.8125rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background: #f9f9f9;
+    border-color: #ddd;
+}
+
+.actionBtn.danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+/* Editor Styles */
+
+.editorHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.editorBody {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.group label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.group input[type="text"],
+.group select {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-family: var(--font-courier-prime), monospace;
+    font-size: 1rem;
+}
+
+.row {
+    display: flex;
+    gap: 2rem;
+}
+
+.infoBox {
+    display: flex;
+    gap: 0.75rem;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #0369a1;
+}
+
+.infoBox p {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.itemsSection {
+    margin-top: 1rem;
+}
+
+.itemsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.itemsHeader h3 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.addBtn {
+    background: white;
+    border: 1px dashed #ccc;
+    color: #666;
+}
+
+.addBtn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.itemsList {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 1rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.itemRow {
+    display: grid;
+    grid-template-columns: 1fr 120px 180px 40px;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.envSelect,
+.amountInput input,
+.modeSelect {
+    padding: 0.625rem;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.amountInput {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.amountInput span {
+    position: absolute;
+    left: 0.75rem;
+    font-size: 0.875rem;
+    color: #888;
+}
+
+.amountInput input {
+    padding-left: 1.75rem;
+    width: 100%;
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.deleteBtn:hover {
+    color: #dc2626;
+}
+
+.emptyItems,
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #999;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+.outlineBtn {
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #666;
+}
+
+.editorFooter {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.saveBtn {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 200px;
+    color: #888;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

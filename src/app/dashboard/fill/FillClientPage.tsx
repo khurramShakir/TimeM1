@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fillEnvelopes } from "@/actions/budget-actions";
+import { getBudgetTemplates, executeBudgetTemplate } from "@/lib/budget-actions";
 import { formatCurrency } from "@/lib/format";
-import { ArrowLeft, Clock, ChevronRight, Pencil } from "lucide-react";
+import { ArrowLeft, Clock, ChevronRight, Pencil, Sparkles, Scale, Settings } from "lucide-react";
 import Link from "next/link";
 import { getThemeColor, getLightColor, getTextColor } from "@/lib/colors";
+import { ReconcileModal } from "@/components/budget/ReconcileModal";
 import styles from "./page.module.css";
 
 interface Envelope {
@@ -35,6 +37,20 @@ export function FillClientPage({
     const [description, setDescription] = useState(domain === "TIME" ? "Weekly Hours Implementation" : "Monthly Paycheck");
     const [allocations, setAllocations] = useState<Record<number, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [templates, setTemplates] = useState<any[]>([]);
+    const [isReconcileOpen, setIsReconcileOpen] = useState(false);
+
+    useEffect(() => {
+        async function load() {
+            const tData = await getBudgetTemplates(domain);
+            setTemplates(tData);
+        }
+        load();
+    }, [domain]);
+
+    const unallocatedEnv = useMemo(() => envelopes.find(e => e.name === "Unallocated"), [envelopes]);
+    const currentUnallocated = unallocatedEnv ? Number(unallocatedEnv.funded) : 0;
+
 
     const targetEnvelopes = useMemo(() => envelopes.filter(e => e.name !== "Unallocated"), [envelopes]);
 
@@ -74,20 +90,65 @@ export function FillClientPage({
         }
     };
 
+    const handleApplyTemplate = (template: any) => {
+        const newAllocations: Record<number, string> = {};
+        template.items.forEach((item: any) => {
+            const env = targetEnvelopes.find(e => e.name === item.envelopeName);
+            if (env) {
+                newAllocations[env.id] = item.amount.toString();
+            }
+        });
+        setAllocations(newAllocations);
+        setDescription(template.name);
+    };
+
+    const handleOneClickFill = async (templateId: string) => {
+        if (!confirm("Are you sure you want to execute this template immediately? This will create transfers from Unallocated.")) return;
+        setIsSubmitting(true);
+        try {
+            await executeBudgetTemplate(templateId, periodId);
+            router.push(domain === "MONEY" ? "/dashboard/money" : "/dashboard/time");
+            router.refresh();
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || "Failed to execute template.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const backUrl = domain === "MONEY" ? "/dashboard/money" : "/dashboard/time";
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
-                <div>
-                    <Link href={backUrl} className={styles.backBtn}>
-                        <ArrowLeft size={18} />
-                        Back to Dashboard
-                    </Link>
-                    <h1 className={styles.title}>Allocation Studio</h1>
-                    <p className="text-gray-500 text-sm">Distribute your {domain === "TIME" ? "time" : "funds"} across envelopes.</p>
+                <div className="flex items-center justify-between w-full">
+                    <div>
+                        <Link href={backUrl} className={styles.backBtn}>
+                            <ArrowLeft size={18} />
+                            Back to Dashboard
+                        </Link>
+                        <h1 className={styles.title}>Allocation Studio</h1>
+                        <p className="text-gray-500 text-sm">Distribute your {domain === "TIME" ? "time" : "funds"} across envelopes.</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            className={styles.reconcileBtn}
+                            onClick={() => setIsReconcileOpen(true)}
+                        >
+                            <Scale size={18} /> Reconcile
+                        </button>
+                    </div>
                 </div>
             </header>
+
+            <ReconcileModal
+                isOpen={isReconcileOpen}
+                onClose={() => setIsReconcileOpen(false)}
+                periodId={periodId}
+                currentUnallocated={currentUnallocated}
+                currency={currency}
+            />
 
             <div className={styles.layout}>
                 {/* Left: Source Control */}
@@ -140,6 +201,41 @@ export function FillClientPage({
                             {isSubmitting ? "Processing..." : "Confirm & Distribute"}
                         </button>
                     </div>
+
+                    {templates.length > 0 && (
+                        <div className={styles.templatesCard}>
+                            <div className={styles.templatesHeader}>
+                                <Sparkles size={16} className="text-amber-500" />
+                                <span className="font-bold text-xs uppercase tracking-wider">Quick Fill Templates</span>
+                            </div>
+                            <div className={styles.templatesList}>
+                                {templates.map(t => (
+                                    <div key={t.id} className={styles.templateItem}>
+                                        <span className={styles.templateName}>{t.name}</span>
+                                        <div className={styles.templateActions}>
+                                            <button
+                                                className={styles.applyBtn}
+                                                onClick={() => handleApplyTemplate(t)}
+                                                title="Pre-fill values"
+                                            >
+                                                Apply
+                                            </button>
+                                            <button
+                                                className={styles.directFillBtn}
+                                                onClick={() => handleOneClickFill(t.id)}
+                                                title="Execute immediately"
+                                            >
+                                                Fill Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link href="/dashboard/settings" className={styles.manageTemplatesLink}>
+                                <Settings size={12} /> Manage Templates
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Envelopes List */}
@@ -201,6 +297,6 @@ export function FillClientPage({
                     })}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

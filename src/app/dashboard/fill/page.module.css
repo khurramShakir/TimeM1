@@ -367,3 +367,110 @@
         flex-wrap: wrap;
     }
 }
+/* Template Card & Buttons */
+.templatesCard {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.templatesHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.templatesList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.templateItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f9fafb;
+}
+
+.templateItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.templateName {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.templateActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.applyBtn, .directFillBtn, .reconcileBtn {
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.applyBtn {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.applyBtn:hover {
+    background: #e5e7eb;
+}
+
+.directFillBtn {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fef3c7;
+}
+
+.directFillBtn:hover {
+    background: #fef3c7;
+}
+
+.reconcileBtn {
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+}
+
+.reconcileBtn:hover {
+    background: #000;
+    transform: translateY(-1px);
+}
+
+.manageTemplatesLink {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-decoration: none;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.manageTemplatesLink:hover {
+    color: #6b7280;
+}
