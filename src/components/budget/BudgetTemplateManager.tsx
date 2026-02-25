@@ -6,6 +6,16 @@ import { getBudgetTemplates, upsertBudgetTemplate, deleteBudgetTemplate, getAllE
 import styles from "./BudgetTemplateManager.module.css";
 import { formatCurrency } from "@/lib/format";
 
+function getCurrencySymbol(currency: string): string {
+    if (currency === "CAD") return "C$";
+    try {
+        const parts = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(0);
+        return parts.find(p => p.type === "currency")?.value ?? "$";
+    } catch {
+        return "$";
+    }
+}
+
 interface TemplateItem {
     envelopeName: string;
     amount: number;
@@ -204,16 +214,22 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                                         onChange={(e) => updateItem(idx, { envelopeName: e.target.value })}
                                     >
                                         <option value="" disabled>Select Envelope</option>
-                                        {availableEnvelopes.map(name => (
-                                            <option key={name} value={name}>{name}</option>
-                                        ))}
+                                        {availableEnvelopes
+                                            .filter(name => {
+                                                // Show this envelope if it's the current row's selection, or not used in any other row
+                                                const usedElsewhere = editingTemplate.items.some((other, otherIdx) => otherIdx !== idx && other.envelopeName === name);
+                                                return !usedElsewhere;
+                                            })
+                                            .map(name => (
+                                                <option key={name} value={name}>{name}</option>
+                                            ))}
                                         {!availableEnvelopes.includes(item.envelopeName) && item.envelopeName && (
                                             <option value={item.envelopeName}>{item.envelopeName} (Previous)</option>
                                         )}
                                     </select>
 
                                     <div className={styles.amountInput}>
-                                        <span>{currency === "USD" ? "$" : currency}</span>
+                                        <span>{getCurrencySymbol(currency)}</span>
                                         <input
                                             type="number"
                                             value={item.amount}
@@ -243,6 +259,15 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                         </div>
                     </div>
                 </div>
+
+                {editingTemplate.items.length > 0 && (
+                    <div className={styles.totalBar}>
+                        <span>Total Budgeted</span>
+                        <span className={styles.totalAmount}>
+                            {formatCurrency(editingTemplate.items.reduce((sum, item) => sum + (item.amount || 0), 0), currency)}
+                        </span>
+                    </div>
+                )}
 
                 <div className={styles.editorFooter}>
                     <button className={styles.saveBtn} onClick={handleSave} disabled={isSaving}>

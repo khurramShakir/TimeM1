@@ -47,7 +47,7 @@
 }
 
 .createBtn:hover {
-    background: var(--primary-dark, #166534);
+    background: var(--primary-hover, #6a8573);
     transform: translateY(-1px);
 }
 
@@ -82,8 +82,8 @@
 .badge {
     font-size: 0.7rem;
     padding: 0.125rem 0.5rem;
-    background: #dcfce7;
-    color: #166534;
+    background: var(--primary-light, #e6ebe8);
+    color: var(--primary, #7c9885);
     border-radius: 99px;
     font-weight: 700;
     text-transform: uppercase;
@@ -181,11 +181,11 @@
 .infoBox {
     display: flex;
     gap: 0.75rem;
-    background: #f0f9ff;
-    border: 1px solid #e0f2fe;
+    background: var(--primary-light, #e6ebe8);
+    border: 1px solid #c4d4c8;
     padding: 1rem;
     border-radius: 8px;
-    color: #0369a1;
+    color: #5a7d63;
 }
 
 .infoBox p {
@@ -257,7 +257,7 @@
 
 .itemRow {
     display: grid;
-    grid-template-columns: 1fr 120px 180px 40px;
+    grid-template-columns: 1fr 150px 180px 40px;
     gap: 0.75rem;
     align-items: center;
 }
@@ -286,7 +286,7 @@
 }
 
 .amountInput input {
-    padding-left: 1.75rem;
+    padding-left: 2.5rem;
     width: 100%;
 }
 
@@ -321,6 +321,25 @@
     color: #666;
 }
 
+.totalBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--primary-light, #e6ebe8);
+    border: 1px solid #c4d4c8;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: #3d6347;
+}
+
+.totalAmount {
+    font-size: 1.125rem;
+    font-family: var(--font-courier-prime), monospace;
+}
+
 .editorFooter {
     margin-top: 2rem;
     padding-top: 1.5rem;
@@ -330,11 +349,15 @@
 }
 
 .saveBtn {
-    background: #16a34a;
+    background: var(--primary, #7c9885);
     color: white;
     border: none;
     padding: 0.75rem 2rem;
     font-size: 1rem;
+}
+
+.saveBtn:hover {
+    background: var(--primary-hover, #6a8573);
 }
 
 .loading {
