@@ -10,7 +10,7 @@
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     margin-bottom: 2rem;
 }
 
@@ -41,9 +41,11 @@
 }
 
 .createBtn {
-    background: var(--primary);
+    background: var(--primary, #7c9885);
     color: white;
     border: none;
+    white-space: nowrap;
+    height: fit-content;
 }
 
 .createBtn:hover {
@@ -180,17 +182,26 @@
 
 .infoBox {
     display: flex;
-    gap: 0.75rem;
-    background: var(--primary-light, #e6ebe8);
-    border: 1px solid #c4d4c8;
-    padding: 1rem;
+    gap: 1rem;
+    background: #fdfdfb;
+    border: 1px solid #e8e6e1;
+    border-left: 4px solid var(--primary, #7c9885);
+    padding: 1rem 1.25rem;
     border-radius: 8px;
-    color: #5a7d63;
+    color: #444;
+    align-items: flex-start;
+}
+
+.infoIcon {
+    color: var(--primary, #7c9885);
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .infoBox p {
-    font-size: 0.8125rem;
-    line-height: 1.4;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
 }
 
 .itemsSection {
@@ -257,19 +268,53 @@
 
 .itemRow {
     display: grid;
-    grid-template-columns: 1fr 150px 180px 40px;
+    grid-template-columns: 1fr 120px 220px 40px;
     gap: 0.75rem;
     align-items: center;
 }
 
 .envSelect,
-.amountInput input,
-.modeSelect {
+.amountInput input {
     padding: 0.625rem;
     border-radius: 6px;
     border: 1px solid #eee;
     font-size: 0.875rem;
     background: white;
+}
+
+.modeToggle {
+    display: flex;
+    background: #f3f2ef;
+    padding: 2px;
+    border-radius: 8px;
+    border: 1px solid #e8e6e1;
+}
+
+.toggleOption {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    min-width: 65px;
+}
+
+.toggleOption:hover {
+    color: #555;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.toggleOption.active {
+    background: white;
+    color: var(--primary, #7c9885);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .amountInput {

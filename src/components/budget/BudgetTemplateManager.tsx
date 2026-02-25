@@ -110,9 +110,12 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
 
     const addItem = () => {
         if (!editingTemplate) return;
+        const usedNames = new Set(editingTemplate.items.map(i => i.envelopeName));
+        const firstUnused = availableEnvelopes.find(name => !usedNames.has(name)) || "";
+
         setEditingTemplate({
             ...editingTemplate,
-            items: [...editingTemplate.items, { envelopeName: availableEnvelopes[0] || "", amount: 0, fundingModeOverride: "INHERIT" }]
+            items: [...editingTemplate.items, { envelopeName: firstUnused, amount: 0, fundingModeOverride: "INHERIT" }]
         });
     };
 
@@ -176,9 +179,9 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                     </div>
 
                     <div className={styles.infoBox}>
-                        <Info size={16} />
+                        <Info size={18} className={styles.infoIcon} />
                         <p><strong>ADD:</strong> Transfers exactly the amount from Unallocated. <br />
-                            <strong>RESET:</strong> Transfers the delta to reach the target amount.</p>
+                            <strong>TARGET:</strong> Reach a specific goal by sweeping excess or pulling missing funds.</p>
                     </div>
 
                     <div className={styles.itemsSection}>
@@ -238,15 +241,29 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                                         />
                                     </div>
 
-                                    <select
-                                        className={styles.modeSelect}
-                                        value={item.fundingModeOverride}
-                                        onChange={(e) => updateItem(idx, { fundingModeOverride: e.target.value as any })}
-                                    >
-                                        <option value="INHERIT">Inherit ({editingTemplate.defaultFundingMode})</option>
-                                        <option value="ADD">ADD</option>
-                                        <option value="RESET">RESET</option>
-                                    </select>
+                                    <div className={styles.modeToggle}>
+                                        <button
+                                            className={`${styles.toggleOption} ${item.fundingModeOverride === 'INHERIT' ? styles.active : ''}`}
+                                            onClick={() => updateItem(idx, { fundingModeOverride: 'INHERIT' })}
+                                            title={`Auto: Inherits default (${editingTemplate.defaultFundingMode})`}
+                                        >
+                                            AUTO
+                                        </button>
+                                        <button
+                                            className={`${styles.toggleOption} ${item.fundingModeOverride === 'ADD' ? styles.active : ''}`}
+                                            onClick={() => updateItem(idx, { fundingModeOverride: 'ADD' })}
+                                            title="Add: Fixed addition"
+                                        >
+                                            ADD
+                                        </button>
+                                        <button
+                                            className={`${styles.toggleOption} ${item.fundingModeOverride === 'RESET' ? styles.active : ''}`}
+                                            onClick={() => updateItem(idx, { fundingModeOverride: 'RESET' })}
+                                            title="Target: Reach goal"
+                                        >
+                                            TARGET
+                                        </button>
+                                    </div>
 
                                     <button className={styles.deleteBtn} onClick={() => removeItem(idx)}>
                                         <Trash2 size={18} />
