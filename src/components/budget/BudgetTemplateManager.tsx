@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Save, Loader2, Info, ChevronRight, Settings2 } from "lucide-react";
-import { getBudgetTemplates, upsertBudgetTemplate, deleteBudgetTemplate } from "@/lib/budget-actions";
-import { getBudgetSummary } from "@/lib/actions";
+import { getBudgetTemplates, upsertBudgetTemplate, deleteBudgetTemplate, getAllEnvelopeNames } from "@/lib/budget-actions";
 import styles from "./BudgetTemplateManager.module.css";
 import { formatCurrency } from "@/lib/format";
 
@@ -38,12 +37,12 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
         async function load() {
             setLoading(true);
             try {
-                const [tData, sData] = await Promise.all([
+                const [tData, envNames] = await Promise.all([
                     getBudgetTemplates(domain),
-                    getBudgetSummary(new Date(), domain)
+                    getAllEnvelopeNames(domain)
                 ]);
                 setTemplates(tData as any);
-                setAvailableEnvelopes(sData.envelopes.filter((e: any) => e.name !== "Unallocated").map((e: any) => e.name));
+                setAvailableEnvelopes(envNames);
             } catch (error) {
                 console.error("Failed to load templates:", error);
             } finally {
@@ -175,9 +174,25 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                     <div className={styles.itemsSection}>
                         <div className={styles.itemsHeader}>
                             <h3>Envelopes to Fill</h3>
-                            <button className={styles.addBtn} onClick={addItem}>
-                                <Plus size={16} /> Add Envelope
-                            </button>
+                            <div className={styles.headerActions}>
+                                <button className={styles.outlineBtnSmall} onClick={() => {
+                                    if (!editingTemplate) return;
+                                    const existing = editingTemplate.items.map(i => i.envelopeName);
+                                    const missing = availableEnvelopes.filter(name => !existing.includes(name));
+                                    setEditingTemplate({
+                                        ...editingTemplate,
+                                        items: [
+                                            ...editingTemplate.items,
+                                            ...missing.map(name => ({ envelopeName: name, amount: 0, fundingModeOverride: "INHERIT" as const }))
+                                        ]
+                                    });
+                                }}>
+                                    Add All Envelopes
+                                </button>
+                                <button className={styles.addBtn} onClick={addItem}>
+                                    <Plus size={16} /> Add Envelope
+                                </button>
+                            </div>
                         </div>
 
                         <div className={styles.itemsList}>

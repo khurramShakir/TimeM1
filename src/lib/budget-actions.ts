@@ -34,6 +34,23 @@ export async function getBudgetTemplates(domain: string = "MONEY") {
     }));
 }
 
+export async function getAllEnvelopeNames(domain: string = "MONEY") {
+    const userId = await getAuthenticatedUser();
+    const envelopes = await (db as any).envelope.findMany({
+        where: {
+            domain: domain,
+            period: { userId }
+        },
+        select: { name: true },
+        distinct: ['name']
+    });
+
+    return envelopes
+        .map((e: any) => e.name)
+        .filter((name: string) => name !== "Unallocated")
+        .sort();
+}
+
 export async function upsertBudgetTemplate(data: {
     id?: string;
     name: string;

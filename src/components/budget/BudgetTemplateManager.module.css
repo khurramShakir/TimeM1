@@ -211,6 +211,30 @@
     color: #555;
 }
 
+.headerActions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.outlineBtnSmall {
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #666;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.outlineBtnSmall:hover {
+    background: #f9f9f9;
+    border-color: #ccc;
+    color: #333;
+}
+
 .addBtn {
     background: white;
     border: 1px dashed #ccc;
