@@ -38,15 +38,17 @@ export async function getAllEnvelopeNames(domain: string = "MONEY") {
     const userId = await getAuthenticatedUser();
     const envelopes = await (db as any).envelope.findMany({
         where: {
-            domain: domain,
-            period: { userId }
+            period: {
+                userId,
+                domain
+            }
         },
         select: { name: true },
         distinct: ['name']
     });
 
     return envelopes
-        .map((e: any) => e.name)
+        .map((e: any) => e.name as string)
         .filter((name: string) => name !== "Unallocated")
         .sort();
 }
