@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, Loader2, Info, ChevronRight, Settings2 } from "lucide-react";
-import { getBudgetTemplates, upsertBudgetTemplate, deleteBudgetTemplate, getAllEnvelopeNames } from "@/lib/budget-actions";
+import { Plus, Trash2, Save, Loader2, Info, ChevronRight, Settings2, CheckCircle2, Copy } from "lucide-react";
+import { getBudgetTemplates, upsertBudgetTemplate, deleteBudgetTemplate, getAllEnvelopeNames, setActiveTemplate } from "@/lib/budget-actions";
 import styles from "./BudgetTemplateManager.module.css";
 import { formatCurrency } from "@/lib/format";
 
@@ -18,7 +18,7 @@ function getCurrencySymbol(currency: string): string {
 
 interface TemplateItem {
     envelopeName: string;
-    amount: number;
+    amount: number | string;
     fundingModeOverride: "ADD" | "RESET" | "INHERIT";
 }
 
@@ -27,6 +27,8 @@ interface Template {
     name: string;
     domain: string;
     isAutoFillEnabled: boolean;
+    isActive: boolean;
+    isBuiltIn: boolean;
     defaultFundingMode: "ADD" | "RESET";
     items: TemplateItem[];
 }
@@ -42,6 +44,7 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
     const [loading, setLoading] = useState(true);
     const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isActivating, setIsActivating] = useState<string | null>(null);
 
     useEffect(() => {
         async function load() {
@@ -68,9 +71,40 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
             name: "New Template",
             domain: domain,
             isAutoFillEnabled: false,
+            isActive: false,
+            isBuiltIn: false,
             defaultFundingMode: "ADD",
             items: []
         });
+    };
+
+    const handleEditOrDuplicate = (t: Template) => {
+        if (t.isBuiltIn) {
+            // Duplicate it instead of editing
+            setEditingTemplate({
+                ...t,
+                id: "", // Clear ID so it saves as new
+                name: `${t.name} (Copy)`,
+                isBuiltIn: false,
+                isActive: false // Copies start as inactive
+            });
+        } else {
+            setEditingTemplate(t);
+        }
+    };
+
+    const handleMakeActive = async (id: string) => {
+        setIsActivating(id);
+        try {
+            await setActiveTemplate(id);
+            const updated = await getBudgetTemplates(domain);
+            setTemplates(updated as any);
+        } catch (error) {
+            console.error("Failed to set active template:", error);
+            alert("Error setting active template.");
+        } finally {
+            setIsActivating(null);
+        }
     };
 
     const handleSave = async () => {
@@ -83,7 +117,10 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                 domain: editingTemplate.domain,
                 isAutoFillEnabled: editingTemplate.isAutoFillEnabled,
                 defaultFundingMode: editingTemplate.defaultFundingMode,
-                items: editingTemplate.items
+                items: editingTemplate.items.map(i => ({
+                    ...i,
+                    amount: Number(i.amount) || 0
+                }))
             });
 
             // Refresh list
@@ -115,7 +152,7 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
 
         setEditingTemplate({
             ...editingTemplate,
-            items: [...editingTemplate.items, { envelopeName: firstUnused, amount: 0, fundingModeOverride: "INHERIT" }]
+            items: [...editingTemplate.items, { envelopeName: firstUnused, amount: "", fundingModeOverride: "INHERIT" }]
         });
     };
 
@@ -196,7 +233,7 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                                         ...editingTemplate,
                                         items: [
                                             ...editingTemplate.items,
-                                            ...missing.map(name => ({ envelopeName: name, amount: 0, fundingModeOverride: "INHERIT" as const }))
+                                            ...missing.map(name => ({ envelopeName: name, amount: "", fundingModeOverride: "INHERIT" as const }))
                                         ]
                                     });
                                 }}>
@@ -209,35 +246,38 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                         </div>
 
                         <div className={styles.itemsList}>
+                            {/* Datalist for envelope names */}
+                            <datalist id="envelope-names">
+                                {availableEnvelopes.map((name) => (
+                                    <option key={name} value={name} />
+                                ))}
+                            </datalist>
+
                             {editingTemplate.items.map((item, idx) => (
                                 <div key={idx} className={styles.itemRow}>
-                                    <select
+                                    <input
                                         className={styles.envSelect}
+                                        type="text"
+                                        list="envelope-names"
+                                        placeholder="Envelope name"
                                         value={item.envelopeName}
                                         onChange={(e) => updateItem(idx, { envelopeName: e.target.value })}
-                                    >
-                                        <option value="" disabled>Select Envelope</option>
-                                        {availableEnvelopes
-                                            .filter(name => {
-                                                // Show this envelope if it's the current row's selection, or not used in any other row
-                                                const usedElsewhere = editingTemplate.items.some((other, otherIdx) => otherIdx !== idx && other.envelopeName === name);
-                                                return !usedElsewhere;
-                                            })
-                                            .map(name => (
-                                                <option key={name} value={name}>{name}</option>
-                                            ))}
-                                        {!availableEnvelopes.includes(item.envelopeName) && item.envelopeName && (
-                                            <option value={item.envelopeName}>{item.envelopeName} (Previous)</option>
-                                        )}
-                                    </select>
+                                        onBlur={(e) => {
+                                            // Handle edge case where name is empty
+                                            if (!e.target.value.trim()) {
+                                                updateItem(idx, { envelopeName: "New Envelope" });
+                                            }
+                                        }}
+                                    />
 
                                     <div className={styles.amountInput}>
                                         <span>{getCurrencySymbol(currency)}</span>
                                         <input
                                             type="number"
                                             value={item.amount}
-                                            onChange={(e) => updateItem(idx, { amount: parseFloat(e.target.value) || 0 })}
+                                            onChange={(e) => updateItem(idx, { amount: e.target.value })}
                                             placeholder="0.00"
+                                            step="0.01"
                                         />
                                     </div>
 
@@ -281,7 +321,7 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
                     <div className={styles.totalBar}>
                         <span>Total Budgeted</span>
                         <span className={styles.totalAmount}>
-                            {formatCurrency(editingTemplate.items.reduce((sum, item) => sum + (item.amount || 0), 0), currency)}
+                            {formatCurrency(editingTemplate.items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0), currency)}
                         </span>
                     </div>
                 )}
@@ -310,21 +350,35 @@ export function BudgetTemplateManager({ domain, currency }: BudgetTemplateManage
 
             <div className={styles.templatesList}>
                 {templates.map(t => (
-                    <div key={t.id} className={styles.templateCard}>
+                    <div key={t.id} className={`${styles.templateCard} ${t.isActive ? styles.activeCard : ''}`}>
                         <div className={styles.templateInfo}>
                             <div className={styles.templateTitleRow}>
                                 <h3>{t.name}</h3>
+                                {t.isActive && <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>}
+                                {t.isBuiltIn && <span className={`${styles.badge} ${styles.badgeBuiltIn}`}>Built-in</span>}
                                 {t.isAutoFillEnabled && <span className={styles.badge}>Auto-Fill On</span>}
                             </div>
                             <p>{t.items.length} envelopes • Default: {t.defaultFundingMode}</p>
                         </div>
                         <div className={styles.templateActions}>
-                            <button className={styles.actionBtn} onClick={() => setEditingTemplate(t)}>
-                                <Settings2 size={18} /> Edit
+                            {!t.isActive && (
+                                <button
+                                    className={`${styles.actionBtn} ${styles.activateBtn}`}
+                                    onClick={() => handleMakeActive(t.id)}
+                                    disabled={isActivating === t.id}
+                                >
+                                    {isActivating === t.id ? <Loader2 size={16} className={styles.spin} /> : <CheckCircle2 size={16} />}
+                                    Set Active
+                                </button>
+                            )}
+                            <button className={styles.actionBtn} onClick={() => handleEditOrDuplicate(t)}>
+                                {t.isBuiltIn ? <><Copy size={16} /> Duplicate</> : <><Settings2 size={16} /> Edit</>}
                             </button>
-                            <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDelete(t.id)}>
-                                <Trash2 size={18} />
-                            </button>
+                            {!t.isBuiltIn && (
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDelete(t.id)}>
+                                    <Trash2 size={16} />
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

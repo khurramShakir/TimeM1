@@ -1,0 +1,211 @@
+.container {
+    width: 100%;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 3.5rem;
+    }
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.iconWrapper {
+    width: 64px;
+    height: 64px;
+    background: var(--primary, #7c9885);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    transform: rotate(3deg);
+    color: white;
+}
+
+.title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.templateCard {
+    text-align: left;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.templateCard:hover {
+    border-color: #d1dfd5;
+    background: #fdfdfb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.templateCard.selected {
+    border: 2px solid var(--primary, #7c9885);
+    background: #fdfdfb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 152, 133, 0.15);
+}
+
+.checkIcon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: var(--primary, #7c9885);
+}
+
+.cardTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+    padding-right: 2rem;
+}
+
+.cardSubtitle {
+    font-size: 0.875rem;
+    color: #888;
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.includesHeader {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.envelopeItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.envelopeName {
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.5rem;
+}
+
+.envelopeAmount {
+    color: #888;
+    font-family: var(--font-courier-prime), monospace;
+    flex-shrink: 0;
+}
+
+.moreItems {
+    font-size: 0.75rem;
+    color: #999;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .footer {
+        flex-direction: row;
+    }
+}
+
+.footerNote {
+    font-size: 0.875rem;
+    color: #888;
+    font-style: italic;
+}
+
+.startBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary, #7c9885);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .startBtn {
+        width: auto;
+    }
+}
+
+.startBtn:hover:not(:disabled) {
+    background: var(--primary-hover, #6a8573);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 152, 133, 0.2);
+}
+
+.startBtn:disabled {
+    background: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

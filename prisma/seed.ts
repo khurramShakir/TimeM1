@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient({})
 
@@ -81,6 +81,104 @@ async function main() {
             },
         })
         console.log('Created transaction')
+    }
+
+    // 5. Create System User and Built-in Templates
+    const systemUserId = 'system_template_owner_1'
+
+    let systemUser = await prisma.user.findUnique({
+        where: { id: systemUserId }
+    })
+
+    if (!systemUser) {
+        systemUser = await prisma.user.create({
+            data: {
+                id: systemUserId,
+                email: 'system@timem1.local',
+                name: 'System Templates',
+            }
+        })
+        console.log('Created System User for templates.')
+    }
+
+    const defaultTemplates: Prisma.BudgetTemplateCreateInput[] = [
+        {
+            name: '50/30/20 Rule',
+            domain: 'MONEY',
+            isBuiltIn: true,
+            defaultFundingMode: 'ADD',
+            items: {
+                create: [
+                    { envelopeName: 'Needs (50%)', amount: 50, fundingModeOverride: 'INHERIT' },
+                    { envelopeName: 'Wants (30%)', amount: 30, fundingModeOverride: 'INHERIT' },
+                    { envelopeName: 'Savings (20%)', amount: 20, fundingModeOverride: 'INHERIT' },
+                ],
+            },
+            user: { connect: { id: systemUserId } }
+        },
+        {
+            name: 'Zero-Based Budget',
+            domain: 'MONEY',
+            isBuiltIn: true,
+            defaultFundingMode: 'RESET',
+            items: {
+                create: [
+                    { envelopeName: 'Housing', amount: 0, fundingModeOverride: 'RESET' },
+                    { envelopeName: 'Food', amount: 0, fundingModeOverride: 'RESET' },
+                    { envelopeName: 'Transportation', amount: 0, fundingModeOverride: 'RESET' },
+                    { envelopeName: 'Utilities', amount: 0, fundingModeOverride: 'RESET' },
+                    { envelopeName: 'Savings', amount: 0, fundingModeOverride: 'RESET' },
+                ],
+            },
+            user: { connect: { id: systemUserId } }
+        },
+        {
+            name: 'Start from Scratch',
+            domain: 'MONEY',
+            isBuiltIn: true,
+            defaultFundingMode: 'ADD',
+            items: {
+                create: [],
+            },
+            user: { connect: { id: systemUserId } }
+        },
+        {
+            name: 'Standard Time Block',
+            domain: 'TIME',
+            isBuiltIn: true,
+            defaultFundingMode: 'ADD',
+            items: {
+                create: [
+                    { envelopeName: 'Sleep', amount: 56, fundingModeOverride: 'INHERIT' },
+                    { envelopeName: 'Work', amount: 40, fundingModeOverride: 'INHERIT' },
+                    { envelopeName: 'Personal Care', amount: 14, fundingModeOverride: 'INHERIT' },
+                    { envelopeName: 'Leisure', amount: 20, fundingModeOverride: 'INHERIT' },
+                ],
+            },
+            user: { connect: { id: systemUserId } }
+        }
+    ]
+
+    for (const tpl of defaultTemplates) {
+        const existing = await prisma.budgetTemplate.findFirst({
+            where: { name: tpl.name, userId: systemUserId }
+        })
+
+        if (!existing) {
+            await prisma.budgetTemplate.create({
+                data: {
+                    name: tpl.name,
+                    domain: tpl.domain,
+                    isBuiltIn: tpl.isBuiltIn,
+                    defaultFundingMode: tpl.defaultFundingMode,
+                    user: { connect: { id: systemUserId } },
+                    items: tpl.items
+                }
+            })
+            console.log(`Seeded built-in template: ${tpl.name}`)
+        } else {
+            console.log(`Template already exists: ${tpl.name}`)
+        }
     }
 
     console.log('Seeding finished.')

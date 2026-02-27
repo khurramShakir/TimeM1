@@ -67,6 +67,12 @@
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.03);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.templateCard.activeCard {
+    border-left: 4px solid var(--primary, #7c9885);
+    background: #fdfdfb;
 }
 
 .templateTitleRow {
@@ -89,6 +95,16 @@
     border-radius: 99px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.badgeActive {
+    background: var(--primary, #7c9885);
+    color: white;
+}
+
+.badgeBuiltIn {
+    background: #eef2fa;
+    color: #4f46e5;
 }
 
 .templateInfo p {
@@ -118,6 +134,21 @@
 .actionBtn:hover {
     background: #f9f9f9;
     border-color: #ddd;
+}
+
+.actionBtn:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.activateBtn {
+    color: var(--primary, #7c9885);
+    border-color: #d1dfd5;
+}
+
+.activateBtn:hover:not(:disabled) {
+    background: var(--primary-light, #e6ebe8);
+    border-color: var(--primary, #7c9885);
 }
 
 .actionBtn.danger:hover {

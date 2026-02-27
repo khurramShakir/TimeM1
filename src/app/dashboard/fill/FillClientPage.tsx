@@ -39,6 +39,7 @@ export function FillClientPage({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [templates, setTemplates] = useState<any[]>([]);
     const [isReconcileOpen, setIsReconcileOpen] = useState(false);
+    const [autoIncome, setAutoIncome] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -106,7 +107,7 @@ export function FillClientPage({
         if (!confirm("Are you sure you want to execute this template immediately? This will create transfers from Unallocated.")) return;
         setIsSubmitting(true);
         try {
-            await executeBudgetTemplate(templateId, periodId);
+            await executeBudgetTemplate(templateId, periodId, autoIncome);
             router.push(domain === "MONEY" ? "/dashboard/money" : "/dashboard/time");
             router.refresh();
         } catch (error: any) {
@@ -208,6 +209,20 @@ export function FillClientPage({
                                 <Sparkles size={16} className="text-amber-500" />
                                 <span className="font-bold text-xs uppercase tracking-wider">Quick Fill Templates</span>
                             </div>
+
+                            <div className="flex items-center gap-2 mb-4 mt-2 bg-[#fdfdfb] p-2 rounded border border-[#e8e6e1]">
+                                <input
+                                    type="checkbox"
+                                    id="autoIncomeToggle"
+                                    checked={autoIncome}
+                                    onChange={(e) => setAutoIncome(e.target.checked)}
+                                    className="cursor-pointer"
+                                />
+                                <label htmlFor="autoIncomeToggle" className="text-xs text-gray-700 cursor-pointer select-none">
+                                    Add <strong>Auto Income</strong> to Unallocated to make it zero if funds fall short.
+                                </label>
+                            </div>
+
                             <div className={styles.templatesList}>
                                 {templates.map(t => (
                                     <div key={t.id} className={styles.templateItem}>

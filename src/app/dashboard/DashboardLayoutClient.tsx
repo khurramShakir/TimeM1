@@ -12,7 +12,7 @@ import { PreferenceProvider, usePreference } from "@/context/PreferenceContext";
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isGateway = pathname === "/dashboard";
+    const isGateway = pathname === "/dashboard" || pathname === "/dashboard/onboarding";
     const { theme } = usePreference();
 
     // PaperBanana Layout (TopNav)

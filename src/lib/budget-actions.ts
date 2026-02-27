@@ -68,6 +68,14 @@ export async function upsertBudgetTemplate(data: {
     const userId = await getAuthenticatedUser();
 
     if (data.id) {
+        // Prevent modifying built-in templates directly
+        const existing = await (db as any).budgetTemplate.findUnique({
+            where: { id: data.id, userId }
+        });
+        if (existing?.isBuiltIn) {
+            throw new Error("Cannot modify built-in templates directly. Please duplicate it first.");
+        }
+
         // Update existing
         await (db as any).$transaction(async (tx: any) => {
             await tx.budgetTemplate.update({
@@ -95,6 +103,8 @@ export async function upsertBudgetTemplate(data: {
                 userId,
                 name: data.name,
                 domain: data.domain,
+                isActive: false, // New templates are not active by default
+                isBuiltIn: false, // User created templates are never built-in
                 isAutoFillEnabled: data.isAutoFillEnabled ?? false,
                 defaultFundingMode: data.defaultFundingMode ?? "ADD",
                 items: {
@@ -111,6 +121,120 @@ export async function upsertBudgetTemplate(data: {
     revalidatePath("/dashboard/settings");
 }
 
+export async function setActiveTemplate(templateId: string) {
+    const userId = await getAuthenticatedUser();
+
+    const template = await (db as any).budgetTemplate.findUnique({
+        where: { id: templateId, userId }
+    });
+
+    if (!template) throw new Error("Template not found");
+
+    await (db as any).$transaction(async (tx: any) => {
+        // 1. Deactivate all other templates in this domain
+        await tx.budgetTemplate.updateMany({
+            where: { userId, domain: template.domain },
+            data: { isActive: false }
+        });
+
+        // 2. Activate the chosen template
+        await tx.budgetTemplate.update({
+            where: { id: templateId },
+            data: { isActive: true }
+        });
+
+        // 3. Find the CURRENT, open budget period for this domain
+        // and update its template link so current month reporting stays in sync.
+        const currentPeriod = await tx.budgetPeriod.findFirst({
+            where: {
+                userId,
+                domain: template.domain,
+                isClosed: false
+            },
+            orderBy: { startDate: 'desc' }
+        });
+
+        if (currentPeriod) {
+            await tx.budgetPeriod.update({
+                where: { id: currentPeriod.id },
+                data: { templateId: template.id }
+            });
+        }
+    });
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard/" + template.domain.toLowerCase(), "layout");
+}
+
+export async function onboardUserTemplate(templateId: string) {
+    const userId = await getAuthenticatedUser();
+
+    // Find the requested template
+    const sourceTemplate = await (db as any).budgetTemplate.findUnique({
+        where: { id: templateId },
+        include: { items: true }
+    });
+
+    if (!sourceTemplate) throw new Error("Template not found");
+
+    if (!sourceTemplate.isBuiltIn && sourceTemplate.userId === userId) {
+        // Just activate it if it's already their own template
+        await setActiveTemplate(templateId);
+        return;
+    }
+
+    if (!sourceTemplate.isBuiltIn) {
+        throw new Error("Unauthorized");
+    }
+
+    // It is built-in; duplicate it to the user's account and set it active
+    await (db as any).$transaction(async (tx: any) => {
+        // Deactivate existing templates in domain
+        await tx.budgetTemplate.updateMany({
+            where: { userId, domain: sourceTemplate.domain },
+            data: { isActive: false }
+        });
+
+        const newTemplate = await tx.budgetTemplate.create({
+            data: {
+                userId,
+                name: sourceTemplate.name,
+                domain: sourceTemplate.domain,
+                isActive: true, // Make active immediately
+                isBuiltIn: false,
+                isAutoFillEnabled: sourceTemplate.isAutoFillEnabled,
+                defaultFundingMode: sourceTemplate.defaultFundingMode,
+                items: {
+                    create: sourceTemplate.items.map((item: any) => ({
+                        envelopeName: item.envelopeName,
+                        amount: item.amount,
+                        fundingModeOverride: item.fundingModeOverride
+                    }))
+                }
+            }
+        });
+
+        // Link to current period
+        const currentPeriod = await tx.budgetPeriod.findFirst({
+            where: {
+                userId,
+                domain: sourceTemplate.domain,
+                isClosed: false
+            },
+            orderBy: { startDate: 'desc' }
+        });
+
+        if (currentPeriod) {
+            await tx.budgetPeriod.update({
+                where: { id: currentPeriod.id },
+                data: { templateId: newTemplate.id }
+            });
+        }
+    });
+
+    revalidatePath("/dashboard", "layout");
+}
+
 export async function deleteBudgetTemplate(id: string) {
     const userId = await getAuthenticatedUser();
     await (db as any).budgetTemplate.delete({
@@ -121,7 +245,7 @@ export async function deleteBudgetTemplate(id: string) {
 
 // --- Execution Logic ---
 
-export async function executeBudgetTemplate(templateId: string, periodId: number) {
+export async function executeBudgetTemplate(templateId: string, periodId: number, autoIncome: boolean = false) {
     const userId = await getAuthenticatedUser();
 
     const template = await (db as any).budgetTemplate.findUnique({
@@ -162,16 +286,14 @@ export async function executeBudgetTemplate(templateId: string, periodId: number
             return { envelopeId: env.id, envelopeName: env.name, delta };
         }).filter((op: any) => op !== null && op.delta !== 0) as { envelopeId: number; envelopeName: string; delta: number; }[];
 
-        // Step 1: Execute sweeps (negative delta) first to maximize Unallocated
         const sweeps = operations.filter(op => op.delta < 0);
         const pulls = operations.filter(op => op.delta > 0);
 
-        // Current Unallocated balance (tracking within transaction)
         let currentUnallocated = Number(unallocatedEnv.funded);
 
+        // Step 1: Execute sweeps (negative delta) first to maximize Unallocated
         for (const op of sweeps as any[]) {
             const amount = Math.abs(op.delta);
-            // Move from Envelope back to Unallocated
             await tx.envelope.update({
                 where: { id: op.envelopeId },
                 data: { funded: { decrement: amount } }
@@ -196,13 +318,43 @@ export async function executeBudgetTemplate(templateId: string, periodId: number
             currentUnallocated += amount;
         }
 
+        // Step 1.5 Checking for deficit and injecting Auto Income
+        const totalRequiredPulls = pulls.reduce((sum, op) => sum + op.delta, 0);
+        const deficit = totalRequiredPulls - currentUnallocated;
+
+        if (deficit > 0) {
+            if (autoIncome) {
+                // Auto Income injection
+                await tx.envelope.update({
+                    where: { id: unallocatedEnv.id },
+                    data: { funded: { increment: deficit } }
+                });
+
+                // Adjust period capacity so reporting math still works
+                await tx.budgetPeriod.update({
+                    where: { id: periodId },
+                    data: { capacity: { increment: deficit } }
+                });
+
+                await tx.transaction.create({
+                    data: {
+                        envelopeId: unallocatedEnv.id,
+                        type: "INCOME",
+                        amount: deficit,
+                        description: "Auto Income",
+                        date: new Date(),
+                        isSystemAdjustment: false // Not system so it shows in reporting
+                    } as any
+                });
+
+                currentUnallocated += deficit;
+            }
+            // If autoIncome is false, we just let Unallocated go negative during the pull loop as requested.
+        }
+
         // Step 2: Execute pulls (positive delta)
         for (const op of pulls) {
-            if (currentUnallocated < op.delta) {
-                throw new Error(`Insufficient funds in Unallocated to fund ${op.envelopeName}. Needed ${op.delta}, available ${currentUnallocated}.`);
-            }
-
-            // Move from Unallocated to Envelope
+            // Unallocated is guaranteed to be sufficient if autoIncome was used or deficit was <= 0
             await tx.envelope.update({
                 where: { id: unallocatedEnv.id },
                 data: { funded: { decrement: op.delta } }
@@ -226,6 +378,12 @@ export async function executeBudgetTemplate(templateId: string, periodId: number
 
             currentUnallocated -= op.delta;
         }
+
+        // Finally, stamp the BudgetPeriod with the template used
+        await tx.budgetPeriod.update({
+            where: { id: periodId },
+            data: { templateId: template.id }
+        });
     });
 
     revalidatePath("/dashboard/money", 'layout');

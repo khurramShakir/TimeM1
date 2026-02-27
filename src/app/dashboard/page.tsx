@@ -1,11 +1,25 @@
-"use client";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { Clock, Banknote, ArrowRight } from "lucide-react";
 import styles from "./page.module.css";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import db from "@/lib/db";
 
-export default function DashboardGateway() {
+export default async function DashboardGateway() {
+    const authObj = await auth();
+    const userId = authObj.userId;
+    if (!userId) redirect("/sign-in");
+
+    const activeTemplate = await db.budgetTemplate.findFirst({
+        where: { userId, domain: "MONEY", isActive: true }
+    });
+
+    if (!activeTemplate) {
+        redirect("/dashboard/onboarding");
+    }
+
     return (
         <div className={styles.gateway}>
             <header className={styles.header}>
