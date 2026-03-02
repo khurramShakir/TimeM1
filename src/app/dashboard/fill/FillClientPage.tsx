@@ -136,6 +136,17 @@ export function FillClientPage({
     const engineDeficit = netPull - effectiveAvailable;
     const hasDeficit = engineDeficit > 0;
 
+    // Dynamic font size — shrink as the formatted number grows longer
+    // Left panel is ~250px; Courier is ~0.6em/char, so 8 chars @ 48px = ~230px max
+    const heroFontSize = useMemo(() => {
+        const len = fmt(engineRequiredFunds).length;
+        if (len > 13) return '26px';
+        if (len > 11) return '32px';
+        if (len > 9) return '38px';
+        if (len > 7) return '44px';
+        return '48px';
+    }, [engineRequiredFunds, fmt]);
+
     const handleMakeActive = async () => {
         if (!editingTemplate) return;
         try {
@@ -332,12 +343,8 @@ export function FillClientPage({
             <header className={styles.header}>
                 <div className="flex items-center justify-between w-full">
                     <div>
-                        <Link href={backUrl} className={styles.backBtn}>
-                            <ArrowLeft size={18} />
-                            Back to Dashboard
-                        </Link>
                         <h1 className={styles.title}>Allocation Studio</h1>
-                        <p className="text-gray-500 text-sm">
+                        <p className={styles.subtitle}>
                             {isManualMode ? `Manually distribute ${domain === "TIME" ? "time" : "funds"} across envelopes.` : `Directly edit your active blueprint and deploy ${domain === "TIME" ? "time" : "funds"}.`}
                         </p>
                     </div>
@@ -366,7 +373,10 @@ export function FillClientPage({
                     <div className={styles.enginePanel}>
                         <div className={styles.unallocatedBox}>
                             <span className={styles.unallocatedLabel}>Budgeted Amount</span>
-                            <div className={`${styles.unallocatedAmount} ${(hasDeficit && domain === "MONEY") ? styles.unallocatedAmountNegative : ''}`}>
+                            <div
+                                className={`${styles.unallocatedAmount} ${(hasDeficit && domain === "MONEY") ? styles.unallocatedAmountNegative : ''}`}
+                                style={{ fontSize: heroFontSize }}
+                            >
                                 {fmt(engineRequiredFunds)}
                             </div>
                         </div>
@@ -416,12 +426,14 @@ export function FillClientPage({
                             <Zap size={20} fill="currentColor" /> Run Template Engine
                         </button>
 
-                        <a
-                            className={styles.switchModeLink}
-                            onClick={() => setIsManualMode(true)}
-                        >
-                            Switch to Manual Form Entry
-                        </a>
+                        <div>
+                            <a
+                                className={styles.switchModeLink}
+                                onClick={() => setIsManualMode(true)}
+                            >
+                                Switch to Manual Form Entry
+                            </a>
+                        </div>
                     </div>
 
                     {/* Right: The Blueprint */}

@@ -13,11 +13,19 @@
 }
 
 .title {
-    font-size: 42px;
+    font-size: 24px;
     font-weight: 700;
-    color: var(--txt-prm, #111827);
-    letter-spacing: -1px;
+    color: var(--txt-prm, #2d2d2d);
+    letter-spacing: -0.3px;
     margin: 0;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0.25rem 0 0 0;
 }
 
 /* Layout Grid */
@@ -36,11 +44,11 @@
 
 /* Left Panel - The Engine */
 .enginePanel {
-    background: var(--bg-wht, #ffffff);
+    background: rgba(251, 250, 246, 0.75);
     border: 1px solid var(--brd-sbt, #e8e6e1);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     position: sticky;
     top: 2rem;
 }
@@ -64,10 +72,16 @@
 
 .unallocatedAmount {
     font-size: 48px;
+    /* overridden inline by heroFontSize */
     font-weight: 700;
     color: var(--txt-prm, #2d2d2d);
-    line-height: 1;
+    line-height: 1.1;
     font-family: var(--font-mono, monospace);
+    width: 100%;
+    text-align: center;
+    display: block;
+    white-space: nowrap;
+    transition: font-size 0.2s ease;
 }
 
 .unallocatedAmountNegative {
@@ -188,17 +202,17 @@
 
 /* Right Panel - The Blueprint */
 .blueprintPanel {
-    background: var(--bg-wht, #ffffff);
+    background: rgba(251, 250, 246, 0.75);
     border: 1px solid var(--brd-sbt, #e8e6e1);
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .blueprintHeader {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--brd-sbt, #e8e6e1);
-    background: #fdfdfc;
+    background: rgba(253, 253, 252, 0.8);
     display: flex;
     justify-content: space-between;
     align-items: center;
