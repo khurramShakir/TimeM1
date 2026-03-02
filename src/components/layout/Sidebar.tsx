@@ -24,7 +24,7 @@ export function Sidebar() {
         { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
         { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
         { name: "Reports", href: `/dashboard/reports${isMoney ? "?domain=MONEY" : "?domain=TIME"}`, icon: TrendingUp },
-        { name: "Settings", href: `/dashboard/settings`, icon: Settings },
+        { name: "Settings", href: `/dashboard/settings${isMoney ? "?domain=MONEY" : "?domain=TIME"}`, icon: Settings },
     ];
 
     return (

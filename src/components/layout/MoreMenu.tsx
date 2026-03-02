@@ -13,6 +13,7 @@ export function MoreMenu() {
     const searchParams = useSearchParams();
 
     const isOpen = searchParams.get("menu") === "more";
+    const isMoney = pathname.startsWith("/dashboard/money") || searchParams.get("domain") === "MONEY";
 
     const closeMenu = () => {
         const params = new URLSearchParams(searchParams.toString());
@@ -30,7 +31,6 @@ export function MoreMenu() {
                 <h3 style={{ padding: '0 1rem', marginBottom: '1rem', fontWeight: 700 }}>More Actions</h3>
 
                 {(() => {
-                    const isMoney = pathname.startsWith("/dashboard/money") || searchParams.get("domain") === "MONEY";
                     return (
                         <Link href={`/dashboard/reports${isMoney ? "?domain=MONEY" : "?domain=TIME"}`} className={styles.menuItem} onClick={closeMenu}>
                             <div className={styles.menuItemIcon}>
@@ -41,7 +41,7 @@ export function MoreMenu() {
                     );
                 })()}
 
-                <Link href="/dashboard/settings" className={styles.menuItem} onClick={closeMenu}>
+                <Link href={`/dashboard/settings${isMoney ? "?domain=MONEY" : "?domain=TIME"}`} className={styles.menuItem} onClick={closeMenu}>
                     <div className={styles.menuItemIcon}>
                         <Settings size={20} />
                     </div>

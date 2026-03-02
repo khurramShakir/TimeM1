@@ -99,7 +99,7 @@ export default async function RootLayout({
           ${outfit.variable} 
           ${manrope.variable}
         `}>
-          <body>
+          <body suppressHydrationWarning>
             {children}
           </body>
         </html>

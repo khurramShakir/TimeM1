@@ -447,6 +447,13 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
         capacity = Number(settings.baseMoneyCapacity || 0);
     }
 
+    // Get the currently active template to know which envelopes are "desired"
+    const activeTemplate = await db.budgetTemplate.findFirst({
+        where: { userId: userId as any, domain: domain, isActive: true },
+        include: { items: true }
+    }) as any;
+    const desiredEnvelopeNames = activeTemplate ? activeTemplate.items.map((i: any) => i.envelopeName) : [];
+
     // Determine Envelope Cloning Strategy & Rollover
     let envelopesToCreate = [];
     const shouldCopy = settings.autoBudget !== false; // Default to true
@@ -475,6 +482,17 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
                     funded: funded,         // Set rollover as start balance
                     color: env.color
                 };
+            })
+            .filter((env: any) => {
+                // Keep if it has rollover money
+                if (env.funded !== 0 && domain === "MONEY") return true;
+                // Keep if it's in the current active template
+                if (desiredEnvelopeNames.includes(env.name)) return true;
+                // Keep if there is NO active template (fallback to old behavior)
+                if (!activeTemplate) return true;
+
+                // Otherwise, this is a $0 envelope from an old template. Drop it.
+                return false;
             });
 
         // Also rollover Unallocated balance
@@ -488,6 +506,13 @@ export async function initNewPeriod(targetDate: Date, domain: string = "MONEY", 
         // Clone NAMES only, set budget to 0 (Zero-Based Budgeting)
         envelopesToCreate = latestPeriod.envelopes
             .filter((env: any) => env.name !== "Unallocated")
+            .filter((env: any) => {
+                // Keep if it's in the current active template
+                if (desiredEnvelopeNames.includes(env.name)) return true;
+                // Keep if there is NO active template (fallback to old behavior)
+                if (!activeTemplate) return true;
+                return false;
+            })
             .map((env: any) => ({
                 name: env.name,
                 budgeted: 0, // Reset to 0
@@ -853,6 +878,7 @@ export async function getTransactions(domain: string = "TIME", limit?: number) {
         date: t.date,
         entity: t.entity,
         refNumber: t.refNumber,
+        isSystemAdjustment: t.isSystemAdjustment,
         envelopeId: t.envelopeId,
         envelope: t.envelope ? {
             id: t.envelope.id,

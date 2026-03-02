@@ -95,6 +95,35 @@ export async function upsertBudgetTemplate(data: {
                     }
                 }
             });
+
+            if (existing?.isActive) {
+                const openPeriods = await tx.budgetPeriod.findMany({
+                    where: { userId, domain: data.domain, isClosed: false },
+                    include: { envelopes: true }
+                });
+
+                for (const period of openPeriods) {
+                    for (const item of data.items) {
+                        const existingEnvelope = period.envelopes.find((e: any) => e.name === item.envelopeName);
+                        if (existingEnvelope) {
+                            await tx.envelope.update({
+                                where: { id: existingEnvelope.id },
+                                data: { budgeted: item.amount }
+                            });
+                        } else {
+                            await tx.envelope.create({
+                                data: {
+                                    name: item.envelopeName,
+                                    budgeted: item.amount,
+                                    funded: 0,
+                                    color: "blue",
+                                    periodId: period.id
+                                }
+                            });
+                        }
+                    }
+                }
+            }
         });
     } else {
         // Create new
@@ -125,7 +154,8 @@ export async function setActiveTemplate(templateId: string) {
     const userId = await getAuthenticatedUser();
 
     const template = await (db as any).budgetTemplate.findUnique({
-        where: { id: templateId, userId }
+        where: { id: templateId, userId },
+        include: { items: true }
     });
 
     if (!template) throw new Error("Template not found");
@@ -143,22 +173,43 @@ export async function setActiveTemplate(templateId: string) {
             data: { isActive: true }
         });
 
-        // 3. Find the CURRENT, open budget period for this domain
-        // and update its template link so current month reporting stays in sync.
-        const currentPeriod = await tx.budgetPeriod.findFirst({
+        // 3. Find ALL CURRENT, open budget periods for this domain
+        // and update their template links so reporting stays in sync.
+        const openPeriods = await tx.budgetPeriod.findMany({
             where: {
                 userId,
                 domain: template.domain,
                 isClosed: false
             },
-            orderBy: { startDate: 'desc' }
+            include: { envelopes: true }
         });
 
-        if (currentPeriod) {
+        for (const period of openPeriods) {
             await tx.budgetPeriod.update({
-                where: { id: currentPeriod.id },
+                where: { id: period.id },
                 data: { templateId: template.id }
             });
+
+            // 4. Sync envelopes from the template into each period
+            for (const item of template.items) {
+                const existingEnvelope = period.envelopes.find((e: any) => e.name === item.envelopeName);
+                if (existingEnvelope) {
+                    await tx.envelope.update({
+                        where: { id: existingEnvelope.id },
+                        data: { budgeted: item.amount }
+                    });
+                } else {
+                    await tx.envelope.create({
+                        data: {
+                            name: item.envelopeName,
+                            budgeted: item.amount,
+                            funded: 0,
+                            color: "blue", // Default color
+                            periodId: period.id
+                        }
+                    });
+                }
+            }
         }
     });
 
@@ -214,21 +265,42 @@ export async function onboardUserTemplate(templateId: string) {
             }
         });
 
-        // Link to current period
-        const currentPeriod = await tx.budgetPeriod.findFirst({
+        // Link to ALL current open periods
+        const openPeriods = await tx.budgetPeriod.findMany({
             where: {
                 userId,
                 domain: sourceTemplate.domain,
                 isClosed: false
             },
-            orderBy: { startDate: 'desc' }
+            include: { envelopes: true }
         });
 
-        if (currentPeriod) {
+        for (const period of openPeriods) {
             await tx.budgetPeriod.update({
-                where: { id: currentPeriod.id },
+                where: { id: period.id },
                 data: { templateId: newTemplate.id }
             });
+
+            // Sync envelopes
+            for (const item of sourceTemplate.items) {
+                const existingEnvelope = period.envelopes.find((e: any) => e.name === item.envelopeName);
+                if (existingEnvelope) {
+                    await tx.envelope.update({
+                        where: { id: existingEnvelope.id },
+                        data: { budgeted: item.amount }
+                    });
+                } else {
+                    await tx.envelope.create({
+                        data: {
+                            name: item.envelopeName,
+                            budgeted: item.amount,
+                            funded: 0,
+                            color: "blue",
+                            periodId: period.id
+                        }
+                    });
+                }
+            }
         }
     });
 
@@ -311,7 +383,7 @@ export async function executeBudgetTemplate(templateId: string, periodId: number
                     amount: amount,
                     description: `🔄 Template Sweep: ${template.name}`,
                     date: new Date(),
-                    isSystemAdjustment: false
+                    isSystemAdjustment: true
                 } as any
             });
 
@@ -372,7 +444,7 @@ export async function executeBudgetTemplate(templateId: string, periodId: number
                     amount: op.delta,
                     description: `✨ Template Fill: ${template.name}`,
                     date: new Date(),
-                    isSystemAdjustment: false
+                    isSystemAdjustment: true
                 } as any
             });
 
@@ -472,4 +544,115 @@ export async function cleanSlate(periodId: number, actualBalance: number, clearD
 
     revalidatePath("/dashboard/money", 'layout');
     revalidatePath("/dashboard/reports", 'layout');
+}
+
+export async function resetBudgetPeriodAction(periodId: number) {
+    const userId = await getAuthenticatedUser();
+
+    const period = await db.budgetPeriod.findUnique({
+        where: { id: periodId, userId },
+        include: { envelopes: { include: { transactions: true } } }
+    });
+
+    if (!period) throw new Error("Period not found");
+
+    // Get Active Template
+    const template = await (db as any).budgetTemplate.findFirst({
+        where: { userId, domain: period.domain, isActive: true },
+        include: { items: true }
+    });
+
+    if (!template) throw new Error("Cannot reset without an Active Template.");
+    const desiredEnvelopeNames = template.items.map((i: any) => i.envelopeName);
+
+    await db.$transaction(async (tx) => {
+        const unallocatedEnv = period.envelopes.find((e: any) => e.name === "Unallocated");
+        if (!unallocatedEnv) throw new Error("Unallocated envelope missing");
+
+        let totalSwept = 0;
+
+        // 1. Sweep unspent funds
+        for (const env of period.envelopes) {
+            if (env.name === "Unallocated") continue;
+
+            const spent = env.transactions
+                .filter((t: any) => t.type === "EXPENSE" || !t.type)
+                .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
+
+            const remaining = Number(env.funded) - spent;
+
+            if (remaining > 0) {
+                // Sweep back to unallocated
+                await tx.transaction.create({
+                    data: {
+                        envelopeId: env.id,
+                        toEnvelopeId: unallocatedEnv.id,
+                        type: "TRANSFER",
+                        amount: remaining,
+                        description: `🔄 Budget Reset Sweep`,
+                        date: new Date(),
+                        isSystemAdjustment: true
+                    } as any
+                });
+
+                await tx.envelope.update({
+                    where: { id: env.id },
+                    data: { funded: { decrement: remaining } }
+                });
+
+                totalSwept += remaining;
+            } else if (remaining < 0) {
+                // If they are overspent, we have to pull from unallocated to cover it so the envelope is at $0
+                const deficit = Math.abs(remaining);
+                await tx.transaction.create({
+                    data: {
+                        envelopeId: unallocatedEnv.id,
+                        toEnvelopeId: env.id,
+                        type: "TRANSFER",
+                        amount: deficit,
+                        description: `🔄 Budget Reset Sweep (Cover Overdraft)`,
+                        date: new Date(),
+                        isSystemAdjustment: true
+                    } as any
+                });
+
+                await tx.envelope.update({
+                    where: { id: env.id },
+                    data: { funded: { increment: deficit } }
+                });
+
+                totalSwept -= deficit;
+            }
+        }
+
+        if (totalSwept !== 0) {
+            await tx.envelope.update({
+                where: { id: unallocatedEnv.id },
+                data: { funded: { increment: totalSwept } }
+            });
+        }
+
+        // 2. Prune obsolete empty envelopes
+        for (const env of period.envelopes) {
+            if (env.name === "Unallocated") continue;
+
+            // Re-calculate after sweeps. It should be 0 unless there's a serious sync issue.
+            const hasSpending = env.transactions.some((t: any) => (t.type === "EXPENSE" || !t.type));
+
+            if (!hasSpending && !desiredEnvelopeNames.includes(env.name)) {
+                // Safe to delete! No spending history, no longer in template.
+                // First delete its transactions (like the sweep we just made)
+                await tx.transaction.deleteMany({
+                    where: { OR: [{ envelopeId: env.id }, { toEnvelopeId: env.id }] }
+                });
+                // Then delete envelope
+                await tx.envelope.delete({ where: { id: env.id } });
+            }
+        }
+    });
+
+    // 3. Execute Template Redistribution
+    await executeBudgetTemplate(template.id, periodId, false);
+
+    revalidatePath("/dashboard", 'layout');
 }

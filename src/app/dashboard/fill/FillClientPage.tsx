@@ -246,8 +246,8 @@ export function FillClientPage({
                                     </div>
                                 ))}
                             </div>
-                            <Link href="/dashboard/settings" className={styles.manageTemplatesLink}>
-                                <Settings size={12} /> Manage Templates
+                            <Link href={`/dashboard/settings?domain=${domain}`} className={styles.manageTemplatesLink}>
+                                Manage Templates <ChevronRight size={14} />
                             </Link>
                         </div>
                     )}

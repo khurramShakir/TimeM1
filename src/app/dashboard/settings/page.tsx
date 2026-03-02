@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { Palette, Clock, Banknote, Globe, Save, Loader2, User, ChevronLeft, RotateCcw, Settings2 } from "lucide-react";
 import { getUserSettings, updateUserSettings, updateUserProfile } from "@/lib/actions";
 import { usePreference } from "@/context/PreferenceContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BudgetTemplateManager } from "@/components/budget/BudgetTemplateManager";
 import styles from "./page.module.css";
 
@@ -17,7 +17,11 @@ export default function SettingsPage() {
     const [settings, setSettings] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [message, setMessage] = useState("");
+
+    const urlDomain = searchParams.get("domain");
+    const activeDomain = urlDomain || settings?.defaultDomain || "MONEY";
 
     useEffect(() => {
         async function load() {
@@ -123,7 +127,7 @@ export default function SettingsPage() {
             {activeTab === "templates" ? (
                 <div style={{ marginTop: '2rem' }}>
                     <BudgetTemplateManager
-                        domain={settings.defaultDomain}
+                        domain={activeDomain}
                         currency={settings.currency}
                     />
                 </div>

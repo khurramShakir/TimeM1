@@ -1,0 +1,169 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #FFFAF0;
+    /* Paper banana */
+    width: 100%;
+    max-width: 450px;
+    border-radius: 4px;
+    border: 1px solid #E6D2B5;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: var(--font-courier-prime), monospace;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #E6D2B5;
+    background: #FDF6E3;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.headerTitle h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #4A4A4A;
+    margin: 0;
+}
+
+.icon {
+    color: #FF6B6B;
+    /* Warning Red for Emergency */
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.closeBtn:hover {
+    color: #4A4A4A;
+}
+
+.body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.warningBox {
+    display: flex;
+    gap: 1rem;
+    background: #FFF0F0;
+    border: 1px solid #FFD0D0;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.warningIcon {
+    color: #FF6B6B;
+    flex-shrink: 0;
+}
+
+.warningText h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #4A4A4A;
+}
+
+.warningText ul {
+    margin: 0 0 0.5rem 0;
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+    color: #4A4A4A;
+    line-height: 1.4;
+}
+
+.warningText p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.cancelBtn,
+.confirmBtn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelBtn {
+    background: white;
+    border: 1px solid #E6D2B5;
+    color: #4A4A4A;
+}
+
+.cancelBtn:hover {
+    background: #FDF6E3;
+}
+
+.confirmBtn {
+    background: #FF6B6B;
+    color: white;
+    border: 1px solid #E63946;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+.confirmBtn:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.confirmBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

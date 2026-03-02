@@ -22,6 +22,7 @@ interface Transaction {
     toEnvelopeId?: number | null;
     startTime?: Date | null;
     endTime?: Date | null;
+    isSystemAdjustment?: boolean;
 }
 
 interface Envelope {
@@ -49,12 +50,15 @@ import { formatValue } from "@/lib/format";
 
 export default function TransactionHistory({ transactions, envelopes, domain = "TIME", currency = "USD" }: TransactionHistoryProps) {
     const [filterEnvelopeId, setFilterEnvelopeId] = useState<string>("all");
+    const [showSystem, setShowSystem] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
-    const filteredTransactions = filterEnvelopeId === "all"
-        ? transactions
-        : transactions.filter(t => t.envelope.id.toString() === filterEnvelopeId);
+    const filteredTransactions = transactions.filter(t => {
+        if (filterEnvelopeId !== "all" && t.envelope.id.toString() !== filterEnvelopeId) return false;
+        if (!showSystem && t.isSystemAdjustment) return false;
+        return true;
+    });
 
     // Truncate notes to a fixed length to prevent alignment issues
     const formatNote = (note: string | null) => {
@@ -113,6 +117,16 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                             <option key={env.id} value={env.id}>{env.name}</option>
                         ))}
                     </select>
+
+                    <label className={styles.checkboxLabel}>
+                        <input
+                            type="checkbox"
+                            checked={showSystem}
+                            onChange={(e) => setShowSystem(e.target.checked)}
+                        />
+                        Show System
+                    </label>
+
                     <button className={styles.logBtn} onClick={handleNew}>
                         <Plus size={20} />
                         {domain === "TIME" ? "Log Time" : "Log Money"}

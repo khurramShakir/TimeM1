@@ -212,3 +212,29 @@
     text-overflow: ellipsis;
     word-break: break-all;
 }
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    padding: 0.5rem;
+    border: 1px dashed var(--border-input);
+    border-radius: var(--radius-sm);
+    background-color: var(--surface-100);
+    transition: all 0.2s ease;
+}
+
+.checkboxLabel:hover {
+    background-color: var(--surface-200);
+}
+
+.checkboxLabel input[type="checkbox"] {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    accent-color: #16a34a;
+}

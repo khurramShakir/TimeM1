@@ -35,6 +35,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
         date: t.date,
         startTime: t.startTime,
         endTime: t.endTime,
+        isSystemAdjustment: t.isSystemAdjustment,
         envelope: {
             id: t.envelope.id,
             name: t.envelope.name,
