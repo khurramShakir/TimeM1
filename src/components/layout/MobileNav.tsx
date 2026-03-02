@@ -18,7 +18,7 @@ export function MobileNav() {
 
     const navigation = [
         { name: "Dashboard", href: `${prefix}${typeParam}`, icon: Home },
-        { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
+        { name: "Allocation Studio", href: `/dashboard/fill?domain=${isMoney ? "MONEY" : "TIME"}`, matchPath: "/dashboard/fill", icon: PieChart },
         { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
         { name: "More", href: `${pathname}?menu=more`, icon: MoreHorizontal },
     ];
@@ -35,7 +35,9 @@ export function MobileNav() {
                     const itemPath = item.href.split('?')[0];
                     const isMenuTrigger = item.href.includes("?menu=");
                     const isParamMatch = isMenuTrigger && searchParams.get("menu") === "more";
-                    const isActive = isMenuTrigger ? isParamMatch : pathname === itemPath;
+                    const isActive = isMenuTrigger
+                        ? isParamMatch
+                        : (pathname === itemPath || (item.matchPath && pathname === item.matchPath));
 
                     return (
                         <Link

@@ -53,6 +53,36 @@ export async function getAllEnvelopeNames(domain: string = "MONEY") {
         .sort();
 }
 
+export async function createEnvelopeForPeriod(data: {
+    name: string;
+    color: string;
+    budgeted?: number;
+    periodId: number;
+}) {
+    const userId = await getAuthenticatedUser();
+
+    // Verify the period belongs to user
+    const period = await (db as any).budgetPeriod.findFirst({
+        where: { id: data.periodId, userId }
+    });
+    if (!period) throw new Error("Period not found.");
+
+    const envelope = await (db as any).envelope.create({
+        data: {
+            name: data.name,
+            color: data.color,
+            budgeted: data.budgeted ?? 0,
+            funded: 0,
+            periodId: data.periodId
+        }
+    });
+
+    revalidatePath("/dashboard/fill");
+    revalidatePath("/dashboard/money");
+    revalidatePath("/dashboard/time");
+    return envelope;
+}
+
 export async function upsertBudgetTemplate(data: {
     id?: string;
     name: string;
@@ -77,8 +107,8 @@ export async function upsertBudgetTemplate(data: {
         }
 
         // Update existing
-        await (db as any).$transaction(async (tx: any) => {
-            await tx.budgetTemplate.update({
+        const updated = await (db as any).$transaction(async (tx: any) => {
+            const up = await tx.budgetTemplate.update({
                 where: { id: data.id, userId },
                 data: {
                     name: data.name,
@@ -87,7 +117,7 @@ export async function upsertBudgetTemplate(data: {
                     defaultFundingMode: data.defaultFundingMode ?? "ADD",
                     items: {
                         deleteMany: {},
-                        create: data.items.map(item => ({
+                        create: data.items.map((item: any) => ({
                             envelopeName: item.envelopeName,
                             amount: item.amount,
                             fundingModeOverride: item.fundingModeOverride ?? "INHERIT"
@@ -124,10 +154,14 @@ export async function upsertBudgetTemplate(data: {
                     }
                 }
             }
+            return up;
         });
+
+        revalidatePath("/dashboard/settings");
+        return updated;
     } else {
         // Create new
-        await (db as any).budgetTemplate.create({
+        const created = await (db as any).budgetTemplate.create({
             data: {
                 userId,
                 name: data.name,
@@ -137,7 +171,7 @@ export async function upsertBudgetTemplate(data: {
                 isAutoFillEnabled: data.isAutoFillEnabled ?? false,
                 defaultFundingMode: data.defaultFundingMode ?? "ADD",
                 items: {
-                    create: data.items.map(item => ({
+                    create: data.items.map((item: any) => ({
                         envelopeName: item.envelopeName,
                         amount: item.amount,
                         fundingModeOverride: item.fundingModeOverride ?? "INHERIT"
@@ -145,9 +179,10 @@ export async function upsertBudgetTemplate(data: {
                 }
             }
         });
-    }
 
-    revalidatePath("/dashboard/settings");
+        revalidatePath("/dashboard/settings");
+        return created;
+    }
 }
 
 export async function setActiveTemplate(templateId: string) {

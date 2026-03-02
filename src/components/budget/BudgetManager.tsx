@@ -20,7 +20,6 @@ interface Envelope {
 }
 
 interface BudgetManagerProps {
-    userId: string;
     periodId: number;
     initialEnvelopes: Envelope[];
     initialCapacity: number;
@@ -34,7 +33,6 @@ interface BudgetManagerProps {
 import { getThemeColor, getLightColor, getTextColor, darkenHexColor } from "@/lib/colors";
 
 export default function BudgetManager({
-    userId,
     periodId,
     initialEnvelopes,
     initialCapacity,

@@ -19,7 +19,7 @@ export function TopNav() {
 
     const navigation = [
         { name: "Dashboard", href: `${prefix}${typeParam}`, icon: Home },
-        { name: "Envelopes", href: `${prefix}/budget${typeParam}`, icon: PieChart },
+        { name: "Allocation Studio", href: `/dashboard/fill?domain=${isMoney ? "MONEY" : "TIME"}`, matchPath: "/dashboard/fill", icon: PieChart },
         { name: "History", href: `${prefix}/transactions${typeParam}`, icon: List },
         { name: "Reports", href: `/dashboard/reports${isMoney ? "?domain=MONEY" : "?domain=TIME"}`, icon: TrendingUp },
         { name: "Settings", href: `/dashboard/settings${isMoney ? "?domain=MONEY" : "?domain=TIME"}`, icon: Settings },
@@ -40,7 +40,9 @@ export function TopNav() {
 
             <nav className={styles.nav}>
                 {navigation.map((item) => {
-                    const isActive = pathname === item.href;
+                    // Match either exact base path or the manual matchPath if provided
+                    const itemBasePath = item.href.split("?")[0];
+                    const isActive = pathname === itemBasePath || (item.matchPath && pathname === item.matchPath);
                     return (
                         <Link
                             key={item.name}

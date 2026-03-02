@@ -52,7 +52,6 @@ export default async function MoneyBudgetPage({ searchParams }: PageProps) {
                     <DateNavigation currentDate={currentDate} weekStart={settings.weekStart} periodType={periodType} />
                 </header>
                 <BudgetManager
-                    userId={summary.period.userId as any}
                     periodId={summary.period.id}
                     initialEnvelopes={sanitizedEnvelopes}
                     initialCapacity={Number(summary.period.capacity)}
