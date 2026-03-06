@@ -658,7 +658,8 @@ export async function getBudgetSummary(targetDateInput?: string | Date, domain: 
     return {
         period: {
             id: period.id,
-            capacity: Number(period.capacity)
+            capacity: Number(period.capacity),
+            startDate: period.startDate
         },
         envelopes,
         totalBudgeted,

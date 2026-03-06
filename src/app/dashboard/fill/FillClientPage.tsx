@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { fillEnvelopes } from "@/actions/budget-actions";
 import { getBudgetTemplates, executeBudgetTemplate, upsertBudgetTemplate, setActiveTemplate, createEnvelopeForPeriod } from "@/lib/budget-actions";
 import { formatCurrency } from "@/lib/format";
-import { ArrowLeft, Clock, Pencil, Scale, Zap, Save, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock, Pencil, Scale, Zap, Save, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getThemeColor, getLightColor, PRESET_COLORS } from "@/lib/colors";
 import { ReconcileModal } from "@/components/budget/ReconcileModal";
 import styles from "./page.module.css";
+import { addIncome } from "@/lib/actions";
 
 interface Envelope {
     id: number;
@@ -41,13 +42,17 @@ interface FillClientPageProps {
     envelopes: Envelope[];
     currency: string;
     domain: string;
+    currentDate: string;
+    allDistinctEnvelopes: string[];
 }
 
 export function FillClientPage({
     periodId,
     envelopes,
     currency,
-    domain
+    domain,
+    currentDate,
+    allDistinctEnvelopes
 }: FillClientPageProps) {
     const router = useRouter();
     const [templates, setTemplates] = useState<Template[]>([]);
@@ -65,6 +70,15 @@ export function FillClientPage({
     const [newEnvBudget, setNewEnvBudget] = useState("");
     const [customColorHex, setCustomColorHex] = useState("#cccccc");
     const [isCreatingEnv, setIsCreatingEnv] = useState(false);
+
+    // Inline Income state
+    const [inlineIncomeAmount, setInlineIncomeAmount] = useState<string>("");
+    const [isAddingIncome, setIsAddingIncome] = useState(false);
+
+    // Template Creation Modal
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [newTemplateName, setNewTemplateName] = useState("");
+    const [newTemplateMode, setNewTemplateMode] = useState<"BLANK" | "DISTINCT" | "COPY">("DISTINCT");
 
     // Manual mode states
     const [totalAmount, setTotalAmount] = useState<string>("");
@@ -193,23 +207,42 @@ export function FillClientPage({
         }
     };
 
-    const handleSaveAsTemplate = async () => {
-        if (!editingTemplate) return;
+    const handleOpenTemplateModal = () => {
+        setNewTemplateName(editingTemplate ? `${editingTemplate.name} (Copy)` : "New Template");
+        setNewTemplateMode("DISTINCT");
+        setShowTemplateModal(true);
+    };
 
-        const newName = prompt("Enter a name for the new template:", `${editingTemplate.name} (Copy)`);
-        if (!newName) return;
+    const handleCreateTemplateSubmit = async () => {
+        if (!newTemplateName.trim()) return;
 
         setSaveStatus("saving");
+        setShowTemplateModal(false);
+
         try {
+            let initialItems: { envelopeName: string; amount: number; fundingModeOverride: "ADD" | "RESET" | "INHERIT" }[] = [];
+
+            if (newTemplateMode === "COPY" && editingTemplate) {
+                initialItems = editingTemplate.items.map(i => ({
+                    envelopeName: i.envelopeName,
+                    amount: Number(i.amount) || 0,
+                    fundingModeOverride: i.fundingModeOverride || "INHERIT"
+                }));
+            } else if (newTemplateMode === "DISTINCT") {
+                initialItems = allDistinctEnvelopes.map(name => ({
+                    envelopeName: name,
+                    amount: 0,
+                    fundingModeOverride: "INHERIT"
+                }));
+            }
+            // else BLANK stays []
+
             const newItem = await upsertBudgetTemplate({
-                name: newName,
-                domain: editingTemplate.domain,
+                name: newTemplateName.trim(),
+                domain: domain,
                 isAutoFillEnabled: false,
-                defaultFundingMode: editingTemplate.defaultFundingMode,
-                items: editingTemplate.items.map(i => ({
-                    ...i,
-                    amount: Number(i.amount) || 0
-                }))
+                defaultFundingMode: editingTemplate?.defaultFundingMode || "ADD",
+                items: initialItems
             });
 
             const updated = await getBudgetTemplates(domain);
@@ -306,6 +339,22 @@ export function FillClientPage({
         }
     };
 
+    const handleAddInlineIncome = async () => {
+        const amount = parseFloat(inlineIncomeAmount);
+        if (!amount || amount <= 0 || isAddingIncome) return;
+        setIsAddingIncome(true);
+        try {
+            await addIncome(periodId, amount);
+            setInlineIncomeAmount("");
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to add income.");
+        } finally {
+            setIsAddingIncome(false);
+        }
+    };
+
     // --- MANUAL MODE LOGIC ---
     const handleAllocationChange = (id: number, value: string) => {
         setAllocations(prev => ({ ...prev, [id]: value }));
@@ -338,12 +387,38 @@ export function FillClientPage({
 
     const backUrl = domain === "MONEY" ? "/dashboard/money" : "/dashboard/time";
 
+    // Navigation Links
+    const currentPathDate = new Date(currentDate);
+    const prevDate = new Date(currentDate);
+    const nextDate = new Date(currentDate);
+    if (domain === "MONEY") {
+        prevDate.setMonth(prevDate.getMonth() - 1);
+        nextDate.setMonth(nextDate.getMonth() + 1);
+    } else {
+        prevDate.setDate(prevDate.getDate() - 7);
+        nextDate.setDate(nextDate.getDate() + 7);
+    }
+
+    const prevUrl = `/dashboard/fill?domain=${domain}&date=${prevDate.toISOString()}`;
+    const nextUrl = `/dashboard/fill?domain=${domain}&date=${nextDate.toISOString()}`;
+
+    const formattedPeriod = domain === "MONEY"
+        ? currentPathDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+        : `Week of ${currentPathDate.toLocaleDateString()}`;
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div className="flex items-center justify-between w-full">
                     <div>
-                        <h1 className={styles.title}>Allocation Studio</h1>
+                        <div className={styles.titleRow}>
+                            <h1 className={styles.title}>Allocation Studio</h1>
+                            <div className={styles.navGroup}>
+                                <Link href={prevUrl} className={styles.navArrow}><ChevronLeft size={16} /></Link>
+                                <span>{formattedPeriod}</span>
+                                <Link href={nextUrl} className={styles.navArrow}><ChevronRight size={16} /></Link>
+                            </div>
+                        </div>
                         <p className={styles.subtitle}>
                             {isManualMode ? `Manually distribute ${domain === "TIME" ? "time" : "funds"} across envelopes.` : `Directly edit your active blueprint and deploy ${domain === "TIME" ? "time" : "funds"}.`}
                         </p>
@@ -374,16 +449,34 @@ export function FillClientPage({
                         <div className={styles.unallocatedBox}>
                             <span className={styles.unallocatedLabel}>Budgeted Amount</span>
                             <div
-                                className={`${styles.unallocatedAmount} ${(hasDeficit && domain === "MONEY") ? styles.unallocatedAmountNegative : ''}`}
+                                className={styles.unallocatedAmount}
                                 style={{ fontSize: heroFontSize }}
                             >
                                 {fmt(engineRequiredFunds)}
                             </div>
                         </div>
 
+                        {/* Inline Income Entry */}
+                        <div className={styles.inlineIncomeRow}>
+                            <input
+                                type="number"
+                                className={styles.inlineIncomeInput}
+                                placeholder="Add income amount..."
+                                value={inlineIncomeAmount}
+                                onChange={(e) => setInlineIncomeAmount(e.target.value)}
+                            />
+                            <button
+                                className={styles.inlineIncomeBtn}
+                                onClick={handleAddInlineIncome}
+                                disabled={isAddingIncome || !inlineIncomeAmount || parseFloat(inlineIncomeAmount) <= 0}
+                            >
+                                {isAddingIncome ? "..." : "Add"}
+                            </button>
+                        </div>
+
                         <div className={styles.engineStats}>
                             <div className={styles.statRow}>
-                                <span className={styles.statTextMuted}>Unallocated</span>
+                                <span className={styles.statTextMuted}>Ready to Deploy</span>
                                 <span className={styles.statFontMono}>{fmt(currentUnallocated)}</span>
                             </div>
                             {netSweep > 0 && (
@@ -455,7 +548,7 @@ export function FillClientPage({
                                 <div className={styles.templateLinks}>
                                     <button className={styles.templateLinkBtn} onClick={handleSaveTemplate} disabled={!editingTemplate}>Save</button>
                                     <span className={styles.templateLinkDot}>|</span>
-                                    <button className={styles.templateLinkBtn} onClick={handleSaveAsTemplate} disabled={!editingTemplate}>Save As...</button>
+                                    <button className={styles.templateLinkBtn} onClick={handleOpenTemplateModal}>Create New / Copy</button>
                                     <span className={styles.templateLinkDot}>|</span>
                                     <button className={`${styles.templateLinkBtn} ${styles.templateLinkBtnDanger}`} onClick={handleResetTemplate} disabled={!editingTemplate}>Reset</button>
                                     {saveStatus === "saved" && <><span className={styles.templateLinkDot}>|</span><span className={styles.templateLinkSaved}>✓ Saved</span></>}
@@ -641,6 +734,64 @@ export function FillClientPage({
                     </div>
                 </div>
             )}\n
+            {/* Template Creation Modal */}
+            {showTemplateModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2 className={styles.modalTitle}>Create Template</h2>
+
+                        <div className={styles.inputGroup}>
+                            <label>Template Name</label>
+                            <input
+                                type="text"
+                                className={styles.inputField}
+                                placeholder="e.g. Master Plan V2"
+                                value={newTemplateName}
+                                onChange={(e) => setNewTemplateName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label>Starting Point</label>
+                            <select
+                                className={styles.inputField}
+                                value={newTemplateMode}
+                                onChange={(e) => setNewTemplateMode(e.target.value as any)}
+                            >
+                                <option value="DISTINCT">Pre-fill with All Past Envelopes ($0.00)</option>
+                                <option value="BLANK">Start Completely Blank</option>
+                                {editingTemplate && (
+                                    <option value="COPY">Duplicate "{editingTemplate.name}"</option>
+                                )}
+                            </select>
+                            <p style={{ fontSize: '12px', color: 'var(--txt-sec)', marginTop: '0.25rem' }}>
+                                {newTemplateMode === "DISTINCT" && "Creates a template containing all envelopes you have previously used, set to $0.00."}
+                                {newTemplateMode === "BLANK" && "Start fresh with zero envelopes."}
+                                {newTemplateMode === "COPY" && "Copies the currently active template."}
+                            </p>
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button
+                                className={styles.btnGhostSm}
+                                onClick={() => setShowTemplateModal(false)}
+                                disabled={saveStatus === "saving"}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className={styles.btnSm}
+                                onClick={handleCreateTemplateSubmit}
+                                disabled={!newTemplateName.trim() || saveStatus === "saving"}
+                            >
+                                {saveStatus === "saving" ? "Saving..." : "Create"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Create Envelope Modal */}
             {showCreateEnv && (
                 <div className={styles.modalOverlay} onClick={() => setShowCreateEnv(false)}>

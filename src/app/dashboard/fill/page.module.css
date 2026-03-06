@@ -12,12 +12,32 @@
     align-items: center;
 }
 
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
 .title {
-    font-size: 24px;
+    font-size: 42px;
     font-weight: 700;
     color: var(--txt-prm, #2d2d2d);
-    letter-spacing: -0.3px;
+    letter-spacing: -1px;
     margin: 0;
+}
+
+.navGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono, monospace);
+    font-size: 14px;
+    color: var(--txt-sec, #6b6b6b);
+    background: var(--surface-200, #f8f7f4);
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--brd-sbt, #e8e6e1);
 }
 
 .subtitle {
@@ -26,6 +46,21 @@
     font-weight: 400;
     line-height: 1.5;
     margin: 0.25rem 0 0 0;
+}
+
+.navArrow {
+    color: var(--txt-sec, #6b6b6b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.navArrow:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--txt-prm, #2d2d2d);
 }
 
 /* Layout Grid */
@@ -44,11 +79,11 @@
 
 /* Left Panel - The Engine */
 .enginePanel {
-    background: rgba(251, 250, 246, 0.75);
+    background: var(--bg-wht, #ffffff);
     border: 1px solid var(--brd-sbt, #e8e6e1);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     position: sticky;
     top: 2rem;
 }
@@ -86,6 +121,53 @@
 
 .unallocatedAmountNegative {
     color: #ef4444;
+}
+
+.inlineIncomeRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px dashed var(--brd-sbt, #e8e6e1);
+    padding-bottom: 1.5rem;
+}
+
+.inlineIncomeInput {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    border: 1px solid var(--brd-sbt, #e8e6e1);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-wht, #ffffff);
+    color: var(--txt-prm, #2d2d2d);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inlineIncomeInput:focus {
+    border-color: var(--acc-grn, #7c9885);
+    box-shadow: 0 0 0 3px rgba(124, 152, 133, 0.15);
+}
+
+.inlineIncomeBtn {
+    background: var(--surface-300, #edecea);
+    color: var(--txt-prm, #2d2d2d);
+    border: 1px solid var(--brd-sbt, #e8e6e1);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.inlineIncomeBtn:hover:not(:disabled) {
+    background: var(--surface-400, #e0dedc);
+}
+
+.inlineIncomeBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .engineStats {
