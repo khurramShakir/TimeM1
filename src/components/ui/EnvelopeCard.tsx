@@ -79,16 +79,16 @@ export function EnvelopeCard({ id, name, budgeted, funded, spent, remaining, col
                         backgroundColor: isOverspent ? '#fee2e2' : 'var(--surface-200)',
                         color: isOverspent ? '#991b1b' : 'var(--foreground)'
                     }}>
-                        {formatValue(remaining, domain, currency)} {remaining >= 0 ? 'Left' : 'Over'}
+                        {formatValue(funded, domain, currency)} {domain === "MONEY" ? 'Funded' : 'Logged'}
                     </div>
                 </div>
 
                 <div className={styles.stats}>
-                    <span className={styles.amountLarge}>
-                        {formatValue(funded, domain, currency)}
+                    <span className={styles.amountLarge} style={{ color: isOverspent ? '#ef4444' : 'inherit' }}>
+                        {formatValue(remaining, domain, currency)}
                     </span>
                     <span className={styles.amountSmall}>
-                        of {formatValue(budgeted, domain, currency)} Budgeted
+                        Remaining of {formatValue(budgeted, domain, currency)} Budgeted
                     </span>
                     {spent > 0 && (
                         <span className={styles.amountSmall} style={{ marginTop: '0.25rem', color: isOverspent ? mutedOverspentColor : '#666' }}>
