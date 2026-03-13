@@ -1,24 +1,27 @@
 import { getBudgetPeriodByDate, getTransactions, getUserSettings } from "@/lib/actions";
 import TransactionHistory from "@/components/transactions/TransactionHistory";
+import { DateNavigation } from "@/components/layout/DateNavigation";
 import styles from "./transactions.module.css";
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-    searchParams: Promise<{ type?: string }>;
+    searchParams: Promise<{ type?: string; date?: string }>;
 }
 
 export default async function TransactionsPage({ searchParams }: PageProps) {
-    const { type: typeStr } = await searchParams;
+    const { type: typeStr, date: dateParam } = await searchParams;
 
     // Fetch settings first to get default if type param is missing
     const settings = await getUserSettings();
     const periodType = typeStr === "WEEKLY" ? "WEEKLY" : (typeStr === "MONTHLY" ? "MONTHLY" : (settings.defaultPeriod || "MONTHLY"));
 
+    const targetDate = dateParam ? new Date(dateParam) : new Date();
+
     // Fetch data in parallel for the current authenticated user
     const [period, transactions] = await Promise.all([
-        getBudgetPeriodByDate(new Date(), undefined, "MONEY", periodType),
-        getTransactions("MONEY"),
+        getBudgetPeriodByDate(targetDate, undefined, "MONEY", periodType),
+        getTransactions("MONEY", undefined, dateParam, periodType),
     ]);
 
     // Extract envelopes for filter
@@ -36,21 +39,22 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
         startTime: t.startTime,
         endTime: t.endTime,
         isSystemAdjustment: t.isSystemAdjustment,
-        envelope: {
+        envelope: t.envelope ? {
             id: t.envelope.id,
             name: t.envelope.name,
             color: t.envelope.color || "default"
-        },
+        } : { id: 0, name: "Deleted", color: "gray" },
         toEnvelopeId: t.toEnvelopeId
     }));
 
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <div className={styles.titleGroup}>
+                <div className={styles.titleRow}>
                     <h1 className={styles.title}>Money Transactions</h1>
                     <p className={styles.subtitle}>View and filter your financial spending history</p>
                 </div>
+                <DateNavigation currentDate={targetDate} periodType={periodType} weekStart={settings.weekStart} />
             </header>
 
             <TransactionHistory

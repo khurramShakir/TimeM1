@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Trash2, Edit2, Plus } from "lucide-react";
+import { Trash2, Edit2, Plus, Loader2 } from "lucide-react";
 import { deleteTransaction } from "@/lib/actions";
 import { LogTimeModal } from "@/components/transactions/LogTimeModal";
 import styles from "./TransactionHistory.module.css";
+import { useSearchParams } from "next/navigation";
 
 interface Transaction {
     id: number;
@@ -37,28 +38,106 @@ interface TransactionHistoryProps {
     currency?: string;
 }
 
-const COLOR_STYLES: Record<string, { bg: string, text: string }> = {
-    blue: { bg: "#dbeafe", text: "#1e40af" },
-    green: { bg: "#d1fae5", text: "#065f46" },
-    purple: { bg: "#f3e8ff", text: "#6b21a8" },
-    red: { bg: "#fee2e2", text: "#991b1b" },
-    gray: { bg: "#f3f4f6", text: "#1f2937" },
-    default: { bg: "#cbd5e1", text: "#1e293b" }
+const COLOR_MAP: Record<string, string> = {
+    blue: "#7dd3fc",
+    green: "#86efac",
+    purple: "#d8b4fe",
+    red: "#fca5a5",
+    gray: "#d1d5db",
+    default: "#94a3b8"
 };
 
 import { formatValue } from "@/lib/format";
+import { Search } from "lucide-react";
+import { getTransactions } from "@/lib/actions";
 
-export default function TransactionHistory({ transactions, envelopes, domain = "TIME", currency = "USD" }: TransactionHistoryProps) {
+export default function TransactionHistory({ transactions: initialTransactions, envelopes, domain = "TIME", currency = "USD" }: TransactionHistoryProps) {
+    const [transactions, setTransactions] = useState(initialTransactions);
     const [filterEnvelopeId, setFilterEnvelopeId] = useState<string>("all");
     const [showSystem, setShowSystem] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchScope, setSearchScope] = useState<"CURRENT" | "ALL">("CURRENT");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
+    const [isLoading, setIsLoading] = useState(false);
+    const searchParams = useSearchParams();
+    const dateStr = searchParams.get("date");
+    const periodType = searchParams.get("type") || (domain === "TIME" ? "WEEKLY" : "MONTHLY");
 
+    // Filter transactions based on UI state
     const filteredTransactions = transactions.filter(t => {
         if (filterEnvelopeId !== "all" && t.envelope.id.toString() !== filterEnvelopeId) return false;
         if (!showSystem && t.isSystemAdjustment) return false;
+        
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            const amount = t.amount.toString();
+            const entity = t.entity?.toLowerCase() || "";
+            const notes = t.description.toLowerCase();
+            
+            if (!entity.includes(query) && !notes.includes(query) && !amount.includes(query)) {
+                return false;
+            }
+        }
+        
         return true;
     });
+
+    // Unified Fetching Logic
+    const refreshTransactions = React.useCallback(async (query: string, scope: "CURRENT" | "ALL") => {
+        setIsLoading(true);
+        try {
+            const results = await getTransactions(
+                domain, 
+                1000, // Fetch more for history
+                scope === "CURRENT" ? (dateStr || new Date().toISOString()) : undefined, 
+                scope === "CURRENT" ? periodType : undefined, 
+                scope === "ALL",
+                query
+            );
+            setTransactions(results as any);
+        } catch (error) {
+            console.error("Search failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [domain, dateStr, periodType]);
+
+    // Handle Search Scope Change
+    const handleScopeChange = (scope: "CURRENT" | "ALL") => {
+        setSearchScope(scope);
+        refreshTransactions(searchQuery, scope);
+    };
+
+    // Debounced Search Re-fetching
+    React.useEffect(() => {
+        if (!searchQuery) {
+            // If empty, restore initial or current period base results depending on scope
+            if (searchScope === "CURRENT") {
+                setTransactions(initialTransactions);
+            } else {
+                refreshTransactions("", "ALL");
+            }
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            refreshTransactions(searchQuery, searchScope);
+        }, 400); // 400ms debounce
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, searchScope, initialTransactions, refreshTransactions]);
+
+    const totalPages = Math.ceil(filteredTransactions.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + pageSize);
+
+    // Reset pagination when filters change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [filterEnvelopeId, showSystem, pageSize, searchQuery, searchScope]);
 
     // Truncate notes to a fixed length to prevent alignment issues
     const formatNote = (note: string | null) => {
@@ -105,38 +184,82 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h2 className={styles.title}>History</h2>
-                <div className={styles.controls}>
-                    <select
-                        className={styles.select}
-                        value={filterEnvelopeId}
-                        onChange={(e) => setFilterEnvelopeId(e.target.value)}
-                    >
-                        <option value="all">All Envelopes</option>
-                        {envelopes.map(env => (
-                            <option key={env.id} value={env.id}>{env.name}</option>
-                        ))}
-                    </select>
+                <div className={styles.topRow}>
+                    <div className={styles.searchContainer}>
+                        <div className={styles.searchInputWrapper}>
+                            <Search className={styles.searchIcon} size={18} />
+                            <input
+                                type="text"
+                                className={styles.searchInput}
+                                placeholder="Search by name, notes, or amount..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <div className={styles.scopeSelector}>
+                            <button 
+                                className={`${styles.scopeBtn} ${searchScope === "CURRENT" ? styles.scopeBtnActive : ""}`}
+                                onClick={() => handleScopeChange("CURRENT")}
+                            >
+                                This Month
+                            </button>
+                            <button 
+                                className={`${styles.scopeBtn} ${searchScope === "ALL" ? styles.scopeBtnActive : ""}`}
+                                onClick={() => handleScopeChange("ALL")}
+                            >
+                                All History
+                            </button>
+                        </div>
+                    </div>
 
-                    <label className={styles.checkboxLabel}>
-                        <input
-                            type="checkbox"
-                            checked={showSystem}
-                            onChange={(e) => setShowSystem(e.target.checked)}
-                        />
-                        Show System
-                    </label>
+                    <div className={styles.controls}>
+                        <select
+                            className={styles.select}
+                            value={filterEnvelopeId}
+                            onChange={(e) => setFilterEnvelopeId(e.target.value)}
+                        >
+                            <option value="all">All Envelopes</option>
+                            {envelopes.map(env => (
+                                <option key={env.id} value={env.id}>{env.name}</option>
+                            ))}
+                        </select>
 
-                    <button className={styles.logBtn} onClick={handleNew}>
-                        <Plus size={20} />
-                        {domain === "TIME" ? "Log Time" : "Log Money"}
-                    </button>
+                        <label className={styles.checkboxLabel}>
+                            <input
+                                type="checkbox"
+                                checked={showSystem}
+                                onChange={(e) => setShowSystem(e.target.checked)}
+                            />
+                            Show System
+                        </label>
+
+                        <select
+                            className={styles.pageSizeSelect}
+                            value={pageSize}
+                            onChange={(e) => setPageSize(Number(e.target.value))}
+                            title="Transactions per page"
+                        >
+                            <option value={25}>25 / page</option>
+                            <option value={50}>50 / page</option>
+                            <option value={100}>100 / page</option>
+                        </select>
+
+                        <button className={styles.logBtn} onClick={handleNew}>
+                            <Plus size={20} />
+                            {domain === "TIME" ? "Log Time" : "Log Money"}
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div className={styles.tableWrapper}>
-                {filteredTransactions.length === 0 ? (
-                    <div className={styles.noData}>No transactions found.</div>
+                {isLoading ? (
+                    <div className={styles.noData}>
+                        <Loader2 className={styles.spinner} />
+                        Searching...
+                    </div>
+                ) : paginatedTransactions.length === 0 ? (
+                    <div className={styles.noData}>No transactions found. {searchQuery ? "Try a different search term or check 'All History'." : ""}</div>
                 ) : (
                     <table className={styles.table}>
                         <thead>
@@ -150,8 +273,8 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTransactions.map(t => {
-                                const colorStyle = COLOR_STYLES[t.envelope.color] || COLOR_STYLES.default;
+                            {paginatedTransactions.map(t => {
+                                const dotColor = COLOR_MAP[t.envelope.color] || COLOR_MAP.default;
                                 return (
                                     <tr key={t.id}>
                                         <td className={styles.date}>
@@ -163,19 +286,14 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                                             <div className={styles.entityColumn}>
                                                 <div className={styles.entityRow}>
                                                     <div className={styles.entityName}>{t.entity || "-"}</div>
-                                                    <span className={`${styles.typeBadge} ${styles[`type_${t.type?.toLowerCase()}`]}`}>
-                                                        {t.type}
-                                                    </span>
                                                 </div>
                                                 {t.refNumber && <div className={styles.refNumber}>#{t.refNumber}</div>}
                                             </div>
                                         </td>
                                         <td>
-                                            <span
-                                                className={styles.envelopeBadge}
-                                                style={{ backgroundColor: colorStyle.bg, color: colorStyle.text }}
-                                            >
-                                                {t.envelope.name}
+                                            <span className={styles.envelopeText}>
+                                                <span style={{ color: dotColor }}>{t.envelope.name.charAt(0)}</span>
+                                                {t.envelope.name.slice(1)}
                                             </span>
                                         </td>
                                         <td className={styles.description}>{formatNote(t.description)}</td>
@@ -208,6 +326,34 @@ export default function TransactionHistory({ transactions, envelopes, domain = "
                     </table>
                 )}
             </div>
+
+            {filteredTransactions.length > 0 && (
+                <div className={styles.pagination}>
+                    <div className={styles.paginationInfo}>
+                        Showing {startIndex + 1}-{Math.min(startIndex + pageSize, filteredTransactions.length)} of {filteredTransactions.length}
+                    </div>
+                    <div className={styles.paginationControls}>
+                        <button
+                            className={styles.pageBtn}
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span className={styles.pageIndicator}>
+                            Page {currentPage} of {totalPages || 1}
+                        </span>
+                        <button
+                            className={styles.pageBtn}
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
+
 
             <LogTimeModal
                 isOpen={isModalOpen}

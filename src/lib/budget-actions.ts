@@ -47,10 +47,12 @@ export async function getAllEnvelopeNames(domain: string = "MONEY") {
         distinct: ['name']
     });
 
-    return envelopes
+    const allNames = envelopes
         .map((e: any) => e.name as string)
-        .filter((name: string) => name !== "Unallocated")
-        .sort();
+        .filter((name: string) => name !== "Unallocated");
+
+    // Enforce uniqueness using Set just in case Prisma distinct fails across joins
+    return Array.from(new Set(allNames)).sort();
 }
 
 export async function createEnvelopeForPeriod(data: {

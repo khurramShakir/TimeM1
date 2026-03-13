@@ -84,7 +84,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
-    font-family: var(--font-mono);
+    font-family: inherit;
     margin-top: -8px;
     /* Overlap tabs by 8px */
     position: relative;
@@ -210,7 +210,7 @@
     text-transform: uppercase;
     pointer-events: none;
     z-index: 0;
-    font-family: var(--font-mono);
+    font-family: inherit;
     white-space: nowrap;
 }
 
@@ -221,7 +221,7 @@
     margin-bottom: 0.75rem;
     /* Further reduced for tighter spacing */
     color: var(--foreground);
-    font-family: var(--font-mono);
+    font-family: inherit;
 }
 
 .form {
@@ -255,7 +255,7 @@
     /* Thicker, more tactile border */
     border-radius: var(--radius-sm);
     font-size: 1rem;
-    font-family: var(--font-mono);
+    font-family: inherit;
     transition: all 0.2s;
     background-color: #ffffff;
     /* distinct white input areas on graph paper */
@@ -284,7 +284,7 @@
     left: 0.75rem;
     color: var(--text-muted);
     font-weight: bold;
-    font-family: var(--font-mono);
+    font-family: inherit;
     pointer-events: none;
     z-index: 1;
 }
@@ -414,7 +414,7 @@
     padding: 0.75rem;
     font-size: 1rem !important;
     font-weight: normal;
-    font-family: var(--font-mono);
+    font-family: inherit;
     color: var(--foreground);
     border: 2px solid var(--border-subtle) !important;
     border-radius: var(--radius-sm) !important;

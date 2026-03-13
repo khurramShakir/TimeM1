@@ -851,17 +851,48 @@ export async function deleteEnvelope(id: number) {
     revalidatePath('/dashboard', 'layout');
 }
 
-export async function getTransactions(domain: string = "TIME", limit?: number) {
+export async function getTransactions(domain: string = "TIME", limit?: number, dateStr?: string, periodType?: string, allowGlobal: boolean = false, query?: string) {
     const userId = await getAuthenticatedUser();
-    const transactions = await db.transaction.findMany({
-        where: {
-            envelope: {
-                period: {
-                    userId: userId as any,
-                    domain: domain
-                },
+    
+    let whereClause: any = {
+        envelope: {
+            period: {
+                userId: userId as any,
+                domain: domain
             },
         },
+    };
+
+    if (dateStr && periodType && !allowGlobal) {
+        const settings = await (db as any).userSettings.findUnique({
+            where: { userId: userId as any }
+        });
+        
+        const startOfP = getStartOfPeriod(new Date(dateStr), periodType, settings?.weekStart || 0);
+        whereClause.envelope.period.startDate = startOfP;
+        whereClause.envelope.period.type = periodType;
+    }
+
+    if (query) {
+        const lowerQuery = query.toLowerCase();
+        
+        // Try to parse amount if query looks like a number
+        const amountQuery = !isNaN(parseFloat(query)) ? parseFloat(query) : null;
+
+        whereClause.OR = [
+            { description: { contains: query } },
+            { entity: { contains: query } },
+            { refNumber: { contains: query } },
+        ];
+
+        if (amountQuery !== null) {
+            whereClause.OR.push({ amount: { equals: amountQuery } });
+        }
+    }
+
+
+    const transactions = await db.transaction.findMany({
+        where: whereClause,
         orderBy: {
             date: 'desc',
         },
@@ -881,6 +912,7 @@ export async function getTransactions(domain: string = "TIME", limit?: number) {
         refNumber: t.refNumber,
         isSystemAdjustment: t.isSystemAdjustment,
         envelopeId: t.envelopeId,
+        toEnvelopeId: t.toEnvelopeId,
         envelope: t.envelope ? {
             id: t.envelope.id,
             name: t.envelope.name,

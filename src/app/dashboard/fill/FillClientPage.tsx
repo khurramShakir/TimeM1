@@ -3,9 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fillEnvelopes } from "@/actions/budget-actions";
-import { getBudgetTemplates, executeBudgetTemplate, upsertBudgetTemplate, setActiveTemplate, createEnvelopeForPeriod } from "@/lib/budget-actions";
+import { getBudgetTemplates, executeBudgetTemplate, upsertBudgetTemplate, setActiveTemplate, createEnvelopeForPeriod, deleteBudgetTemplate } from "@/lib/budget-actions";
 import { formatCurrency } from "@/lib/format";
-import { ArrowLeft, Clock, Pencil, Scale, Zap, Save, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clock, Pencil, Scale, Zap, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getThemeColor, getLightColor, PRESET_COLORS } from "@/lib/colors";
 import { ReconcileModal } from "@/components/budget/ReconcileModal";
@@ -207,6 +207,35 @@ export function FillClientPage({
         }
     };
 
+    const handleDeleteTemplate = async () => {
+        if (!editingTemplate || editingTemplate.isBuiltIn || editingTemplate.isActive) return;
+        if (!confirm(`Are you sure you want to permanently delete "${editingTemplate.name}"?`)) return;
+
+        setSaveStatus("saving");
+        try {
+            await deleteBudgetTemplate(editingTemplate.id);
+            
+            const updated = await getBudgetTemplates(domain);
+            setTemplates(updated as any);
+            
+            // Switch to the first available template or null
+            if (updated.length > 0) {
+                const next = (updated as any).find((t: any) => t.id !== editingTemplate.id) || updated[0];
+                setActiveTemplateId(next.id);
+                setEditingTemplate({ ...next, items: [...next.items] });
+            } else {
+                setActiveTemplateId("");
+                setEditingTemplate(null);
+            }
+            
+            setSaveStatus("idle");
+        } catch (error) {
+            console.error("Failed to delete template:", error);
+            alert("Error deleting template.");
+            setSaveStatus("idle");
+        }
+    };
+
     const handleOpenTemplateModal = () => {
         setNewTemplateName(editingTemplate ? `${editingTemplate.name} (Copy)` : "New Template");
         setNewTemplateMode("DISTINCT");
@@ -298,8 +327,8 @@ export function FillClientPage({
     const addItem = () => {
         if (!editingTemplate) return;
         const usedNames = new Set(editingTemplate.items.map(i => i.envelopeName));
-        // Only add if there is an unused envelope
-        const firstUnused = targetEnvelopes.find(e => !usedNames.has(e.name))?.name;
+        // Only add if there is an unused envelope from the distinct history
+        const firstUnused = allDistinctEnvelopes.find(name => !usedNames.has(name));
         if (!firstUnused) return; // all envelopes already added
         setEditingTemplate({
             ...editingTemplate,
@@ -311,8 +340,8 @@ export function FillClientPage({
     const hasUnusedEnvelopes = useMemo(() => {
         if (!editingTemplate) return false;
         const usedNames = new Set(editingTemplate.items.map(i => i.envelopeName));
-        return targetEnvelopes.some(e => !usedNames.has(e.name));
-    }, [editingTemplate, targetEnvelopes]);
+        return allDistinctEnvelopes.some(name => !usedNames.has(name));
+    }, [editingTemplate, allDistinctEnvelopes]);
 
     const handleCreateEnvelope = async () => {
         if (!newEnvName.trim()) return;
@@ -387,37 +416,16 @@ export function FillClientPage({
 
     const backUrl = domain === "MONEY" ? "/dashboard/money" : "/dashboard/time";
 
-    // Navigation Links
-    const currentPathDate = new Date(currentDate);
-    const prevDate = new Date(currentDate);
-    const nextDate = new Date(currentDate);
-    if (domain === "MONEY") {
-        prevDate.setMonth(prevDate.getMonth() - 1);
-        nextDate.setMonth(nextDate.getMonth() + 1);
-    } else {
-        prevDate.setDate(prevDate.getDate() - 7);
-        nextDate.setDate(nextDate.getDate() + 7);
-    }
-
-    const prevUrl = `/dashboard/fill?domain=${domain}&date=${prevDate.toISOString()}`;
-    const nextUrl = `/dashboard/fill?domain=${domain}&date=${nextDate.toISOString()}`;
-
-    const formattedPeriod = domain === "MONEY"
-        ? currentPathDate.toLocaleString('default', { month: 'long', year: 'numeric' })
-        : `Week of ${currentPathDate.toLocaleDateString()}`;
-
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div className="flex items-center justify-between w-full">
                     <div>
+                        <Link href={backUrl} className={styles.backBtn} style={{ marginBottom: '1rem', display: 'inline-flex' }}>
+                            <ArrowLeft size={16} /> Back to Dashboard
+                        </Link>
                         <div className={styles.titleRow}>
                             <h1 className={styles.title}>Allocation Studio</h1>
-                            <div className={styles.navGroup}>
-                                <Link href={prevUrl} className={styles.navArrow}><ChevronLeft size={16} /></Link>
-                                <span>{formattedPeriod}</span>
-                                <Link href={nextUrl} className={styles.navArrow}><ChevronRight size={16} /></Link>
-                            </div>
                         </div>
                         <p className={styles.subtitle}>
                             {isManualMode ? `Manually distribute ${domain === "TIME" ? "time" : "funds"} across envelopes.` : `Directly edit your active blueprint and deploy ${domain === "TIME" ? "time" : "funds"}.`}
@@ -551,6 +559,20 @@ export function FillClientPage({
                                     <button className={styles.templateLinkBtn} onClick={handleOpenTemplateModal}>Create New / Copy</button>
                                     <span className={styles.templateLinkDot}>|</span>
                                     <button className={`${styles.templateLinkBtn} ${styles.templateLinkBtnDanger}`} onClick={handleResetTemplate} disabled={!editingTemplate}>Reset</button>
+                                    
+                                    {/* Delete option - Hidden for Active or Built-in templates */}
+                                    {editingTemplate && !editingTemplate.isBuiltIn && !editingTemplate.isActive && (
+                                        <>
+                                            <span className={styles.templateLinkDot}>|</span>
+                                            <button 
+                                                className={`${styles.templateLinkBtn} ${styles.templateLinkBtnDanger}`} 
+                                                onClick={handleDeleteTemplate}
+                                            >
+                                                Delete
+                                            </button>
+                                        </>
+                                    )}
+
                                     {saveStatus === "saved" && <><span className={styles.templateLinkDot}>|</span><span className={styles.templateLinkSaved}>✓ Saved</span></>}
                                     {saveStatus === "saving" && <><span className={styles.templateLinkDot}>|</span><span className={styles.templateLinkSaving}>Saving...</span></>}
                                 </div>
@@ -598,8 +620,8 @@ export function FillClientPage({
                                                         value={item.envelopeName}
                                                         onChange={(e) => updateItem(index, { envelopeName: e.target.value })}
                                                     >
-                                                        {targetEnvelopes.map(e => (
-                                                            <option key={e.id} value={e.name}>{e.name}</option>
+                                                        {allDistinctEnvelopes.map(name => (
+                                                            <option key={name} value={name}>{name}</option>
                                                         ))}
                                                     </select>
                                                 </div>
@@ -736,26 +758,24 @@ export function FillClientPage({
             )}\n
             {/* Template Creation Modal */}
             {showTemplateModal && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <h2 className={styles.modalTitle}>Create Template</h2>
+                <div className={styles.modalOverlay} onClick={() => setShowTemplateModal(false)}>
+                    <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+                        <h3 className={styles.modalTitle}>Create Template</h3>
 
-                        <div className={styles.inputGroup}>
-                            <label>Template Name</label>
+                        <div className={styles.modalBody}>
+                            <label className={styles.modalLabel}>Template Name</label>
                             <input
                                 type="text"
-                                className={styles.inputField}
+                                className={styles.modalInput}
                                 placeholder="e.g. Master Plan V2"
                                 value={newTemplateName}
                                 onChange={(e) => setNewTemplateName(e.target.value)}
                                 autoFocus
                             />
-                        </div>
 
-                        <div className={styles.inputGroup}>
-                            <label>Starting Point</label>
+                            <label className={styles.modalLabel} style={{ marginTop: '1rem' }}>Starting Point</label>
                             <select
-                                className={styles.inputField}
+                                className={styles.modalInput}
                                 value={newTemplateMode}
                                 onChange={(e) => setNewTemplateMode(e.target.value as any)}
                             >
@@ -772,16 +792,16 @@ export function FillClientPage({
                             </p>
                         </div>
 
-                        <div className={styles.modalActions}>
+                        <div className={styles.modalFooter}>
                             <button
-                                className={styles.btnGhostSm}
+                                className={styles.blueprintBtn}
                                 onClick={() => setShowTemplateModal(false)}
                                 disabled={saveStatus === "saving"}
                             >
                                 Cancel
                             </button>
                             <button
-                                className={styles.btnSm}
+                                className={`${styles.blueprintBtn} ${styles.blueprintBtnPrimary}`}
                                 onClick={handleCreateTemplateSubmit}
                                 disabled={!newTemplateName.trim() || saveStatus === "saving"}
                             >
