@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeBudget - History Screen Mockup</title>
+    <style>
+        :root {
+            --bg-crm: #f8f7f4;
+            --bg-wht: #ffffff;
+            --txt-prm: #2d2d2d;
+            --txt-sec: #6b6b6b;
+            --brd-sbt: #e8e6e1;
+            --acc-grn: #7c9885;
+            --acc-hvr: #6a8573;
+            --font-main: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+        }
+
+        body {
+            background-color: var(--bg-crm);
+            /* Graph Paper Pattern */
+            background-image:
+                linear-gradient(var(--brd-sbt) 1px, transparent 1px),
+                linear-gradient(90deg, var(--brd-sbt) 1px, transparent 1px);
+            background-size: 20px 20px;
+
+            color: var(--txt-prm);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px; /* Made wider to match current history table */
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--txt-sec);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--txt-prm);
+        }
+
+        /* Header Layout */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .page-title h1 {
+            font-size: 28px; /* Slightly larger */
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title .subtitle {
+            color: var(--txt-sec);
+            font-size: 13px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Elements */
+        .btn {
+            background: var(--acc-grn);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--acc-hvr);
+            color: white;
+        }
+
+        .pill-badge {
+            background: var(--bg-wht);
+            border: 1px solid var(--brd-sbt);
+            color: var(--txt-prm);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+        
+        .pill-badge .label {
+            color: var(--txt-sec);
+            font-weight: normal;
+        }
+        
+        .pill-badge .value {
+            color: var(--acc-grn); 
+        }
+
+        /* Transaction Table */
+        .table-container {
+            background: rgba(251, 250, 246, 0.75); /* Banana paper color */
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--brd-sbt);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--brd-sbt);
+            color: var(--txt-prm); 
+            font-weight: 700;
+            background-color: #fcfbf9; /* Slight off-white header background */
+        }
+
+        td {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            color: var(--txt-prm);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: #faf9f7;
+        }
+
+        /* Envelope Square Column (Now First Column) */
+        .col-env {
+            width: 32px;
+            padding-right: 8px !important;
+            padding-left: 24px !important;
+            text-align: center;
+        }
+
+        .env-square {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+            cursor: help;
+            border: 1px solid rgba(0,0,0,0.1);
+            vertical-align: middle;
+            transition: transform 0.1s;
+        }
+        
+        .env-square:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Envelope colors */
+        .env-blue { background-color: #3b82f6; }
+        .env-purple { background-color: #a855f7; }
+        .env-green { background-color: #22c55e; }
+        .env-orange { background-color: #f97316; }
+        .env-red { background-color: #ef4444; }
+
+        .desc-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: #eaf6fc;
+            color: #3b82f6;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 10px;
+            vertical-align: middle;
+        }
+
+        /* Filters & Search - Single Row */
+        .filters-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens, but aims for single row */
+        }
+
+        .search-group {
+            display: flex;
+            gap: 12px;
+            flex: 1; /* Allow search and scope to take up remaining space if needed, or define fixed widths */
+            min-width: 250px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8); /* Slightly transparent white for input */
+            border: 1px solid var(--brd-sbt);
+            border-radius: 8px;
+            padding: 8px 12px;
+            flex: 1; /* Search box stretches */
+            max-width: 300px;
+            gap: 8px;
+            color: var(--txt-sec);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 13px;
+            width: 100%;
+            outline: none;
+            color: var(--txt-prm);
+        }
+
+        .scope-group {
+            display: flex;
+            background: rgba(0,0,0,0.03);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .scope-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--txt-sec);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .scope-btn.active {
+            background: var(--bg-wht);
+            color: var(--acc-grn);
+            font-weight: 800;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0; /* Keep controls from shrinking */
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--brd-sbt);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--txt-prm);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--txt-sec); /* Slightly muted text */
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--brd-sbt);
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+
+        /* Actions Column */
+        .col-actions {
+            width: 80px;
+            text-align: right;
+            padding-right: 24px !important;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--txt-sec);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--txt-prm);
+        }
+        
+        .action-btn.delete:hover {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="#" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to Dashboard
+        </a>
+
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+            <div class="page-title">
+                <h1 style="font-family: 'Courier New', Courier, monospace; letter-spacing: -1px; font-size: 32px; margin-bottom: 4px;">Money Transactions</h1>
+                <div class="subtitle" style="color: var(--txt-sec); font-size: 13px;">View and filter your financial spending history</div>
+            </div>
+            
+            <div class="date-navigation" style="display: flex; align-items: center; gap: 16px; background: rgba(255, 255, 255, 0.5); padding: 8px 16px; border: 1px solid var(--brd-sbt); border-radius: 8px;">
+                <button class="action-btn" style="padding: 0; color: var(--txt-sec); width: 24px; height: 24px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <span style="font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    March 2026
+                </span>
+                <button class="action-btn" style="padding: 0; color: var(--txt-sec); width: 24px; height: 24px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="filters-container">
+            <div class="search-group">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" placeholder="Search by name, notes, or amount...">
+                </div>
+                <div class="scope-group">
+                    <button class="scope-btn active">THIS MONTH</button>
+                    <button class="scope-btn">ALL HISTORY</button>
+                </div>
+            </div>
+            
+            <div class="controls-group">
+                <select class="filter-select">
+                    <option>All Envelopes</option>
+                    <option>Utilities</option>
+                    <option>Transport</option>
+                </select>
+                <label class="checkbox-label">
+                    <input type="checkbox"> Show System
+                </label>
+                <select class="filter-select">
+                    <option>25 / page</option>
+                    <option>50 / page</option>
+                </select>
+                <button class="btn" style="padding: 8px 16px; font-size: 14px; text-transform: uppercase;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Log Money
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-env" title="Envelope"></th>
+                        <th style="width: 120px;">Date</th>
+                        <th style="width: 140px;">Payee/Payer</th>
+                        <th>Description</th>
+                        <th style="text-align: left; width: 120px;">Amount</th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-env">
+                            <div class="env-square env-blue" title="Utilities"></div>
+                        </td>
+                        <td>3/13/2026</td>
+                        <td>-</td>
+                        <td>
+                            <span class="desc-icon">🔄</span> Budget Reset Sweep
+                        </td>
+                        <td>$1,200.00</td>
+                        <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" title="Delete">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-env">
+                            <div class="env-square env-orange" title="Transport"></div>
+                        </td>
+                        <td>3/13/2026</td>
+                        <td>uber</td>
+                        <td>Saim's Uber transport.</td>
+                        <td>$22.00</td>
+                        <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" title="Delete">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-env">
+                            <div class="env-square env-blue" title="Utilities"></div>
+                        </td>
+                        <td>3/13/2026</td>
+                        <td>Rogers</td>
+                        <td>Internet</td>
+                        <td>$70.00</td>
+                         <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" title="Delete">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-env">
+                            <div class="env-square env-blue" title="Utilities"></div>
+                        </td>
+                        <td>3/13/2026</td>
+                        <td>Roger</td>
+                        <td>Sadia phone Bill</td>
+                        <td>$35.00</td>
+                         <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" title="Delete">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-env">
+                            <div class="env-square env-blue" title="Utilities"></div>
+                        </td>
+                        <td>3/13/2026</td>
+                        <td>Telus</td>
+                        <td>Khurram Phone</td>
+                        <td>$66.00</td>
+                         <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" title="Delete">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

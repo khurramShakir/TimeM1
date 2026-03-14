@@ -166,6 +166,20 @@ export default function TransactionHistory({ transactions: initialTransactions, 
         setIsModalOpen(true);
     };
 
+    // Color map for envelope squares matching the mockup
+    const getEnvColorClass = (color: string) => {
+        const map: Record<string, string> = {
+            blue: styles.envBlue,
+            purple: styles.envPurple,
+            green: styles.envGreen,
+            orange: styles.envOrange,
+            red: styles.envRed,
+            gray: styles.envGray,
+            default: styles.envGray
+        };
+        return map[color] || styles.envGray;
+    };
+
     // Helper to map UI Transaction to Modal Transaction format
     const modalTransaction = React.useMemo(() => editingTransaction ? {
         id: editingTransaction.id,
@@ -245,8 +259,7 @@ export default function TransactionHistory({ transactions: initialTransactions, 
                         </select>
 
                         <button className={styles.logBtn} onClick={handleNew}>
-                            <Plus size={20} />
-                            {domain === "TIME" ? "Log Time" : "Log Money"}
+                            + LOG {domain === "TIME" ? "TIME" : "MONEY"}
                         </button>
                     </div>
                 </div>
@@ -264,19 +277,24 @@ export default function TransactionHistory({ transactions: initialTransactions, 
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>{domain === "TIME" ? "Activity" : "Payee/Payer"}</th>
-                                <th>Envelope</th>
-                                <th>Notes</th>
-                                <th>{domain === "TIME" ? "Hours" : "Amount"}</th>
-                                <th></th>
+                                <th className={styles.colEnv} title="Envelope"></th>
+                                <th style={{ width: '120px' }}>Date</th>
+                                <th style={{ width: '180px' }}>{domain === "TIME" ? "Activity" : "Payee/Payer"}</th>
+                                <th>Description</th>
+                                <th style={{ textAlign: 'left', width: '140px' }}>{domain === "TIME" ? "Hours" : "Amount"}</th>
+                                <th className={styles.colActions}></th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedTransactions.map(t => {
-                                const dotColor = COLOR_MAP[t.envelope.color] || COLOR_MAP.default;
                                 return (
                                     <tr key={t.id}>
+                                        <td className={styles.colEnv}>
+                                            <div 
+                                                className={`${styles.envSquare} ${getEnvColorClass(t.envelope.color)}`} 
+                                                title={t.envelope.name}
+                                            ></div>
+                                        </td>
                                         <td className={styles.date}>
                                             <span suppressHydrationWarning>
                                                 {new Date(t.date).toLocaleDateString()}
@@ -290,32 +308,29 @@ export default function TransactionHistory({ transactions: initialTransactions, 
                                                 {t.refNumber && <div className={styles.refNumber}>#{t.refNumber}</div>}
                                             </div>
                                         </td>
-                                        <td>
-                                            <span className={styles.envelopeText}>
-                                                <span style={{ color: dotColor }}>{t.envelope.name.charAt(0)}</span>
-                                                {t.envelope.name.slice(1)}
-                                            </span>
+                                        <td className={styles.description}>
+                                            {t.isSystemAdjustment && <span className={styles.descIcon}>🔄</span>}
+                                            {formatNote(t.description)}
                                         </td>
-                                        <td className={styles.description}>{formatNote(t.description)}</td>
                                         <td className={`${styles.amount} ${t.type === "INCOME" ? styles.amountPositive : ""} ${t.type === "TRANSFER" ? styles.amountTransfer : ""}`}>
                                             {t.type === "INCOME" ? "+" : ""}
                                             {formatValue(Number(t.amount), domain, currency)}
                                         </td>
-                                        <td>
+                                        <td className={styles.colActions}>
                                             <div className={styles.actions}>
                                                 <button
                                                     className={styles.actionBtn}
                                                     onClick={() => handleEdit(t)}
                                                     title="Edit"
                                                 >
-                                                    <Edit2 size={20} />
+                                                    <Edit2 size={18} />
                                                 </button>
                                                 <button
                                                     className={`${styles.actionBtn} ${styles.deleteBtn}`}
                                                     onClick={() => handleDelete(t.id)}
                                                     title="Delete"
                                                 >
-                                                    <Trash2 size={20} />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             </div>
                                         </td>
